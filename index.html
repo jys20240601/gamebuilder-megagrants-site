@@ -143,6 +143,28 @@
     max-width: 62ch;
   }
 
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.35rem;
+  }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.72rem 0.9rem;
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+    background: var(--accent);
+    color: #fff;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .hero-cta:hover { filter: brightness(1.08); }
+
   .chain {
     display: flex;
     flex-wrap: wrap;
@@ -350,6 +372,9 @@
           to the next. Walk them left to right and you finish with combat, loot, quests, rewards, a HUD and
           saving — with no Blueprint wiring in between.
         </p>
+        <div class="hero-actions">
+          <a class="hero-cta" href="https://youtu.be/7KUcNIbyJt8">Watch the updated 3:18 demo &rarr;</a>
+        </div>
         <div class="chain">
           <b>Landscape</b><span class="sep">&rsaquo;</span><b>Material</b><span class="sep">&rsaquo;</span><b>Character</b><span class="sep">&rsaquo;</span><b>Prop</b><span class="sep">&rsaquo;</span><b>Item</b><span class="sep">&rsaquo;</span><b>Effect</b><span class="sep">&rsaquo;</span><b>Level</b><span class="sep">&rsaquo;</span><b>Quest</b><span class="sep">&rsaquo;</span><b>UI</b>
         </div>
