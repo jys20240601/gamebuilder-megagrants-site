@@ -22,7 +22,7 @@
     { shot: 'mj.quiet', scrim: 'bottom', enter() { mj.mode = 'auto'; mj.cycle = 40; mj.setT(21); } },
     { shot: 'closing', scrim: 'bottom', enter: overview }
   ];
-  function fit() { document.documentElement.style.setProperty('--scale', Math.min(innerWidth / 1600, innerHeight / 900)); }
+  function fit() { if (innerWidth < 800) { location.replace(artworkSiteURL(index < 0 ? undefined : index)); return; } document.documentElement.style.setProperty('--scale', Math.min(innerWidth / 1600, innerHeight / 900)); }
   addEventListener('resize', fit); fit();
   slides.forEach((s, i) => {
     s.setAttribute('aria-label', `${i + 1}. ${s.dataset.title}`);
@@ -48,11 +48,12 @@
     slides.forEach((s, i) => { s.classList.toggle('active', i === n); s.setAttribute('aria-hidden', i !== n); s.inert = i !== n; });
     const cfg = scenes[n]; $('#scrim').className = cfg.scrim;
     document.body.dataset.slide = n + 1;
+    document.body.dataset.artwork = [2,5,8].includes(n) ? 'true' : 'false';
     cfg.enter(); D.flyTo(cfg.shot, { dur: 1.8, cut: first || options.cut });
     $('#counter').value = `${String(n + 1).padStart(2, '0')} / 12`; $('#progress').style.width = `${(n + 1) / 12 * 100}%`;
     $('#prev').disabled = n === 0; $('#next').disabled = n === 11;
     $$('.overview-item').forEach((b, i) => b.classList.toggle('current', i === n));
-    $('#fallback-button').href = (document.documentElement.dataset.fallback || '../index.html') + '#' + (n + 1);
+    $('#fallback-button').href = artworkSiteURL(n);
     try { history.replaceState(null, '', '#' + (n + 1)); } catch (_) { /* file:// history may be restricted */ }
     updateNote(); activeUI();
   }
@@ -95,7 +96,7 @@
     if(k==='o') { toggleOverlay('#overview'); return; } if(k==='n') { toggleOverlay('#notes'); return; }
     if(open) return;
     if(k==='f') fullscreen(); if(k==='r') replay();
-    if(e.key===' ' && !['BUTTON','A'].includes(e.target.tagName)) { e.preventDefault(); if(index===2||index===4) ow.press(); else if(index===3) togglePlay(); else show(index+1); }
+    if(e.key===' ' && !['BUTTON','A'].includes(e.target.tagName)) { e.preventDefault(); if(index===4) ow.press(); else if(index===3) togglePlay(); else show(index+1); }
     if(['ArrowRight','PageDown'].includes(e.key)) { e.preventDefault(); show(index+1); }
     if(['ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); show(index-1); }
     if(e.key==='Home') { e.preventDefault(); show(0); } if(e.key==='End') { e.preventDefault(); show(11); }
