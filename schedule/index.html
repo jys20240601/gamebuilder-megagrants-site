@@ -9,18 +9,18 @@
 <meta name="theme-color" content="#F7F7F5">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="MY CALENDAR">
-<title>MY CALENDAR</title>
+<meta name="apple-mobile-web-app-title" content="MyPlanner">
+<title>MyPlanner</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;500;600&display=swap">
-<link rel="stylesheet" href="app.css?v=2">
+<link rel="stylesheet" href="app.css?v=5">
 </head>
 <body>
 <header class="top">
-  <span class="brand" id="brand">MY CALENDAR</span>
+  <span class="brand" id="brand">MyPlanner</span>
   <button class="sync" id="sync" type="button" hidden></button>
   <button class="icon-btn" id="open-settings" type="button" aria-label="설정">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
@@ -28,6 +28,8 @@
 </header>
 
 <main id="view-cal" class="view"></main>
+<main id="view-tasks" class="view" hidden></main>
+<main id="view-goals" class="view" hidden></main>
 <main id="view-notes" class="view" hidden></main>
 
 <button class="fab" id="fab" type="button" aria-label="메모 쓰기">
@@ -38,6 +40,14 @@
   <button type="button" class="tab" id="tab-cal" data-tab="cal" aria-current="page">
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
     <span>일정</span>
+  </button>
+  <button type="button" class="tab" id="tab-tasks" data-tab="tasks">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.2l2.6 2.6 4.9-5.1"/></svg>
+    <span>할 일</span>
+  </button>
+  <button type="button" class="tab" id="tab-goals" data-tab="goals">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12h.01"/></svg>
+    <span>목표</span>
   </button>
   <button type="button" class="tab" id="tab-notes" data-tab="notes">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5"/></svg>
@@ -85,7 +95,37 @@
   <div class="st-body" id="st-body"></div>
 </section>
 
+<section class="sheet detail" id="detail" hidden aria-label="일정 정보">
+  <div class="sheet-bar">
+    <button type="button" class="text-btn" id="dt-close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>닫기
+    </button>
+    <span class="sheet-title">일정</span>
+    <span class="bar-spacer"></span>
+  </div>
+  <div class="dt-body" id="dt-body"></div>
+  <div class="dt-foot" id="dt-foot" hidden></div>
+</section>
+
+<section class="sheet item-ed" id="item-ed" hidden aria-label="편집">
+  <div class="sheet-bar">
+    <button type="button" class="text-btn" id="it-close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>완료
+    </button>
+    <span class="sheet-title" id="it-kind"></span>
+    <button type="button" class="icon-btn" id="it-delete" aria-label="삭제">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+    </button>
+  </div>
+  <div class="confirm" id="it-confirm" hidden>
+    <span id="it-confirm-text">삭제할까요?</span>
+    <button type="button" class="pill danger" id="it-confirm-yes">삭제</button>
+    <button type="button" class="pill" id="it-confirm-no">취소</button>
+  </div>
+  <div class="it-body" id="it-body"></div>
+</section>
+
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-<script src="app.js?v=2"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

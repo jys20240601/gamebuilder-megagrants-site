@@ -1,7 +1,7 @@
 {
-  "name": "MY CALENDAR",
-  "short_name": "MY CALENDAR",
-  "description": "일정 보기와 메모",
+  "name": "MyPlanner",
+  "short_name": "MyPlanner",
+  "description": "일정, 할 일, 목표, 메모",
   "lang": "ko",
   "start_url": "./",
   "scope": "./",
@@ -10,6 +10,7 @@
   "theme_color": "#F7F7F5",
   "shortcuts": [
     { "name": "메모 쓰기", "url": "./#new" },
+    { "name": "할 일", "url": "./#tasks" },
     { "name": "메모 목록", "url": "./#notes" }
   ],
   "icons": [
