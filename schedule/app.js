@@ -507,7 +507,74 @@
 
   // ------------------------------------------------------------------ Google sign-in (token model, popup)
   let tokenClient = null;
+  const native = window.MyPlannerNative && typeof window.MyPlannerNative.postMessage === 'function' ? window.MyPlannerNative : null;
+  const nativeWaiters = new Map();
+  let nativeSeq = 0, authEpoch = 0, nativeTokenFlight = null, tokenTimer = null;
+  let briefing = null, briefingBusy = false, briefingMessage = '';
+
+  // Listen on the origin-restricted native object, never on window's public message channel.
+  if (native) {
+    const receive = e => {
+      if (typeof e.data !== 'string' || e.data.length > 65536) return;
+      let m; try { m = JSON.parse(e.data); } catch (_) { return; }
+      if (!isObj(m)) return;
+      const key = m.type === 'token' ? 'token:' + m.id : m.type;
+      const waiter = nativeWaiters.get(key);
+      if (!waiter) return;
+      nativeWaiters.delete(key); clearTimeout(waiter.timer); waiter.resolve(m);
+    };
+    if (typeof native.addEventListener === 'function') native.addEventListener('message', receive);
+    else native.onmessage = receive;
+  }
+
+  function nativeRequest(msg) {
+    const key = msg.type === 'token' ? 'token:' + msg.id : msg.type.startsWith('briefing:') && msg.type !== 'briefing:test' ? 'briefing' : msg.type;
+    // Non-token responses have no id. Share the pending request rather than mismatching replies.
+    if (nativeWaiters.has(key)) return nativeWaiters.get(key).promise;
+    let resolve;
+    const promise = new Promise(r => { resolve = r; });
+    const finish = m => { nativeWaiters.delete(key); resolve(m); };
+    const timeout = msg.type === 'token' && msg.interactive ? 300000 : msg.type === 'briefing:test' ? 180000 : 45000;
+    const timer = setTimeout(() => finish({ error: 'failed', message: '앱 응답이 늦어요. 잠시 후 다시 시도해 주세요.' }), timeout);
+    nativeWaiters.set(key, { resolve, timer, promise });
+    try { native.postMessage(JSON.stringify(msg)); }
+    catch (_) { clearTimeout(timer); finish({ error: 'failed', message: '앱에 연결하지 못했어요. 앱을 다시 열어 주세요.' }); }
+    return promise;
+  }
+
+  async function nativeToken(interactive, stale) {
+    if (nativeTokenFlight) {
+      const ok = await nativeTokenFlight;
+      if (ok || !interactive) return ok;
+    }
+    if (!interactive && tokenValid() && (!stale || stale !== S.token)) return true;
+    const epoch = authEpoch;
+    const request = { type: 'token', id: String(++nativeSeq), interactive: !!interactive };
+    if (stale) request.stale = stale;
+    const flight = (async () => {
+      const resp = await nativeRequest(request);
+      if (epoch !== authEpoch) return false; // disconnect wins over a late native reply
+      if (!resp.error && typeof resp.access_token === 'string' && resp.access_token) {
+        applyToken(resp); return true;
+      }
+      clearTimeout(tokenTimer); S.token = null; S.tokenExp = 0;
+      setSync(prefs.connected ? 'reconnect' : 'idle');
+      if (interactive || resp.error !== 'needs_consent') toast(resp.message || 'Google 연결에 실패했어요. 다시 시도해 주세요.');
+      return false;
+    })();
+    nativeTokenFlight = flight;
+    try { return await flight; }
+    finally { if (nativeTokenFlight === flight) nativeTokenFlight = null; }
+  }
+
+  function revokeToken() {
+    authEpoch++; clearTimeout(tokenTimer); nativeTokenFlight = null;
+    if (native) nativeRequest({ type: 'signout' }).then(r => { if (r.error) toast(r.message); });
+    else if (S.token && window.google && google.accounts && google.accounts.oauth2) google.accounts.oauth2.revoke(S.token, () => {});
+  }
+
   function loadGis() {
+    if (native) return;
     if (document.querySelector('script[data-gis]')) return;
     const s = document.createElement('script');
     s.src = 'https://accounts.google.com/gsi/client';
@@ -519,6 +586,7 @@
   }
 
   function initTokenClient() {
+    if (native) return;
     const id = clientId();
     if (!id || !window.google || !google.accounts || !google.accounts.oauth2) return;
     tokenClient = google.accounts.oauth2.initTokenClient({
@@ -539,6 +607,7 @@
 
   // prompt '' asks again only for scopes not granted yet; 'consent' shows the full consent screen
   function requestToken(prompt) {
+    if (native) { nativeToken(true).then(ok => { if (ok) syncAll(); }); return; }
     if (!clientId()) { openSettings(); return; }
     if (!tokenClient) {
       initTokenClient();
@@ -553,24 +622,34 @@
       if (resp && resp.error && resp.error !== 'access_denied') toast('Google 연결에 실패했어요. 다시 시도해 주세요.');
       return;
     }
+    applyToken(resp);
+    syncAll();
+  }
+
+  function applyToken(resp) {
     S.token = resp.access_token;
-    S.tokenExp = Date.now() + Math.max(120, (+resp.expires_in || 3600) - 120) * 1000;
-    const o = google.accounts.oauth2;
-    S.canCal = o.hasGrantedAllScopes(resp, SCOPE_LIST, SCOPE_EVENTS);
-    S.canDrive = o.hasGrantedAllScopes(resp, SCOPE_DRIVE);
+    const lifetime = Number.isFinite(+resp.expires_in) && +resp.expires_in > 0 ? +resp.expires_in : 3600;
+    S.tokenExp = Date.now() + Math.max(1, lifetime - Math.min(120, lifetime / 2)) * 1000;
+    const granted = typeof resp.scope === 'string' ? resp.scope.split(/\s+/) : [];
+    const has = (...scopes) => scopes.every(s => granted.includes(s));
+    S.canCal = has(SCOPE_LIST, SCOPE_EVENTS);
+    S.canDrive = has(SCOPE_DRIVE);
     // accounts connected before the Doc copy existed may lack drive.file: notes still sync, the copy is skipped
-    S.canCopy = o.hasGrantedAllScopes(resp, SCOPE_FILE);
+    S.canCopy = has(SCOPE_FILE);
     prefs.connected = true;
     prefs.copy = S.canDrive && S.canCopy;
     savePrefs();
     if (!S.canCal && !S.canDrive) toast('권한을 받지 못해 연결하지 않았어요.');
     else if (!S.canDrive) toast('드라이브 권한이 없어 메모와 할 일은 이 폰에만 저장돼요.');
     else if (!S.canCal) toast('일정 읽기 권한이 없어 일정은 보이지 않아요.');
-    syncAll();
+    if (native) {
+      clearTimeout(tokenTimer);
+      tokenTimer = setTimeout(() => { nativeToken(false).then(ok => { if (ok) syncAll(); }); }, Math.max(1, S.tokenExp - Date.now() + 20));
+    }
   }
 
   function disconnect() {
-    if (S.token && window.google && google.accounts && google.accounts.oauth2) google.accounts.oauth2.revoke(S.token, () => {});
+    revokeToken();
     S.token = null; S.tokenExp = 0; S.canCal = false; S.canDrive = false; S.canCopy = false;
     S.events = []; S.eventsRange = null; S.fileId = null; S.remoteDoc = null; S.wsFileId = null; S.wsDoc = null; S.lastSync = 0;
     prefs.connected = false; prefs.copy = false; prefs.docId = '';
@@ -584,10 +663,20 @@
   class AuthNeeded extends Error {}
 
   async function api(url, opts) {
+    const epoch = authEpoch;
+    if (native && !tokenValid()) await nativeToken(false);
+    if (epoch !== authEpoch) throw new AuthNeeded('disconnected');
     if (!tokenValid()) { S.token = null; throw new AuthNeeded('token'); }
-    const o = Object.assign({}, opts || {});
-    o.headers = Object.assign({ Authorization: 'Bearer ' + S.token }, (opts && opts.headers) || {});
-    const r = await fetch(url, o);
+    const send = token => {
+      const o = Object.assign({}, opts || {});
+      o.headers = Object.assign({}, (opts && opts.headers) || {}, { Authorization: 'Bearer ' + token });
+      return fetch(url, o);
+    };
+    const used = S.token;
+    let r = await send(used);
+    if (epoch !== authEpoch) throw new AuthNeeded('disconnected');
+    if (r.status === 401 && native && await nativeToken(false, used)) r = await send(S.token);
+    if (epoch !== authEpoch) throw new AuthNeeded('disconnected');
     if (r.status === 401) { S.token = null; throw new AuthNeeded('expired'); }
     if (!r.ok) { const err = new Error('HTTP ' + r.status); err.status = r.status; throw err; }
     return r;
@@ -602,18 +691,22 @@
   }
 
   function handleFailure(err) {
+    if (err instanceof AuthNeeded && err.message === 'disconnected') return;
     if (err instanceof AuthNeeded) setSync('reconnect');
     else setSync('error', failText(err));
   }
 
   async function syncAll() {
+    if (native && !tokenValid() && !await nativeToken(false)) return;
+    const epoch = authEpoch;
     setSync('busy');
     try {
       await Promise.all([loadEvents(true, true), syncNotes(true), syncWorkspace(true)]);
+      if (epoch !== authEpoch) return;
       S.lastSync = Date.now();
       setSync('ok');
     } catch (err) {
-      handleFailure(err);
+      if (epoch === authEpoch) handleFailure(err);
     }
     render();
   }
@@ -1679,6 +1772,57 @@
     S.confirmWipe = false;
     renderSettings();
     openSheet('settings');
+    if (native) updateBriefing({ type: 'briefing:get' });
+  }
+
+  async function updateBriefing(msg) {
+    if (briefingBusy) return;
+    briefingBusy = true; renderSettings();
+    const result = await nativeRequest(msg);
+    if (result.type === 'briefing' && typeof result.enabled === 'boolean' && Number.isInteger(result.intervalHours) &&
+        result.intervalHours >= 1 && result.intervalHours <= 24 && Number.isInteger(result.quietStart) && result.quietStart >= 0 &&
+        result.quietStart <= 23 && Number.isInteger(result.quietEnd) && result.quietEnd >= 0 && result.quietEnd <= 23) {
+      briefing = result;
+      briefingMessage = msg.type === 'briefing:set' ? '브리핑 설정을 저장했어요.' : '';
+    } else if (msg.type === 'briefing:test' && typeof result.ok === 'boolean') {
+      briefingMessage = typeof result.message === 'string' ? result.message : '브리핑 테스트를 마쳤어요.';
+    } else briefingMessage = result.message || '브리핑 설정을 불러오지 못했어요.';
+    briefingBusy = false;
+    if (!$('#settings').hidden) renderSettings();
+    if (msg.type === 'briefing:test' && result.ok) {
+      const message = briefingMessage;
+      await updateBriefing({ type: 'briefing:get' });
+      briefingMessage = message;
+      if (!$('#settings').hidden) renderSettings();
+    }
+  }
+
+  function briefingSection() {
+    const section = h('section', { class: 'st-sec', id: 'st-briefing' }, h('h2', { text: '알림/브리핑' }));
+    if (briefing) {
+      const b = briefing;
+      const enabled = h('input', { id: 'briefing-enabled', type: 'checkbox', disabled: briefingBusy }); enabled.checked = b.enabled;
+      section.append(h('label', { class: 'st-line', for: 'briefing-enabled' }, h('span', { class: 'k', text: '정기 브리핑' }), enabled));
+      const select = (id, label, count, start, current, suffix) => {
+        const input = h('select', { id, class: 'field', disabled: briefingBusy },
+          Array.from({ length: count }, (_, n) => h('option', { value: n + start, text: (n + start) + suffix })));
+        input.value = String(current);
+        section.append(h('label', { for: id, text: label }), input);
+        return input;
+      };
+      const interval = select('briefing-interval', '알림 간격', 24, 1, b.intervalHours, '시간');
+      const start = select('briefing-start', '조용한 시간 시작', 24, 0, b.quietStart, '시');
+      const end = select('briefing-end', '조용한 시간 끝', 24, 0, b.quietEnd, '시');
+      section.append(h('p', { text: '조용한 시간에는 알리지 않아요. 시작과 끝을 같게 하면 종일 알림을 받아요. 온라인일 때 주기 안에서 실행돼요.' }),
+        h('div', { class: 'st-line' }, h('span', { class: 'k', text: '알림 권한' }), h('span', { class: 'v', id: 'briefing-permission', text: b.notifications === false ? '꺼짐 · 휴대폰 설정에서 MyPlanner 알림을 허용해 주세요' : '허용됨' })),
+        h('div', { class: 'st-line' }, h('span', { class: 'k', text: '마지막 알림' }), h('span', { class: 'v', id: 'briefing-last', text: Number.isFinite(b.last) && b.last > 0 ? new Date(b.last).toLocaleString('ko-KR') : '아직 없음' })),
+        h('div', { class: 'btn-row' },
+          h('button', { type: 'button', class: 'btn outline', id: 'briefing-save', disabled: briefingBusy, text: '브리핑 설정 저장', onclick: () => updateBriefing({ type: 'briefing:set', enabled: enabled.checked, intervalHours: +interval.value, quietStart: +start.value, quietEnd: +end.value }) }),
+          h('button', { type: 'button', class: 'btn outline', id: 'briefing-test', disabled: briefingBusy, text: '테스트 알림', onclick: () => updateBriefing({ type: 'briefing:test' }) })));
+    }
+    section.append(h('p', { id: 'briefing-status', role: 'status', text: briefingBusy ? '앱에서 확인하는 중이에요…' : briefingMessage || '오늘 남은 일정과 할 일을 알려 드려요.' }),
+      h('button', { type: 'button', class: 'btn outline', id: 'briefing-refresh', disabled: briefingBusy, text: '알림 상태 새로고침', onclick: () => updateBriefing({ type: 'briefing:get' }) }));
+    return section;
   }
 
   function renderSettings() {
@@ -1687,14 +1831,14 @@
     const sections = [];
 
     let status;
-    if (!id) status = '연결 준비 전 (웹 클라이언트 ID 필요)';
+    if (!native && !id) status = '연결 준비 전 (웹 클라이언트 ID 필요)';
     else if (tokenValid()) status = '연결됨 · ' + [S.canCal ? '일정 읽기' : '', S.canDrive ? '메모·할 일 동기화' : ''].filter(Boolean).join(' · ');
-    else if (prefs.connected) status = '다시 연결이 필요해요 (보안을 위해 1시간마다 확인해요)';
+    else if (prefs.connected) status = native ? '다시 연결이 필요해요. 아래에서 Google 계정을 확인해 주세요.' : '다시 연결이 필요해요 (보안을 위해 1시간마다 확인해요)';
     else status = '연결 안 됨';
     const acct = h('section', { class: 'st-sec' }, h('h2', { text: 'GOOGLE 계정' }),
       h('div', { class: 'st-line' }, h('span', { class: 'k', text: '상태' }), h('span', { class: 'v', text: status })));
     const btns = h('div', { class: 'btn-row' });
-    if (id && !tokenValid()) btns.append(h('button', { type: 'button', class: 'btn primary', onclick: connect, text: prefs.connected ? '다시 연결' : 'Google로 연결' }));
+    if ((native || id) && !tokenValid()) btns.append(h('button', { type: 'button', class: 'btn primary', onclick: connect, text: prefs.connected ? '다시 연결' : 'Google로 연결' }));
     if (prefs.connected) btns.append(h('button', { type: 'button', class: 'btn outline', onclick: disconnect, text: '연결 해제' }));
     if (btns.childNodes.length) acct.append(btns);
     acct.append(h('p', { text: '일정은 읽기만 해요. 메모와 할 일·목표는 내 Google 드라이브의 앱 전용 숨김 폴더에 저장되고, 메모는 드라이브에서도 볼 수 있게 MyPlanner 폴더에 사본 문서를 만들어요.' }));
@@ -1725,6 +1869,7 @@
       h('button', { type: 'button', class: 'btn outline', onclick: exportNotes, text: '메모 내보내기 (JSON)' }),
       h('button', { type: 'button', class: 'btn outline', onclick: exportWorkspace, text: '할 일·목표 내보내기 (JSON)' })));
     sections.push(syncSec);
+    if (native) sections.push(briefingSection());
 
     const field = h('input', { id: 'st-client', class: 'field', type: 'text', inputmode: 'url', autocomplete: 'off', spellcheck: 'false', placeholder: '1234567890-xxxx.apps.googleusercontent.com' });
     field.value = prefs.clientId || '';
@@ -1750,7 +1895,7 @@
           renderSettings();
         },
       })));
-    sections.push(cidSec);
+    if (!native) sections.push(cidSec);
 
     const wipe = h('section', { class: 'st-sec' }, h('h2', { text: '이 기기' }));
     if (!S.confirmWipe) {
@@ -1779,7 +1924,7 @@
   }
 
   function wipeDevice() {
-    if (S.token && window.google && google.accounts && google.accounts.oauth2) google.accounts.oauth2.revoke(S.token, () => {});
+    revokeToken();
     for (const k of Object.values(K)) local.remove(k);
     prefs.clientId = ''; prefs.connected = false; prefs.copy = false; prefs.docId = '';
     S.notes = []; S.events = []; S.eventsRange = null; S.token = null; S.tokenExp = 0;
@@ -1837,7 +1982,9 @@
     if (document.visibilityState !== 'visible') return;
     S.now = new Date();
     refreshViews();
-    if (tokenValid() && Date.now() - S.lastSync > 60000) syncAll();
+    if (native && prefs.connected && !tokenValid()) nativeToken(false).then(ok => { if (ok) syncAll(); });
+    else if (tokenValid() && Date.now() - S.lastSync > 60000) syncAll();
+    if (native && !$('#settings').hidden) updateBriefing({ type: 'briefing:get' });
   });
 
   // a reload keeps history.state; without this, closing the next sheet would go back to the previous site
@@ -1856,5 +2003,6 @@
   render();
   followHash();
   setTimeout(tick, 60000 - (Date.now() % 60000) + 50);
-  if (clientId()) loadGis();
+  if (native) nativeToken(false).then(ok => { if (ok) syncAll(); });
+  else if (clientId()) loadGis();
 })();
