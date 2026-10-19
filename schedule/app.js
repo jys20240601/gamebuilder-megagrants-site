@@ -511,6 +511,7 @@
   const nativeWaiters = new Map();
   let nativeSeq = 0, authEpoch = 0, nativeTokenFlight = null, tokenTimer = null;
   let briefing = null, briefingBusy = false, briefingMessage = '';
+  let pushState = null, pushBusy = false, pushMessage = '';
 
   // Listen on the origin-restricted native object, never on window's public message channel.
   if (native) {
@@ -528,13 +529,13 @@
   }
 
   function nativeRequest(msg) {
-    const key = msg.type === 'token' ? 'token:' + msg.id : msg.type.startsWith('briefing:') && msg.type !== 'briefing:test' ? 'briefing' : msg.type;
+    const key = msg.type === 'token' ? 'token:' + msg.id : msg.type.startsWith('briefing:') && msg.type !== 'briefing:test' ? 'briefing' : msg.type.startsWith('push:') ? 'push:state' : msg.type;
     // Non-token responses have no id. Share the pending request rather than mismatching replies.
     if (nativeWaiters.has(key)) return nativeWaiters.get(key).promise;
     let resolve;
     const promise = new Promise(r => { resolve = r; });
     const finish = m => { nativeWaiters.delete(key); resolve(m); };
-    const timeout = msg.type === 'token' && msg.interactive ? 300000 : msg.type === 'briefing:test' ? 180000 : 45000;
+    const timeout = msg.type === 'push:get' ? 8000 : msg.type === 'push:set' ? 30000 : msg.type === 'token' && msg.interactive ? 300000 : msg.type === 'briefing:test' ? 180000 : 45000;
     const timer = setTimeout(() => finish({ error: 'failed', message: '앱 응답이 늦어요. 잠시 후 다시 시도해 주세요.' }), timeout);
     nativeWaiters.set(key, { resolve, timer, promise });
     try { native.postMessage(JSON.stringify(msg)); }
@@ -569,6 +570,7 @@
 
   function revokeToken() {
     authEpoch++; clearTimeout(tokenTimer); nativeTokenFlight = null;
+    pushState = null; pushMessage = 'Google 계정을 연결한 뒤 외부 알림을 확인해 주세요.';
     if (native) nativeRequest({ type: 'signout' }).then(r => { if (r.error) toast(r.message); });
     else if (S.token && window.google && google.accounts && google.accounts.oauth2) google.accounts.oauth2.revoke(S.token, () => {});
   }
@@ -1772,7 +1774,53 @@
     S.confirmWipe = false;
     renderSettings();
     openSheet('settings');
-    if (native) updateBriefing({ type: 'briefing:get' });
+    if (native) { updateBriefing({ type: 'briefing:get' }); updatePush({ type: 'push:get' }); }
+  }
+
+  async function updatePush(msg) {
+    if (!native || pushBusy) return;
+    const epoch = authEpoch;
+    pushBusy = true; renderSettings();
+    const result = await nativeRequest(msg);
+    pushBusy = false;
+    if (epoch !== authEpoch) {
+      if (!$('#settings').hidden) renderSettings();
+      return;
+    }
+    if (result.type === 'push:state' && ['enabled', 'registered', 'canNotify', 'configured'].every(k => typeof result[k] === 'boolean') &&
+        Number.isFinite(result.lastReceivedAt) && result.lastReceivedAt >= 0) {
+      pushState = Object.fromEntries(['enabled', 'registered', 'canNotify', 'configured', 'lastReceivedAt'].map(k => [k, result[k]]));
+      const messages = {
+        firebase_config_missing: '외부 알림을 준비 중이에요. 앱 업데이트 후 다시 확인해 주세요.',
+        needs_google_connection: 'Google 계정을 다시 연결해 주세요.',
+        drive_permission: 'Google 계정을 다시 연결하고 동기화 권한을 허용해 주세요.',
+        busy: '다른 요청을 처리 중이에요. 잠시 후 다시 시도해 주세요.',
+        registration_cleanup_failed: '기기 등록 해제를 확인하지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.'
+      };
+      pushMessage = typeof result.error === 'string' && result.error ? messages[result.error] || '기기 등록을 확인하지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.' : msg.type === 'push:set' ? '외부 알림 설정을 저장했어요.' : '';
+    } else {
+      pushState = null;
+      pushMessage = '외부 알림 상태를 확인하지 못했어요. 앱 업데이트 후 다시 시도해 주세요.';
+    }
+    if (!$('#settings').hidden) renderSettings();
+  }
+
+  function pushSection() {
+    const section = h('section', { class: 'st-sec', id: 'st-push' }, h('h2', { text: '외부 알림' }),
+      h('p', { text: '신뢰하는 PC에서 보낸 중요한 알림을 휴대폰으로 받아요. 정기 브리핑과 별도로 동작해요.' }));
+    if (pushState) {
+      const p = pushState;
+      const enabled = h('input', { id: 'push-enabled', type: 'checkbox', disabled: pushBusy || !prefs.connected || !p.configured,
+        onchange: e => updatePush({ type: 'push:set', enabled: e.target.checked }) });
+      enabled.checked = p.enabled;
+      section.append(h('label', { class: 'st-line', for: 'push-enabled' }, h('span', { class: 'k', text: '외부 알림 받기' }), enabled),
+        h('div', { class: 'st-line' }, h('span', { class: 'k', text: '기기 등록' }), h('span', { class: 'v', id: 'push-registration', text: !p.configured ? '앱의 외부 알림 설정이 필요해요' : !prefs.connected ? 'Google 계정 연결 필요' : p.registered ? '등록됨' : '등록 대기' })),
+        h('div', { class: 'st-line' }, h('span', { class: 'k', text: '알림 권한' }), h('span', { class: 'v', id: 'push-permission', text: p.canNotify ? '허용됨' : '꺼짐 · 휴대폰 설정에서 MyPlanner 알림을 허용해 주세요' })),
+        h('div', { class: 'st-line' }, h('span', { class: 'k', text: '마지막 수신' }), h('span', { class: 'v', id: 'push-last', text: p.lastReceivedAt > 0 ? new Date(p.lastReceivedAt).toLocaleString('ko-KR') : '아직 없음' })));
+    }
+    section.append(h('p', { id: 'push-status', role: 'status', text: pushBusy ? '앱에서 확인하는 중이에요…' : pushMessage || '외부 알림 상태를 확인할 수 있어요.' }),
+      h('button', { type: 'button', class: 'btn outline', id: 'push-refresh', disabled: pushBusy, text: '외부 알림 상태 새로고침', onclick: () => updatePush({ type: 'push:get' }) }));
+    return section;
   }
 
   async function updateBriefing(msg) {
@@ -1869,7 +1917,7 @@
       h('button', { type: 'button', class: 'btn outline', onclick: exportNotes, text: '메모 내보내기 (JSON)' }),
       h('button', { type: 'button', class: 'btn outline', onclick: exportWorkspace, text: '할 일·목표 내보내기 (JSON)' })));
     sections.push(syncSec);
-    if (native) sections.push(briefingSection());
+    if (native) sections.push(briefingSection(), pushSection());
 
     const field = h('input', { id: 'st-client', class: 'field', type: 'text', inputmode: 'url', autocomplete: 'off', spellcheck: 'false', placeholder: '1234567890-xxxx.apps.googleusercontent.com' });
     field.value = prefs.clientId || '';
@@ -1984,7 +2032,7 @@
     refreshViews();
     if (native && prefs.connected && !tokenValid()) nativeToken(false).then(ok => { if (ok) syncAll(); });
     else if (tokenValid() && Date.now() - S.lastSync > 60000) syncAll();
-    if (native && !$('#settings').hidden) updateBriefing({ type: 'briefing:get' });
+    if (native && !$('#settings').hidden) { updateBriefing({ type: 'briefing:get' }); updatePush({ type: 'push:get' }); }
   });
 
   // a reload keeps history.state; without this, closing the next sheet would go back to the previous site
