@@ -11,7 +11,7 @@
 (() => {
   // Web OAuth client ID ("....apps.googleusercontent.com"). Empty: notes stay on this device until one is set
   // here or in Settings (the Settings value is kept on that device only).
-  const DEFAULT_CLIENT_ID = '';
+  const DEFAULT_CLIENT_ID = '286652120884-rhes1oo3f3itereav32v6n0bg27hmg4r.apps.googleusercontent.com';
 
   const SCOPE_LIST = 'https://www.googleapis.com/auth/calendar.calendarlist.readonly';
   const SCOPE_EVENTS = 'https://www.googleapis.com/auth/calendar.events.readonly';
