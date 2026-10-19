@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://cdn.jsdelivr.net https://fonts.gstatic.com; connect-src https://www.googleapis.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; img-src 'self' data:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#F7F7F5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MY CALENDAR">
+<title>MY CALENDAR</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;500;600&display=swap">
+<link rel="stylesheet" href="app.css?v=1">
+</head>
+<body>
+<header class="top">
+  <span class="brand" id="brand">MY CALENDAR</span>
+  <button class="sync" id="sync" type="button" hidden></button>
+  <button class="icon-btn" id="open-settings" type="button" aria-label="설정">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
+  </button>
+</header>
+
+<main id="view-cal" class="view"></main>
+<main id="view-notes" class="view" hidden></main>
+
+<button class="fab" id="fab" type="button" aria-label="메모 쓰기">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<nav class="tabs" aria-label="화면">
+  <button type="button" class="tab" id="tab-cal" data-tab="cal" aria-current="page">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+    <span>일정</span>
+  </button>
+  <button type="button" class="tab" id="tab-notes" data-tab="notes">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5"/></svg>
+    <span>메모</span>
+  </button>
+</nav>
+
+<section class="sheet editor" id="editor" hidden aria-label="메모 편집">
+  <div class="sheet-bar">
+    <button type="button" class="text-btn" id="ed-close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>완료
+    </button>
+    <span class="ed-state" id="ed-state"></span>
+    <button type="button" class="icon-btn" id="ed-delete" aria-label="메모 삭제">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+    </button>
+  </div>
+  <div class="confirm" id="ed-confirm" hidden>
+    <span>이 메모를 삭제할까요?</span>
+    <button type="button" class="pill danger" id="ed-confirm-yes">삭제</button>
+    <button type="button" class="pill" id="ed-confirm-no">취소</button>
+  </div>
+  <div class="ed-body">
+    <div class="ed-date">
+      <label class="date-chip" for="ed-date-input">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+        <span id="ed-date-label">날짜 없음</span>
+        <input type="date" id="ed-date-input">
+      </label>
+      <button type="button" class="text-btn small" id="ed-date-clear">날짜 빼기</button>
+    </div>
+    <input id="ed-title" class="ed-title" type="text" placeholder="제목" maxlength="200" autocomplete="off" enterkeyhint="next">
+    <textarea id="ed-text" class="ed-text" placeholder="내용을 적어 두세요" rows="8"></textarea>
+  </div>
+</section>
+
+<section class="sheet settings" id="settings" hidden aria-label="설정">
+  <div class="sheet-bar">
+    <button type="button" class="text-btn" id="st-close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>닫기
+    </button>
+    <span class="sheet-title">설정</span>
+    <span class="bar-spacer"></span>
+  </div>
+  <div class="st-body" id="st-body"></div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script src="app.js?v=1"></script>
+</body>
+</html>
