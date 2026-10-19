@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="MyPlanner Windows 데스크톱 앱의 현재 화면과 UI 리뉴얼 요구사항. 샘플 데이터로 촬영한 PC 화면 모음입니다.">
+  <title>MyPlanner PC 화면 디자인 참고</title>
+  <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="reference.css?v=1">
+</head>
+<body>
+  <a class="skip" href="#screens">화면 모음으로 이동</a>
+  <header class="top">
+    <a class="brand" href="#overview">MyPlanner <span>PC REFERENCE</span></a>
+    <a class="mobile-link" href="../">모바일 페이지 ↗</a>
+  </header>
+  <main>
+    <section class="intro" id="overview">
+      <p class="eyebrow">WINDOWS DESKTOP · 2026.10.19</p>
+      <h1>리뉴얼 전, 지금의 PC 화면</h1>
+      <p class="lead">바탕화면 대시보드부터 목표, 프로젝트, 할 일과 메모까지.<br>MyPlanner Windows 앱의 현재 UI를 한곳에 모았습니다.</p>
+      <div class="intro-footer">
+        <p class="sample-note"><span class="status-dot" aria-hidden="true"></span>실제 앱 화면 · 모든 내용은 샘플 데이터</p>
+        <a class="brief-link" href="renewal-brief.md" download>리뉴얼 의뢰서 받기 <span aria-hidden="true">↓</span></a>
+      </div>
+    </section>
+    <div class="layout" id="screens">
+      <aside class="sidebar" aria-label="참고 화면 목차">
+        <p class="nav-title">현재 화면</p>
+        <nav>
+          <a href="#month"><span>01</span>대시보드 · 월간</a>
+          <a href="#week"><span>02</span>주간 일정</a>
+          <a href="#event-detail"><span>03</span>일정 상세</a>
+          <a href="#goals"><span>04</span>목표 관리</a>
+          <a href="#projects"><span>05</span>프로젝트 관리</a>
+          <a href="#tasks"><span>06</span>할 일 관리</a>
+          <a href="#task-detail"><span>07</span>할 일 상세</a>
+          <a href="#task-edit"><span>08</span>인라인 편집</a>
+          <a href="#knowledge"><span>09</span>메모와 참고 자료</a>
+          <a href="#settings"><span>10</span>설정</a>
+          <a href="#dark-month"><span>11</span>다크 테마</a>
+          <a class="requirements-link" href="#requirements">리뉴얼 기준</a>
+        </nav>
+        <p class="sidebar-note">이미지를 누르면 원본 크기로 열립니다.</p>
+      </aside>
+      <div class="content">
+        <p class="gallery-note">현재 구현을 보여 주는 정적 화면 모음입니다. 기능을 실행하는 웹 버전은 아닙니다.</p>
+        <section class="screen" id="month">
+          <div class="section-heading"><p class="number">01 / DASHBOARD</p><h2>대시보드와 월간 일정</h2><p>시계와 7일 스트립, 오늘 일정·마감·다가오는 일정, 다섯 관리 화면과 월간 달력을 한 화면에서 확인합니다.</p></div>
+          <figure><a href="assets/month.png" target="_blank" rel="noopener noreferrer" aria-label="대시보드 월간 화면 원본 열기"><img src="assets/month.png" width="1920" height="1032" alt="MyPlanner Windows 앱의 밝은 테마 대시보드. 왼쪽 시계와 일정 목록, 오른쪽 관리 타일과 월간 달력." fetchpriority="high"></a><figcaption>Windows 앱 · 라이트 테마 · 샘플 일정과 할 일</figcaption></figure>
+        </section>
+        <section class="screen" id="week">
+          <div class="section-heading"><p class="number">02 / CALENDAR</p><h2>주간 일정</h2><p>날짜 헤더를 유지하고 일정 영역 안에서 스크롤합니다. Google 일정과 날짜를 지정한 할 일을 함께 살펴봅니다.</p></div>
+          <figure><a href="assets/week.png" target="_blank" rel="noopener noreferrer" aria-label="주간 일정 원본 열기"><img src="assets/week.png" width="1920" height="1032" alt="MyPlanner PC 주간 일정 화면. 날짜별 세로 영역에 일정 카드가 배치되어 있음." loading="lazy"></a><figcaption>월간·주간 전환, 이전·오늘·다음 이동</figcaption></figure>
+        </section>
+        <section class="screen" id="event-detail">
+          <div class="section-heading"><p class="number">03 / EVENT DETAIL</p><h2>일정 상세 패널</h2><p>선택한 일정의 제목, 캘린더, 시간과 본문을 오른쪽에서 읽습니다. Google Calendar 일정은 읽기 전용입니다.</p></div>
+          <figure><a href="assets/event-detail.png" target="_blank" rel="noopener noreferrer" aria-label="일정 상세 원본 열기"><img src="assets/event-detail.png" width="1920" height="1032" alt="월간 달력 오른쪽에 Google 일정의 상세 패널이 열린 PC 앱 화면." loading="lazy"></a><figcaption>Google 일정 수정은 캘린더에서 관리하기로 연결</figcaption></figure>
+        </section>
+        <section class="screen" id="goals">
+          <div class="section-heading"><p class="number">04 / GOALS</p><h2>목표 관리</h2><p>최종 목표·5년 목표·1년 목표를 세로 열로 나눕니다. 보드는 제목을 간결하게 보여 주고 상세 내용은 선택 후 읽습니다.</p></div>
+          <figure><a href="assets/goals.png" target="_blank" rel="noopener noreferrer" aria-label="목표 관리 원본 열기"><img src="assets/goals.png" width="1920" height="1032" alt="최종 목표, 5년 목표, 1년 목표의 세 열로 구성된 MyPlanner PC 목표 관리 보드." loading="lazy"></a><figcaption>목표는 이루려는 결과와 생활 방향</figcaption></figure>
+        </section>
+        <section class="screen" id="projects">
+          <div class="section-heading"><p class="number">05 / PROJECTS</p><h2>프로젝트 관리</h2><p>준비 중·진행 중 두 열로 실제 업무를 관리합니다. 완료·보류·보관 항목은 별도 보관함에서 확인합니다.</p></div>
+          <figure><a href="assets/projects.png" target="_blank" rel="noopener noreferrer" aria-label="프로젝트 관리 원본 열기"><img src="assets/projects.png" width="1920" height="1032" alt="준비 중과 진행 중 두 열, 보관함 버튼이 있는 PC 프로젝트 관리 화면." loading="lazy"></a><figcaption>프로젝트는 구체적인 업무와 산출물이 있는 일</figcaption></figure>
+        </section>
+        <section class="screen" id="tasks">
+          <div class="section-heading"><p class="number">06 / TASKS</p><h2>할 일 관리</h2><p>위의 기간 탭과 아래의 상태 열을 분리합니다. 기본 기간은 전체이며 다음·예정·대기 세 열을 사용합니다.</p></div>
+          <figure><a href="assets/tasks.png" target="_blank" rel="noopener noreferrer" aria-label="할 일 관리 원본 열기"><img src="assets/tasks.png" width="1920" height="1032" alt="오늘, 내일, 이번주, 이번달, 전체 기간 탭과 다음, 예정, 대기 세 열이 있는 PC 할 일 보드." loading="lazy"></a><figcaption>실행일과 마감일을 구분하고 완료 항목은 보관함으로 이동</figcaption></figure>
+        </section>
+        <section class="screen" id="task-detail">
+          <div class="section-heading"><p class="number">07 / DETAIL</p><h2>선택한 할 일의 상세</h2><p>큰 제목과 소제목, 본문을 오른쪽 인라인 패널에서 읽습니다. 목록의 제목과 상세 본문의 역할을 분리합니다.</p></div>
+          <figure><a href="assets/task-detail.png" target="_blank" rel="noopener noreferrer" aria-label="할 일 상세 원본 열기"><img src="assets/task-detail.png" width="1920" height="1032" alt="샘플 할 일의 큰 제목, 본문, 관계와 날짜를 오른쪽 인라인 패널에 표시한 PC 앱 화면." loading="lazy"></a><figcaption>별도 팝업 없이 현재 화면에서 상세 확인</figcaption></figure>
+        </section>
+        <section class="screen" id="task-edit">
+          <div class="section-heading"><p class="number">08 / EDITOR</p><h2>인라인 추가와 편집</h2><p>오른쪽 영역에서 항목을 작성합니다. 긴 폼에서도 저장·취소를 사용할 수 있고 작성 중 화면 이동을 보호합니다.</p></div>
+          <figure><a href="assets/task-edit.png" target="_blank" rel="noopener noreferrer" aria-label="인라인 편집 원본 열기"><img src="assets/task-edit.png" width="1920" height="1032" alt="PC MyPlanner 오른쪽 인라인 영역에 할 일 제목, 본문, 날짜, 관계 입력과 저장 취소가 표시된 화면." loading="lazy"></a><figcaption>상세·작성·편집을 같은 맥락에서 연결</figcaption></figure>
+        </section>
+        <section class="screen" id="knowledge">
+          <div class="section-heading"><p class="number">09 / KNOWLEDGE</p><h2>메모와 참고 자료</h2><p>지식 관리에서 메모와 참고 자료를 구분합니다. 제목으로 찾고 선택한 본문과 연결은 상세 영역에서 확인합니다.</p></div>
+          <figure><a href="assets/knowledge.png" target="_blank" rel="noopener noreferrer" aria-label="지식 관리 원본 열기"><img src="assets/knowledge.png" width="1920" height="1032" alt="메모와 참고 자료 두 열로 구성된 MyPlanner PC 지식 관리 화면." loading="lazy"></a><figcaption>메모는 동기화, PC 로컬 문서·폴더 연결은 해당 PC에서 사용</figcaption></figure>
+        </section>
+        <section class="screen" id="settings">
+          <div class="section-heading"><p class="number">10 / SETTINGS</p><h2>설정과 창 배치</h2><p>보기, 테마, 시계와 창 배치를 조정합니다. PC의 Google 연결과 Android 앱 전용 알림 설정은 환경에 맞게 구분합니다.</p></div>
+          <figure><a href="assets/settings.png" target="_blank" rel="noopener noreferrer" aria-label="설정 원본 열기"><img src="assets/settings.png" width="1920" height="1032" alt="MyPlanner Windows 앱의 설정 패널이 열린 화면. 테마, 시계, 창 배치와 연결 관련 설정." loading="lazy"></a><figcaption>현재 이미지의 설정 값도 실제 사용자 프로필이 아닌 샘플</figcaption></figure>
+        </section>
+        <section class="screen" id="dark-month">
+          <div class="section-heading"><p class="number">11 / DARK THEME</p><h2>다크 테마</h2><p>같은 정보 구조에서 배경과 글자, 경계선과 선택 상태를 어두운 환경에 맞춥니다. 기본 디자인 검토는 라이트 테마를 기준으로 합니다.</p></div>
+          <figure><a href="assets/dark-month.png" target="_blank" rel="noopener noreferrer" aria-label="다크 테마 원본 열기"><img src="assets/dark-month.png" width="1920" height="1032" alt="MyPlanner PC 앱 월간 대시보드의 다크 테마." loading="lazy"></a><figcaption>라이트·다크의 정보 구조와 조작 방식 유지</figcaption></figure>
+        </section>
+        <section class="requirements" id="requirements">
+          <p class="number">RENEWAL BRIEF</p><h2>리뉴얼에서 유지할 기준</h2>
+          <div class="requirement-grid">
+            <article><h3>제목은 간결하게</h3><p>보드에서 빠르게 훑고, 선택한 항목의 본문은 상세에서 편하게 읽습니다.</p></article>
+            <article><h3>편집은 현재 화면에서</h3><p>오른쪽 인라인 패널을 우선하고 긴 폼의 저장·취소와 작성 중 변경 보호를 유지합니다.</p></article>
+            <article><h3>분류와 날짜는 정확하게</h3><p>목표·프로젝트·할 일의 의미, 기간·상태, 실행일·마감일을 구분합니다.</p></article>
+            <article><h3>PC와 모바일을 연결</h3><p>같은 디자인 체계를 사용하되 큰 화면의 열 배치와 작은 화면의 탐색을 각각 설계합니다.</p></article>
+          </div>
+          <p class="brief-bottom">기능 목록, 화면별 요구사항, 반응형 크기와 개발 제약은 의뢰서에서 확인할 수 있습니다.</p>
+          <a class="brief-link" href="renewal-brief.md" download>전체 리뉴얼 의뢰서 다운로드 <span aria-hidden="true">↓</span></a>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer>MyPlanner · Windows 앱 현재 화면 · 2026.10.19</footer>
+</body>
+</html>
