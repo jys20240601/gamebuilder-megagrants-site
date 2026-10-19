@@ -1790,14 +1790,18 @@
     if (result.type === 'push:state' && ['enabled', 'registered', 'canNotify', 'configured'].every(k => typeof result[k] === 'boolean') &&
         Number.isFinite(result.lastReceivedAt) && result.lastReceivedAt >= 0) {
       pushState = Object.fromEntries(['enabled', 'registered', 'canNotify', 'configured', 'lastReceivedAt'].map(k => [k, result[k]]));
+      pushState.vibrationMode = ['repeat10', 'untilAcknowledged'].includes(result.vibrationMode) ? result.vibrationMode : null;
       const messages = {
         firebase_config_missing: '외부 알림을 준비 중이에요. 앱 업데이트 후 다시 확인해 주세요.',
         needs_google_connection: 'Google 계정을 다시 연결해 주세요.',
         drive_permission: 'Google 계정을 다시 연결하고 동기화 권한을 허용해 주세요.',
         busy: '다른 요청을 처리 중이에요. 잠시 후 다시 시도해 주세요.',
+        invalid_vibration_mode: '지원하지 않는 진동 방식이에요. 앱을 업데이트하고 다시 시도해 주세요.',
         registration_cleanup_failed: '기기 등록 해제를 확인하지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.'
       };
       pushMessage = typeof result.error === 'string' && result.error ? messages[result.error] || '기기 등록을 확인하지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.' : msg.type === 'push:set' ? '외부 알림 설정을 저장했어요.' : '';
+      if (!result.error && msg.type === 'push:set' && 'vibrationMode' in msg && pushState.vibrationMode !== msg.vibrationMode)
+        pushMessage = '진동 방식이 적용되지 않았어요. 현재 앱 설정을 확인해 주세요.';
     } else {
       pushState = null;
       pushMessage = '외부 알림 상태를 확인하지 못했어요. 앱 업데이트 후 다시 시도해 주세요.';
@@ -1817,6 +1821,16 @@
         h('div', { class: 'st-line' }, h('span', { class: 'k', text: '기기 등록' }), h('span', { class: 'v', id: 'push-registration', text: !p.configured ? '앱의 외부 알림 설정이 필요해요' : !prefs.connected ? 'Google 계정 연결 필요' : p.registered ? '등록됨' : '등록 대기' })),
         h('div', { class: 'st-line' }, h('span', { class: 'k', text: '알림 권한' }), h('span', { class: 'v', id: 'push-permission', text: p.canNotify ? '허용됨' : '꺼짐 · 휴대폰 설정에서 MyPlanner 알림을 허용해 주세요' })),
         h('div', { class: 'st-line' }, h('span', { class: 'k', text: '마지막 수신' }), h('span', { class: 'v', id: 'push-last', text: p.lastReceivedAt > 0 ? new Date(p.lastReceivedAt).toLocaleString('ko-KR') : '아직 없음' })));
+      const supported = p.vibrationMode !== null;
+      const mode = h('select', { id: 'push-vibration-mode', class: 'field', disabled: pushBusy || !supported },
+        h('option', { value: 'repeat10', text: '10초 반복 진동' }),
+        h('option', { value: 'untilAcknowledged', text: '확인할 때까지 반복 진동' }));
+      mode.value = supported ? p.vibrationMode : '';
+      section.append(h('label', { for: 'push-vibration-mode', text: '진동 방식' }), mode,
+        h('p', { id: 'push-vibration-help', text: '소리 없이 진동합니다. 알림을 열거나 지우면 멈춥니다. 휴대폰 알림 설정을 따릅니다.' }),
+        h('button', { type: 'button', class: 'btn outline', id: 'push-vibration-save', disabled: pushBusy || !supported, text: '진동 방식 저장',
+          onclick: () => updatePush({ type: 'push:set', enabled: p.enabled, vibrationMode: mode.value }) }));
+      if (!supported) section.append(h('p', { id: 'push-vibration-update', text: '진동 방식을 선택하려면 앱을 업데이트해 주세요.' }));
     }
     section.append(h('p', { id: 'push-status', role: 'status', text: pushBusy ? '앱에서 확인하는 중이에요…' : pushMessage || '외부 알림 상태를 확인할 수 있어요.' }),
       h('button', { type: 'button', class: 'btn outline', id: 'push-refresh', disabled: pushBusy, text: '외부 알림 상태 새로고침', onclick: () => updatePush({ type: 'push:get' }) }));
