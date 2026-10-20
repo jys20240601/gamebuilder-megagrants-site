@@ -16,17 +16,17 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="app.css?v=10">
+<link rel="stylesheet" href="app.css?v=11">
 </head>
 <body>
 <div class="app" id="app">
   <div class="list-col" id="list-col">
     <header class="hdr">
-      <div class="hdr-text"><span class="hdr-sub" id="hdr-sub"></span><h1 class="hdr-title" id="hdr-title">오늘</h1></div>
-      <button class="sync" id="sync" type="button"></button>
-      <button class="gear" id="open-settings" type="button" aria-label="설정">
+      <div class="hdr-text"><span class="hdr-sub" id="hdr-sub"></span><h1 class="hdr-title" id="hdr-title">오늘</h1>
+      <button class="gear" id="open-settings" type="button" aria-label="설정" title="설정 열기">
         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 6.5h8M15 6.5h1.5M3.5 13.5h1.5M8.5 13.5h8M13 4.7a1.8 1.8 0 1 1 0 3.6a1.8 1.8 0 0 1 0-3.6zM6.7 11.7a1.8 1.8 0 1 1 0 3.6a1.8 1.8 0 0 1 0-3.6z"/></svg>
-      </button>
+      </button></div>
+      <button class="sync" id="sync" type="button"></button>
     </header>
     <div id="banner"></div>
     <main class="scroll" id="list-scroll">
@@ -69,6 +69,6 @@
 
 <div class="cf" id="cf" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-<script src="app.js?v=10"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>

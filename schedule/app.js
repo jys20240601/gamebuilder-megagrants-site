@@ -188,6 +188,7 @@
     cf: null, // open confirm sheet
     confirmWipe: false,
     quietOpen: false,
+    settingsMore: false,
     bannerClosed: '',
   };
   {
@@ -605,6 +606,7 @@
         const end = en && !isNaN(+en) ? +en : +st + (allDay ? DAY : 0);
         const item = {
           k: cal.id + '|' + ev.id,
+          q: cal.id + '\n' + ev.id, // canonical desktop association key (cache only)
           t: String(ev.summary || '(제목 없음)').slice(0, 300),
           s: +st,
           e: Math.max(end, +st),
@@ -671,9 +673,14 @@
 
   function withExtraKeys(n, from, known) {
     const extra = Object.keys(from).filter(k => !known.includes(k) && !Object.prototype.hasOwnProperty.call(n, k));
-    if (!extra.length) return n;
+    const pcObjects = isObj(n.pc) && isObj(from.pc);
+    if (isObj(n.pc) && from.pc != null && !isObj(from.pc)) {
+      throw newerFormat('다른 버전의 상세 정보가 있어 덮어쓸 수 없어요. 앱을 업데이트한 뒤 다시 동기화해 주세요.');
+    }
+    if (!extra.length && !pcObjects) return n;
     const out = Object.assign({}, n);
     for (const k of extra) out[k] = from[k];
+    if (pcObjects) out.pc = Object.assign({}, from.pc, n.pc);
     return out;
   }
 
@@ -765,10 +772,10 @@
       }
       const remote = S.remoteDoc && Array.isArray(S.remoteDoc.notes) ? S.remoteDoc.notes.filter(validNote) : [];
       // merge with the notes as they are now (edits made while downloading are included)
-      const before = signature(S.notes);
+      const before = JSON.stringify(S.notes);
       S.notes = mergeNotes(S.notes, remote);
       local.set(K.notes, S.notes.filter(hasContent));
-      if (signature(S.notes) !== before) refreshViews();
+      if (JSON.stringify(S.notes) !== before) refreshViews();
       if (!S.fileId || signature(S.notes) !== signature(remote)) await uploadNotes();
       S.dirty = false;
       try {
@@ -831,12 +838,12 @@
       const rItems = arr(S.wsDoc && S.wsDoc.items).filter(validItem);
       const rPlans = arr(S.wsDoc && S.wsDoc.plans).filter(validPlan);
       // merge with the workspace as it is now (edits made while downloading are included)
-      const before = wsSignature(S.ws.items, S.ws.plans);
+      const before = JSON.stringify([S.ws.items, S.ws.plans]);
       S.ws.items = mergeItems(S.ws.items, rItems);
       S.ws.plans = mergePlans(S.ws.plans, rPlans);
       local.set(K.ws, { items: S.ws.items.filter(keepItem), plans: S.ws.plans });
       const after = wsSignature(S.ws.items, S.ws.plans);
-      if (after !== before) refreshViews(); // an open editor is left alone so typing is never interrupted
+      if (JSON.stringify([S.ws.items, S.ws.plans]) !== before) refreshViews(); // an open editor is left alone so typing is never interrupted
       const anything = S.ws.items.some(keepItem) || S.ws.plans.length > 0;
       if (S.wsFileId ? after !== wsSignature(rItems, rPlans) : anything) {
         const doc = wsDoc();
@@ -1030,7 +1037,9 @@
     document.documentElement.dataset.design = design;
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', ({ A: ['#f6f4f1', '#18151b'], B: ['#eef0f2', '#0f1113'] })[design][dark ? 1 : 0]);
+    const backgroundColor = ({ A: ['#f6f4f1', '#18151b'], B: ['#eef0f2', '#0f1113'] })[design][dark ? 1 : 0];
+    if (meta) meta.setAttribute('content', backgroundColor);
+    if (native) { try { native.postMessage(JSON.stringify({ type: 'appearance:set', backgroundColor, darkIcons: !dark })); } catch (_) { /* old bridge */ } }
   }
   function setLook(patch) {
     Object.assign(look, patch);
@@ -1077,7 +1086,7 @@
     return dLabel(st) + ' ' + hm(st) + ' – ' + dLabel(en) + ' ' + hm(en);
   }
 
-  // ------------------------------------------------------------------ workspace reading (PC-only fields are shown, never written)
+  // ------------------------------------------------------------------ workspace reading (pc.body is editable; other pc keys are preserved)
   const pcOf = it => (isObj(it && it.pc) ? it.pc : {});
   const pcStr = (it, k) => { const v = pcOf(it)[k]; return typeof v === 'string' ? v : ''; };
   const bodyOf = it => pcStr(it, 'body').trim();
@@ -1093,6 +1102,13 @@
   const CAT_LABEL = { work: '업무', personal: '개인', study: '학습' };
   const shortRange = (a, b) => [a, b].map(s => { const d = parseYmd(s); return d ? (d.getMonth() + 1) + '.' + d.getDate() : ''; });
   const notesLinked = (key, id) => liveNotes().filter(n => pcStr(n, key) === id);
+  const sharedEventKey = e => {
+    if (typeof e.q === 'string' && e.q.includes('\n')) return e.q;
+    const at = e.k.lastIndexOf('|');
+    return at > 0 ? e.k.slice(0, at) + '\n' + e.k.slice(at + 1) : e.k;
+  };
+  const noteEventKeys = n => arr(pcOf(n).eventKeys).filter(k => typeof k === 'string' && k.length <= 4096 && /^[^\r\n]+\n[^\r\n]+$/.test(k));
+  const notesLinkedEvent = e => liveNotes().filter(n => noteEventKeys(n).includes(sharedEventKey(e)));
 
   function periodRange(per, today) {
     if (per === 'today') return [today, today];
@@ -1365,7 +1381,7 @@
   }
 
   function noteRow(n) {
-    const linked = !!(pcStr(n, 'projectId') || pcStr(n, 'taskId'));
+    const linked = !!(pcStr(n, 'projectId') || pcStr(n, 'taskId') || pcStr(n, 'parentId') || noteEventKeys(n).length);
     return rowEl({ type: 'note', id: n.id, title: noteTitle(n), sub: dShort(parseYmd(n.date) || startOfDay(new Date(n.updatedAt))),
       icons: linked ? [mini('link', '연결된 항목')] : [], open: () => openRef({ type: 'note', id: n.id }) });
   }
@@ -1466,7 +1482,8 @@
     const notes = notesOn(sel);
     if (notes.length) kids.push(secEl({ key: 'notes', title: '메모', rows: notes.map(noteRow) }));
 
-    kids.push(monthCard(today));
+    // Extra month navigation stays available without changing the reference calendar list.
+    kids.push(h('details', { class: 'secondary calendar-more' }, h('summary', { text: '다른 날짜 보기' }), monthCard(today)));
     root.replaceChildren(...kids);
   }
 
@@ -1732,10 +1749,32 @@
     }
     return out;
   }
-  const blockEls = (blocks, muted) => blocks.map(b => h('div', { class: 'blk' },
-    b.h ? h('h3', { text: b.h }) : null,
-    b.p ? h('p', { class: muted ? 'muted' : null, text: b.p }) : null,
-    b.list ? h('ul', null, b.list.map(x => h('li', { text: x }))) : null));
+  // Memo read view only: never turn stored text into markup, and never place links inside list-card buttons.
+  function phoneText(text) {
+    const value = String(text || ''), out = [];
+    const pattern = /\+82(?:[ .-]?\(0\))?[ .-]?0?(?:1[016789]|2|3[1-3]|4[1-4]|5[1-5]|50[2-8]|6[1-4]|70|80)[ .-]?\d{3,4}[ .-]?\d{4}|0(?:1[016789]|2|3[1-3]|4[1-4]|5[1-5]|50[2-8]|6[1-4]|70|80)[ .-]?\d{3,4}[ .-]?\d{4}|1[568]\d{2}[ .-]?\d{4}/g;
+    let last = 0, match;
+    while ((match = pattern.exec(value))) {
+      const raw = match[0], start = match.index, end = start + raw.length;
+      if (/[0-9A-Za-z+]/.test(value[start - 1] || '') || /[0-9A-Za-z]/.test(value[end] || '') ||
+          (/[.-]/.test(value[start - 1] || '') && /\d/.test(value[start - 2] || '')) ||
+          (/[.-]/.test(value[end] || '') && /\d/.test(value[end + 1] || ''))) continue;
+      const international = raw.startsWith('+82');
+      let digits = raw.replace(/\D/g, '');
+      if (international) { digits = digits.slice(2); if (digits.startsWith('0')) digits = digits.slice(1); }
+      const domestic = international ? '0' + digits : digits;
+      if (!/^(?:010\d{8}|01[16789]\d{7,8}|02\d{7,8}|0(?:3[1-3]|4[1-4]|5[1-5]|6[1-4])\d{7,8}|050[2-8]\d{7,8}|070\d{8}|080\d{7,8}|1[568]\d{6})$/.test(domestic)) continue;
+      if (start > last) out.push(value.slice(last, start));
+      out.push(h('a', { class: 'phone-link', href: 'tel:' + (international ? '+82' + digits : digits), text: raw }));
+      last = end;
+    }
+    if (last < value.length) out.push(value.slice(last));
+    return out.length ? out : [value];
+  }
+  const blockEls = (blocks, muted, phones) => blocks.map(b => h('div', { class: 'blk' },
+    b.h ? h('h3', null, phones ? phoneText(b.h) : b.h) : null,
+    b.p ? h('p', { class: muted ? 'muted' : null }, phones ? phoneText(b.p) : b.p) : null,
+    b.list ? h('ul', null, b.list.map(x => h('li', null, phones ? phoneText(x) : x))) : null));
 
   function grp(title, rows, o) {
     o = o || {};
@@ -1753,7 +1792,7 @@
 
   function buildDetail(ref) {
     const x = refTarget(ref);
-    const d = { tag: '', title: '', blocks: [], groups: [], foot: [], editable: false };
+    const d = { tag: '', title: '', blocks: [], groups: [], foot: [], extra: [], editable: false };
     if (!x) {
       d.title = '찾을 수 없는 항목';
       d.blocks = blockEls([{ p: '다른 기기에서 지웠거나 아직 동기화되지 않았어요.' }], true);
@@ -1774,7 +1813,8 @@
       const desc = typeof x.d === 'string' ? x.d.trim() : '';
       d.blocks = blockEls([{ h: '설명', p: desc || '설명이 없는 일정이에요.' }], !desc);
       const files = Array.isArray(x.f) ? x.f.filter(isObj).slice(0, MAX_ATTACH) : [];
-      d.groups.push(grp('첨부파일', files.map(attachRow)));
+      if (files.length) d.extra.push(grp('첨부파일', files.map(attachRow)));
+      d.groups.push(grp('관련 메모', noteRows(notesLinkedEvent(x))));
       const link = safeLink(x.l) || 'https://calendar.google.com/calendar/r';
       d.foot = [h('a', { class: 'btn primary', id: 'dt-calendar', href: link, target: '_blank', rel: 'noopener noreferrer' }, '캘린더에서 관리하기', icon('ext'))];
       return d;
@@ -1797,7 +1837,7 @@
         prop('목표', goal ? itemTitle(goal) : '연결 안 함', goal ? { link: () => openRef({ type: 'goal', id: goal.id }, 'link') } : { none: true }),
       ];
       const body = bodyOf(x);
-      d.blocks = blockEls(body ? bodyBlocks(body) : [{ p: '본문이 비어 있어요.' }], !body);
+      d.blocks = blockEls(body ? bodyBlocks(body) : [{ p: '본문이 비어 있어요. 편집에서 내용을 적을 수 있어요.' }], !body);
       d.groups.push(grp('관련 메모', noteRows(notesLinked('taskId', x.id))));
       d.foot = [h('button', { type: 'button', class: 'btn outline', id: 'dt-done', onclick: () => setDone(x.id, !done), text: done ? '완료 취소' : '완료' }), editBtn()];
       return d;
@@ -1811,8 +1851,8 @@
       d.props = [prop('분류', kind || '없음', { none: !kind }),
         prop('상위 목표', parent ? itemTitle(parent) : '없음', parent ? { link: () => openRef({ type: 'goal', id: parent.id }, 'link') } : { none: true })];
       const due = parseYmd(x.dueDate);
-      if (due) d.props.push(prop('기한', dLabel(due), x.status !== 'done' ? { chip: dday(due) } : {}));
-      if (x.status !== 'active' && GOAL_STATUS.some(s => s[0] === x.status)) d.props.push(prop('상태', '', { chip: x.status === 'done' ? '달성' : '보류' }));
+      if (due) d.extra.push(h('div', { class: 'card props' }, prop('기한', dLabel(due), x.status !== 'done' ? { chip: dday(due) } : {})));
+      if (x.status !== 'active' && GOAL_STATUS.some(s => s[0] === x.status)) d.extra.push(h('div', { class: 'card props' }, prop('상태', '', { chip: x.status === 'done' ? '달성' : '보류' })));
       const outcome = typeof x.desiredResult === 'string' ? x.desiredResult.trim() : '';
       if (outcome) d.outcome = outcome;
       const body = bodyOf(x);
@@ -1821,6 +1861,7 @@
       d.groups.push(grp('하위 목표', goals.filter(g => pcStr(g, 'parentId') === x.id).map(g => iconRow('goal', g.id, 'target', null, itemTitle(g), '', 'link'))));
       d.groups.push(grp('관련 프로젝트', projects.filter(p => p.parentId === x.id).map(p => iconRow('project', p.id, 'folder', null, itemTitle(p), STAGE[stageOf(p)], 'link')), { keep: true, empty: '연결된 프로젝트가 없어요' }));
       d.groups.push(grp('관련 할 일', liveItems('task').filter(t => pcStr(t, 'parentId') === x.id).map(subTask)));
+      d.groups.push(grp('관련 메모', noteRows(notesLinked('parentId', x.id))));
       d.foot = [editBtn()];
       return d;
     }
@@ -1835,10 +1876,10 @@
       d.props = [prop('상태', '', { chip: STAGE[stage], hot: stage === 'active' }),
         prop('관련 목표', goal ? itemTitle(goal) : '연결 안 함', goal ? { link: () => openRef({ type: 'goal', id: goal.id }, 'link') } : { none: true }),
         prop('기간', period || '정하지 않음', { none: !period })];
-      if (CAT_LABEL[x.category]) d.props.push(prop('분류', CAT_LABEL[x.category]));
+      if (CAT_LABEL[x.category]) d.extra.push(h('div', { class: 'card props' }, prop('분류', CAT_LABEL[x.category])));
       const body = bodyOf(x);
       d.blocks = body ? blockEls(bodyBlocks(body)) : [];
-      const tasks = liveItems('task').filter(t => t.projectId === x.id).sort((p, q) => (p.status === 'done') - (q.status === 'done') || p.createdAt - q.createdAt);
+      const tasks = liveItems('task').filter(t => t.projectId === x.id);
       d.groups.push(grp('연결된 할 일', tasks.map(subTask), { keep: true, empty: '연결된 할 일이 없어요', add: { label: '이 프로젝트에 할 일 추가', run: () => startNew('task', { projectId: x.id }) } }));
       d.groups.push(grp('관련 메모', noteRows(notesLinked('projectId', x.id))));
       d.foot = [editBtn()];
@@ -1848,12 +1889,18 @@
     d.tag = '메모 · ' + dShort(parseYmd(x.date) || startOfDay(new Date(x.updatedAt)));
     d.title = noteTitle(x);
     const body = x.title.trim() ? x.body.trim() : x.body.trim().split('\n').slice(1).join('\n').trim();
-    d.blocks = blockEls(body ? bodyBlocks(body) : [{ p: '아직 내용이 없어요.' }], !body);
+    d.blocks = blockEls(body ? bodyBlocks(body) : [{ p: '아직 내용이 없어요.' }], !body, true);
     const rel = [];
     const proj = liveItem(pcStr(x, 'projectId'), 'project');
     if (proj) rel.push(iconRow('project', proj.id, 'folder', null, itemTitle(proj), '프로젝트', 'link'));
+    for (const key of noteEventKeys(x)) {
+      const event = S.events.find(e => sharedEventKey(e) === key);
+      if (event) rel.push(iconRow('event', event.k, 'cal', safeColor(event.c), event.t, 'Google 일정', 'link'));
+    }
     const task = liveItem(pcStr(x, 'taskId'), 'task');
     if (task) rel.push(subTask(task));
+    const goal = liveItem(pcStr(x, 'parentId'), 'goal');
+    if (goal) rel.push(iconRow('goal', goal.id, 'target', null, itemTitle(goal), '목표', 'link'));
     d.groups.push(grp('연결된 항목', rel));
     d.foot = [editBtn()];
     return d;
@@ -1893,7 +1940,8 @@
       d.props && d.props.length ? h('div', { class: 'card props', id: 'dt-props' }, d.props) : null,
       d.outcome ? h('div', { class: 'outcome', id: 'dt-outcome' }, h('span', { class: 'l', text: '원하는 결과' }), h('span', { class: 'v', text: d.outcome })) : null,
       d.blocks,
-      d.groups.filter(Boolean));
+      d.groups.filter(Boolean),
+      d.extra.length ? h('details', { class: 'secondary' }, h('summary', { text: '추가 정보' }), d.extra) : null);
     box.replaceChildren(
       h('div', { class: 'page-bar' }, backBtn('dt-back'), d.editable ? h('button', { type: 'button', class: 'edit-link', id: 'dt-edit', onclick: d.onEdit, text: '편집' }) : h('span')),
       body,
@@ -1909,9 +1957,9 @@
 
   function draftOf(type, x) {
     x = x || {};
-    if (type === 'task') return { t: x.title || '', status: isWait(x) ? 'waiting' : 'next', plan: DATE_RE.test(x.plannedDate || '') ? x.plannedDate : '', due: DATE_RE.test(x.dueDate || '') ? x.dueDate : '', proj: x.projectId || '' };
-    if (type === 'goal') return { t: x.title || '', outcome: typeof x.desiredResult === 'string' ? x.desiredResult : '', horizon: TIERS.some(t => t[0] === x.horizon) ? x.horizon : 'one-year', status: GOAL_STATUS.some(s => s[0] === x.status) ? x.status : 'active', due: DATE_RE.test(x.dueDate || '') ? x.dueDate : '' };
-    if (type === 'project') return { t: x.title || '', status: PROJECT_GROUPS.some(g => g[0] === x.status) ? x.status : 'active', cat: CAT_LABEL[x.category] ? x.category : '', goal: x.parentId || '', due: DATE_RE.test(x.dueDate || '') ? x.dueDate : '' };
+    if (type === 'task') return { t: x.title || '', body: bodyOf(x), status: isWait(x) ? 'waiting' : 'next', plan: DATE_RE.test(x.plannedDate || '') ? x.plannedDate : '', due: DATE_RE.test(x.dueDate || '') ? x.dueDate : '', proj: x.projectId || '' };
+    if (type === 'goal') return { t: x.title || '', body: bodyOf(x), outcome: typeof x.desiredResult === 'string' ? x.desiredResult : '', horizon: TIERS.some(t => t[0] === x.horizon) ? x.horizon : 'one-year', status: GOAL_STATUS.some(s => s[0] === x.status) ? x.status : 'active', due: DATE_RE.test(x.dueDate || '') ? x.dueDate : '' };
+    if (type === 'project') return { t: x.title || '', body: bodyOf(x), status: PROJECT_GROUPS.some(g => g[0] === x.status) ? x.status : 'active', cat: CAT_LABEL[x.category] ? x.category : '', goal: x.parentId || '', due: DATE_RE.test(x.dueDate || '') ? x.dueDate : '' };
     return { t: x.title || '', body: x.body || '', date: DATE_RE.test(x.date || '') ? x.date : '' };
   }
 
@@ -1919,7 +1967,7 @@
     const x = refTarget(ref);
     if (!x || ref.type === 'event') return;
     const draft = draftOf(ref.type, x);
-    pushLayer({ kind: 'edit', type: ref.type, id: ref.id, draft, orig: JSON.parse(JSON.stringify(draft)) });
+    pushLayer({ kind: 'edit', type: ref.type, id: ref.id, baseUpdatedAt: x.updatedAt, draft, orig: JSON.parse(JSON.stringify(draft)) });
   }
 
   function startNew(type, base) {
@@ -1936,22 +1984,33 @@
   }
 
   function dateCtl(id, value, onChange) {
-    const input = h('input', { type: 'date', id, 'aria-label': '날짜 고르기' });
-    const text = h('span');
-    const clear = h('button', { type: 'button', class: 'date-clear', text: '지우기' });
+    const input = h('input', { type: 'date', id, tabindex: '-1', 'aria-hidden': 'true' });
+    const select = h('select', { 'aria-label': '날짜 고르기' });
     const today = startOfDay(S.now);
     const paint = v => {
-      const d = parseYmd(v);
-      const n = d ? daysBetween(today, d) : null;
-      text.textContent = d ? dShort(d) + (n === 0 ? ' · 오늘' : n === 1 ? ' · 내일' : '') : '없음';
-      text.className = d ? '' : 'none';
-      input.value = d ? v : '';
-      clear.hidden = !d;
+      select.replaceChildren(h('option', { value: '', text: '없음' }));
+      const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      const dates = [];
+      for (let d = today; d <= end; d = addDays(d, 1)) dates.push(ymd(d));
+      if (parseYmd(v) && !dates.includes(v)) dates.push(v);
+      dates.sort().forEach(key => {
+        const d = parseYmd(key), n = daysBetween(today, d);
+        select.append(h('option', { value: key, text: dShort(d) + (n === 0 ? ' · 오늘' : n === 1 ? ' · 내일' : '') }));
+      });
+      select.append(h('option', { value: 'custom', text: '다른 날짜 선택…' }));
+      select.value = parseYmd(v) ? v : '';
+      input.value = select.value;
     };
     input.addEventListener('change', () => { const v = DATE_RE.test(input.value) ? input.value : ''; onChange(v); paint(v); });
-    clear.addEventListener('click', () => { onChange(''); paint(''); });
+    select.addEventListener('change', () => {
+      if (select.value === 'custom') {
+        select.value = input.value;
+        if (typeof input.showPicker === 'function') { try { input.showPicker(); } catch (_) { input.focus(); input.click(); } }
+        else { input.focus(); input.click(); }
+      } else { const v = select.value; onChange(v); paint(v); }
+    });
     paint(value);
-    return h('div', { class: 'date-wrap' }, h('label', { class: 'date-box' }, text, input), clear);
+    return h('div', { class: 'date-wrap' }, h('div', { class: 'date-box' }, select, input));
   }
 
   function renderEditor(layer) {
@@ -1973,13 +2032,13 @@
     title.addEventListener('input', () => set({ t: title.value }));
     title.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); title.blur(); } });
     const fld = (label, ctl, cls, hint) => h('div', { class: 'fld' }, h('span', { class: 'l' + (cls ? ' ' + cls : '') }, label, hint ? h('span', { class: 'hint2', text: hint }) : null), ctl);
-    const fields = [title];
+    const fields = [title], extra = [];
 
     if (type === 'task') {
       const hint = h('span', { class: 'h' });
       const paintHint = () => { hint.textContent = dr.status === 'waiting' ? '대기는 실행일이 있어도 대기에 남아요.' : dr.plan ? '실행일이 있어서 ‘예정’에 보여요. 마감 알림은 마감일에만 생겨요.' : '실행일이 없으면 ‘다음’에 보여요.'; };
       paintHint();
-      fields.push(h('div', { class: 'fld' }, h('span', { class: 'l', text: '상태' }),
+      fields.push(h('div', { class: 'fld task-state' }, h('span', { class: 'l', text: '상태' }),
         segCtl('ed-status', [['next', '다음'], ['waiting', '대기']], dr.status, v => { set({ status: v }); paintHint(); }), hint));
       fields.push(fld('실행일 · 하기로 한 날', dateCtl('ed-plan', dr.plan, v => { set({ plan: v }); paintHint(); })));
       fields.push(fld('마감일 · 실제 기한', dateCtl('ed-due', dr.due, v => set({ due: v })), 'due'));
@@ -1993,34 +2052,30 @@
       area.value = dr.outcome;
       area.addEventListener('input', () => set({ outcome: area.value }));
       fields.push(fld('원하는 결과', area));
-      fields.push(fld('구분', segCtl('ed-horizon', [['ultimate', '최종'], ['five-year', '5년'], ['one-year', '1년']], dr.horizon, v => set({ horizon: v }))));
-      fields.push(fld('상태', segCtl('ed-gstatus', GOAL_STATUS, dr.status, v => set({ status: v }))));
-      fields.push(fld('기한', dateCtl('ed-due', dr.due, v => set({ due: v }))));
+      extra.push(fld('구분', segCtl('ed-horizon', [['ultimate', '최종'], ['five-year', '5년'], ['one-year', '1년']], dr.horizon, v => set({ horizon: v }))));
+      extra.push(fld('상태', segCtl('ed-gstatus', GOAL_STATUS, dr.status, v => set({ status: v }))));
+      extra.push(fld('기한', dateCtl('ed-due', dr.due, v => set({ due: v }))));
     } else if (type === 'project') {
-      fields.push(fld('상태', segCtl('ed-pstatus', [['preparing', '준비 중'], ['active', '진행 중'], ['paused', '보류'], ['done', '완료']], dr.status, v => set({ status: v }))));
+      extra.push(fld('상태', segCtl('ed-pstatus', [['preparing', '준비 중'], ['active', '진행 중'], ['paused', '보류'], ['done', '완료']], dr.status, v => set({ status: v }))));
       const goals = liveItems('goal');
       const sel = h('select', { id: 'ed-goal', 'aria-label': '관련 목표' }, h('option', { value: '', text: '연결 안 함' }), goals.map(g => h('option', { value: g.id, text: itemTitle(g) })));
       sel.value = goals.some(g => g.id === dr.goal) ? dr.goal : '';
       sel.addEventListener('change', () => set({ goal: sel.value }));
-      fields.push(fld('관련 목표 · 선택', sel));
-      fields.push(fld('분류', segCtl('ed-cat', [['', '없음'], ['work', '업무'], ['personal', '개인'], ['study', '학습']], dr.cat, v => set({ cat: v }))));
-      fields.push(fld('기한', dateCtl('ed-due', dr.due, v => set({ due: v }))));
+      extra.push(fld('관련 목표 · 선택', sel));
+      extra.push(fld('분류', segCtl('ed-cat', [['', '없음'], ['work', '업무'], ['personal', '개인'], ['study', '학습']], dr.cat, v => set({ cat: v }))));
+      extra.push(fld('기한', dateCtl('ed-due', dr.due, v => set({ due: v }))));
     } else {
-      fields.push(fld('날짜', dateCtl('ed-date', dr.date, v => set({ date: v }))));
+      extra.push(fld('날짜', dateCtl('ed-date', dr.date, v => set({ date: v }))));
     }
 
-    if (type === 'note') {
+    {
       const area = h('textarea', { id: 'ed-text', class: 'body', placeholder: '자세한 내용은 여기에 적어요.', 'aria-label': '본문' });
       area.value = dr.body;
-      area.addEventListener('input', () => { set({ body: area.value }); grow(area); });
+      area.addEventListener('input', () => set({ body: area.value }));
       fields.push(fld('본문', area, null, '## 소제목 · - 목록'));
-    } else {
-      // the body of goals, projects and tasks is a PC field in the shared file: shown here, edited on the PC
-      const area = h('textarea', { id: 'ed-text', class: 'body', readonly: true, placeholder: '본문은 PC 앱에서 적을 수 있어요.', 'aria-label': '본문 (PC 앱에서 편집)' });
-      area.value = x ? bodyOf(x) : '';
-      fields.push(fld('본문', area, null, 'PC 앱에서 편집'));
     }
-    if (!isNew) fields.push(h('button', { type: 'button', class: 'ed-del', id: 'ed-delete', onclick: () => askDelete(layer), text: TYPE_NAME[type] + ' 삭제' }));
+    if (!isNew) extra.push(h('button', { type: 'button', class: 'ed-del', id: 'ed-delete', onclick: () => askDelete(layer), text: TYPE_NAME[type] + ' 삭제' }));
+    if (extra.length) fields.push(h('details', { class: 'secondary' }, h('summary', { text: '추가 설정' }), extra));
 
     box.replaceChildren(
       h('div', { class: 'ed-bar' },
@@ -2031,15 +2086,8 @@
       h('div', { class: 'ed-body', id: 'ed-body' }, fields));
     box.hidden = false;
     box.dataset.uid = String(layer.uid);
-    for (const t of box.querySelectorAll('textarea.body')) grow(t);
     update();
     if (isNew) setTimeout(() => { if (!box.hidden && box.dataset.uid === String(layer.uid)) title.focus(); }, 60);
-  }
-
-  // the body box grows with its text, so the page scrolls instead of the box
-  function grow(t) {
-    t.style.height = 'auto';
-    t.style.height = Math.max(t.scrollHeight + 2, 240) + 'px';
   }
 
   function cancelEditor(layer) {
@@ -2061,6 +2109,15 @@
     const d = layer.draft, type = layer.type, title = d.t.trim();
     if (type === 'note' ? !(title || d.body.trim()) : !title) { toast(type === 'note' ? '제목이나 내용을 적어 주세요' : '제목을 적어 주세요'); return false; }
     let id = layer.id;
+    const current = id ? (type === 'note' ? noteById(id) : itemById(id)) : null;
+    if (id && (!current || current.deleted || current.updatedAt !== layer.baseUpdatedAt)) {
+      toast('다른 기기에서 바뀐 항목이에요. 작성한 내용을 복사한 뒤 다시 열어 주세요.');
+      return false;
+    }
+    if (type !== 'note' && d.body !== layer.orig.body && current && current.pc != null && !isObj(current.pc)) {
+      toast('다른 버전의 상세 정보가 있어 본문을 덮어쓸 수 없어요. 앱을 업데이트해 주세요.');
+      return false;
+    }
     if (type === 'note') {
       let n = id ? noteById(id) : null;
       if (!n || n.deleted) { const now = Date.now(); n = { id: uid(), title: '', body: '', date: null, createdAt: now, updatedAt: now }; S.notes.push(n); }
@@ -2074,6 +2131,8 @@
       let it = id ? itemById(id) : null;
       if (!it || it.deleted) { it = makeItem(type); S.ws.items.push(it); }
       it.title = title.slice(0, 500);
+      // Body is the existing shared desktop field. Change only this key; keep every other pc key.
+      if (d.body !== layer.orig.body) it.pc = Object.assign({}, isObj(it.pc) ? it.pc : {}, { body: d.body.slice(0, 200000) });
       if (type === 'task') {
         const wasWait = isWait(it);
         if (d.status === 'waiting') { if (!wasWait) it.status = 'waiting'; }
@@ -2098,6 +2157,7 @@
     }
     const fresh = !layer.id;
     layer.orig = JSON.parse(JSON.stringify(layer.draft));
+    layer.baseUpdatedAt = (type === 'note' ? noteById(id) : itemById(id)).updatedAt;
     if (stay) { layer.id = id; return true; }
     if (fresh) {
       toast('새로 만들었어요');
@@ -2230,6 +2290,7 @@
 
   function settingsContent() {
     const out = [stHead('설정', '이 기기의 화면과 Google 연결')];
+    const more = [];
     const design = look.design === 'B' ? 'B' : 'A';
     const designs = [['A', '차분한 플래너', '부드러운 보라 · 둥근 체크 · 여유 있는 간격'], ['B', '업무 대시보드', '검정과 빨강 · 네모 체크 · 또렷한 대비']];
     out.push(stSec('화면', '이 기기에만 적용돼요', h('div', { class: 'st-card', id: 'st-look' },
@@ -2264,14 +2325,14 @@
 
     if (native) out.push(stSec('알림', 'Android 앱 전용', h('div', { class: 'st-card' }, stRow({ id: 'st-notify', k: '알림', small: '정기 브리핑 · 외부 알림 · 진동 방식', onclick: openNotify }))));
 
-    out.push(stSec('데이터', '이 기기로 내려받기', h('div', { class: 'st-card' }, h('div', { class: 'st-btns' },
+    more.push(stSec('데이터', '이 기기로 내려받기', h('div', { class: 'st-card' }, h('div', { class: 'st-btns' },
       h('button', { type: 'button', class: 'btn outline', id: 'st-export-notes', onclick: exportNotes, text: '메모 내보내기 (JSON)' }),
       h('button', { type: 'button', class: 'btn outline', id: 'st-export-ws', onclick: exportWorkspace, text: '할 일·목표 내보내기 (JSON)' })))));
 
     if (!native) {
       const field = h('input', { id: 'st-client', type: 'text', inputmode: 'url', autocomplete: 'off', spellcheck: 'false', placeholder: '1234567890-xxxx.apps.googleusercontent.com', 'aria-label': '웹 클라이언트 ID' });
       field.value = prefs.clientId || '';
-      out.push(stSec('웹 클라이언트 ID', '브라우저에서만', h('div', { class: 'st-card' }, h('div', { class: 'st-field' },
+      more.push(stSec('웹 클라이언트 ID', '브라우저에서만', h('div', { class: 'st-card' }, h('div', { class: 'st-field' },
         h('p', { text: DEFAULT_CLIENT_ID ? '기본 ID가 들어 있어요. 다른 ID를 쓰려면 아래에 넣으세요.' : 'Google 연결에 쓰는 공개 ID예요 (비밀번호가 아니에요). 한 번만 만들면 됩니다.' }),
         h('ol', null,
           h('li', null, 'Google Cloud 콘솔 → API 및 서비스 → 사용자 인증 정보'),
@@ -2303,7 +2364,9 @@
           h('button', { type: 'button', class: 'btn outline danger-text', id: 'st-wipe-yes', text: '지우기', onclick: wipeDevice }),
           h('button', { type: 'button', class: 'btn outline', text: '취소', onclick: () => { S.confirmWipe = false; renderSettings(); } })));
     }
-    out.push(stSec('이 기기', null, h('div', { class: 'st-card' }, wipe)));
+    more.push(stSec('이 기기', null, h('div', { class: 'st-card' }, wipe)));
+    out.push(h('details', { class: 'secondary', open: S.settingsMore ? true : null,
+      ontoggle: ev => { S.settingsMore = ev.currentTarget.open; } }, h('summary', { text: '데이터·연결 고급 설정' }), more));
     return out;
   }
 
@@ -2320,6 +2383,9 @@
         Number.isFinite(result.lastReceivedAt) && result.lastReceivedAt >= 0) {
       pushState = Object.fromEntries(['enabled', 'registered', 'canNotify', 'configured', 'lastReceivedAt'].map(k => [k, result[k]]));
       pushState.vibrationMode = ['repeat10', 'untilAcknowledged'].includes(result.vibrationMode) ? result.vibrationMode : null;
+      pushState.deviceLabel = typeof result.deviceLabel === 'string' ? result.deviceLabel.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 120) : '';
+      pushState.versionName = typeof result.versionName === 'string' && /^[0-9]+(?:\.[0-9]+){1,3}$/.test(result.versionName) ? result.versionName : '';
+      pushState.canOpenNotificationSettings = result.canOpenNotificationSettings === true;
       const messages = {
         firebase_config_missing: '외부 알림을 준비 중이에요. 앱 업데이트 후 다시 확인해 주세요.',
         needs_google_connection: 'Google 계정을 다시 연결해 주세요.',
@@ -2374,6 +2440,15 @@
     }
   }
 
+  async function openNotificationSettings() {
+    if (!pushState || !pushState.canOpenNotificationSettings) {
+      toast('앱을 업데이트하면 여기서 Android 알림 설정을 열 수 있어요.');
+      return;
+    }
+    const result = await nativeRequest({ type: 'notifications:settings' });
+    if (result.ok !== true) toast(typeof result.message === 'string' ? result.message : 'Android 설정을 열지 못했어요. 기기의 설정 앱에서 MyPlanner 알림을 켜 주세요.');
+  }
+
   function notifyContent() {
     const b = briefing, p = pushState;
     const out = [stHead('알림', 'Android 앱 전용 · 정기 브리핑과 외부 알림은 따로 움직여요')];
@@ -2387,9 +2462,11 @@
     out.push(h('div', { class: 'st-card', id: 'notify-status' },
       stRow({ id: 'notify-perm', dot: perm === false ? 'err' : perm ? 'ok' : 'faint', k: '알림 권한',
         small: perm === false ? '꺼져 있어요 · Android 설정에서 켜 주세요' : perm ? '브리핑과 외부 알림을 표시할 수 있어요' : '앱에서 확인하는 중이에요',
-        v: perm === false ? '꺼짐' : perm ? '허용됨' : '', vCls: perm === false ? 'off' : 'ok', vid: 'notify-permission' }),
-      stRow({ id: 'notify-reg', dot: reg.dot, k: '기기 등록', small: reg.small, v: reg.v, vCls: reg.vCls, vid: 'push-registration' })));
+        v: perm === false && p && p.canOpenNotificationSettings ? null : perm === false ? '꺼짐' : perm ? '허용됨' : '', vCls: perm === false ? 'off' : 'ok', vid: 'notify-permission',
+        ctl: perm === false && p && p.canOpenNotificationSettings ? h('button', { type: 'button', class: 'st-perm-open', id: 'notify-open-system', text: '설정 열기', onclick: openNotificationSettings }) : null }),
+      stRow({ id: 'notify-reg', dot: reg.dot, k: '기기 등록', small: [p && p.deviceLabel, p && p.versionName ? '앱 ' + p.versionName : '', reg.small].filter(Boolean).join(' · '), v: reg.v, vCls: reg.vCls, vid: 'push-registration' })));
     if (perm === false) out.push(h('div', { class: 'st-alert', id: 'notify-perm-alert', text: '알림 권한이 꺼져 있어서 브리핑과 외부 알림이 모두 표시되지 않아요. 설정은 저장돼 있고, 권한을 켜면 바로 다시 받아요.' }));
+    if (perm === false && p && !p.canOpenNotificationSettings) out.push(h('button', { type: 'button', class: 'st-status', id: 'notify-perm-update', text: '앱 업데이트 후 Android 알림 설정 열기', onclick: openNotificationSettings }));
 
     const bKids = [];
     if (b) {
