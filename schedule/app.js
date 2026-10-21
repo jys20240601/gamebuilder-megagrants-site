@@ -1771,10 +1771,40 @@
     if (last < value.length) out.push(value.slice(last));
     return out.length ? out : [value];
   }
-  const blockEls = (blocks, muted, phones) => blocks.map(b => h('div', { class: 'blk' },
-    b.h ? h('h3', null, phones ? phoneText(b.h) : b.h) : null,
-    b.p ? h('p', { class: muted ? 'muted' : null }, phones ? phoneText(b.p) : b.p) : null,
-    b.list ? h('ul', null, b.list.map(x => h('li', null, phones ? phoneText(x) : x))) : null));
+  // Item read views only (the user's own text, never calendar descriptions): http(s) URLs become anchors that open
+  // outside the page; the Android app hands them to the browser. A URL stops at the first non-URL character, and
+  // trailing punctuation or an unmatched closing bracket stays text. Stored text is never changed.
+  const itemLink = u => {
+    try {
+      const url = new URL(u);
+      return (url.protocol === 'https:' || url.protocol === 'http:') && url.hostname && !url.username && !url.password ? url.href : null;
+    } catch (e) { return null; }
+  };
+  function richText(text, phones, links) {
+    const value = String(text || ''), plain = s => (phones ? phoneText(s) : [s]);
+    if (!links) return plain(value);
+    const out = [], pattern = /https?:\/\/[A-Za-z0-9\-._~:/?#[\]@!$&()*+,;=%]+/g, count = (s, c) => s.split(c).length - 1;
+    let last = 0, match;
+    while ((match = pattern.exec(value))) {
+      let u = match[0];
+      for (;;) {
+        const c = u[u.length - 1];
+        if ('.,;:!?*'.includes(c) || (c === ')' && count(u, '(') < count(u, ')')) || (c === ']' && count(u, '[') < count(u, ']'))) u = u.slice(0, -1);
+        else break;
+      }
+      const href = u.indexOf('://') + 3 < u.length ? itemLink(u) : null;
+      if (!href) continue;
+      if (match.index > last) out.push(...plain(value.slice(last, match.index)));
+      out.push(h('a', { class: 'body-link', href, target: '_blank', rel: 'noopener noreferrer', text: u }));
+      last = pattern.lastIndex = match.index + u.length;
+    }
+    if (last < value.length) out.push(...plain(value.slice(last)));
+    return out.length ? out : [value];
+  }
+  const blockEls = (blocks, muted, phones, links) => blocks.map(b => h('div', { class: 'blk' },
+    b.h ? h('h3', null, richText(b.h, phones, links)) : null,
+    b.p ? h('p', { class: muted ? 'muted' : null }, richText(b.p, phones, links)) : null,
+    b.list ? h('ul', null, b.list.map(x => h('li', null, richText(x, phones, links)))) : null));
 
   function grp(title, rows, o) {
     o = o || {};
@@ -1837,7 +1867,7 @@
         prop('목표', goal ? itemTitle(goal) : '연결 안 함', goal ? { link: () => openRef({ type: 'goal', id: goal.id }, 'link') } : { none: true }),
       ];
       const body = bodyOf(x);
-      d.blocks = blockEls(body ? bodyBlocks(body) : [{ p: '본문이 비어 있어요. 편집에서 내용을 적을 수 있어요.' }], !body);
+      d.blocks = blockEls(body ? bodyBlocks(body) : [{ p: '본문이 비어 있어요. 편집에서 내용을 적을 수 있어요.' }], !body, false, true);
       d.groups.push(grp('관련 메모', noteRows(notesLinked('taskId', x.id))));
       d.foot = [h('button', { type: 'button', class: 'btn outline', id: 'dt-done', onclick: () => setDone(x.id, !done), text: done ? '완료 취소' : '완료' }), editBtn()];
       return d;
@@ -1856,7 +1886,7 @@
       const outcome = typeof x.desiredResult === 'string' ? x.desiredResult.trim() : '';
       if (outcome) d.outcome = outcome;
       const body = bodyOf(x);
-      d.blocks = body ? blockEls(bodyBlocks(body)) : [];
+      d.blocks = body ? blockEls(bodyBlocks(body), false, false, true) : [];
       const goals = liveItems('goal'), projects = liveItems('project');
       d.groups.push(grp('하위 목표', goals.filter(g => pcStr(g, 'parentId') === x.id).map(g => iconRow('goal', g.id, 'target', null, itemTitle(g), '', 'link'))));
       d.groups.push(grp('관련 프로젝트', projects.filter(p => p.parentId === x.id).map(p => iconRow('project', p.id, 'folder', null, itemTitle(p), STAGE[stageOf(p)], 'link')), { keep: true, empty: '연결된 프로젝트가 없어요' }));
@@ -1878,7 +1908,7 @@
         prop('기간', period || '정하지 않음', { none: !period })];
       if (CAT_LABEL[x.category]) d.extra.push(h('div', { class: 'card props' }, prop('분류', CAT_LABEL[x.category])));
       const body = bodyOf(x);
-      d.blocks = body ? blockEls(bodyBlocks(body)) : [];
+      d.blocks = body ? blockEls(bodyBlocks(body), false, false, true) : [];
       const tasks = liveItems('task').filter(t => t.projectId === x.id);
       d.groups.push(grp('연결된 할 일', tasks.map(subTask), { keep: true, empty: '연결된 할 일이 없어요', add: { label: '이 프로젝트에 할 일 추가', run: () => startNew('task', { projectId: x.id }) } }));
       d.groups.push(grp('관련 메모', noteRows(notesLinked('projectId', x.id))));
@@ -1889,7 +1919,7 @@
     d.tag = '메모 · ' + dShort(parseYmd(x.date) || startOfDay(new Date(x.updatedAt)));
     d.title = noteTitle(x);
     const body = x.title.trim() ? x.body.trim() : x.body.trim().split('\n').slice(1).join('\n').trim();
-    d.blocks = blockEls(body ? bodyBlocks(body) : [{ p: '아직 내용이 없어요.' }], !body, true);
+    d.blocks = blockEls(body ? bodyBlocks(body) : [{ p: '아직 내용이 없어요.' }], !body, true, true);
     const rel = [];
     const proj = liveItem(pcStr(x, 'projectId'), 'project');
     if (proj) rel.push(iconRow('project', proj.id, 'folder', null, itemTitle(proj), '프로젝트', 'link'));
