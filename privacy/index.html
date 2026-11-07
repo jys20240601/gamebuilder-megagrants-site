@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>개인정보처리방침 · 어느별 스튜디오</title>
+<meta name="description" content="어느별 스튜디오 내부 도구의 개인정보처리방침">
+<link rel="icon" href="/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f7f3ec;
+  --ink: #1b1820;
+  --ink-soft: #57505e;
+  --rule: #d9cfc1;
+  --star: #c98a12;
+  --display: "Jua", "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #17151b; --ink: #f1ece4; --ink-soft: #b4abba; --rule: #39343f; --star: #f0b43c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #17151b; --ink: #f1ece4; --ink-soft: #b4abba; --rule: #39343f; --star: #f0b43c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1rem;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+main { max-width: 720px; margin: 0 auto; padding: 48px 16px 64px; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.4rem); margin: 0 0 4px; }
+h2 { font-size: 1.1rem; font-weight: 600; margin: 32px 0 8px; padding-top: 16px; border-top: 1px solid var(--rule); }
+p, li { color: var(--ink); }
+.meta { color: var(--ink-soft); margin: 0 0 24px; }
+a { color: inherit; text-decoration-color: var(--star); text-underline-offset: 3px; }
+ul { padding-left: 1.2em; }
+.en { color: var(--ink-soft); font-size: 0.95rem; }
+footer { color: var(--ink-soft); font-size: 0.9rem; margin-top: 48px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>개인정보처리방침</h1>
+  <p class="meta">어느별 스튜디오 · 시행일 2026년 11월 7일</p>
+
+  <p>이 방침은 어느별 스튜디오(이하 “스튜디오”)가 업무용으로 직접 운영하는 내부 도구에 적용됩니다. 예를 들어 작업 컴퓨터의 파일을 스튜디오의 Google Drive에 백업하는 도구(rclone ComMini)가 여기에 해당합니다. 이 도구들은 일반에 제공하는 서비스가 아니며 스튜디오 구성원 본인의 계정에만 연결됩니다.</p>
+
+  <h2>1. 이용하는 정보</h2>
+  <ul>
+    <li>Google 계정으로 로그인할 때 받는 접근 토큰</li>
+    <li>백업과 정리를 위해 읽고 쓰는 스튜디오 자신의 Google Drive 파일과 폴더 정보(이름, 크기, 수정일, 체크섬)</li>
+  </ul>
+  <p>그 밖의 개인정보는 수집하지 않습니다.</p>
+
+  <h2>2. 이용 목적</h2>
+  <p>스튜디오 작업 파일을 Google Drive에 올리고, 올린 파일이 원본과 같은지 확인하고, Drive 안의 폴더를 정리하는 데에만 씁니다.</p>
+
+  <h2>3. 보관과 제3자 제공</h2>
+  <ul>
+    <li>접근 토큰은 스튜디오 작업 컴퓨터의 설정 파일에만 저장됩니다.</li>
+    <li>Drive 데이터는 스튜디오의 컴퓨터와 스튜디오 자신의 Google Drive 사이에서만 오갑니다.</li>
+    <li>정보를 판매하거나 제3자에게 제공하지 않으며, 광고나 AI 모델 학습에 쓰지 않습니다.</li>
+  </ul>
+
+  <h2>4. Google API 데이터</h2>
+  <p>Google API에서 받은 정보의 사용과 다른 앱으로의 전송은 제한적 사용(Limited Use) 요구사항을 포함한 <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API 서비스 사용자 데이터 정책</a>을 따릅니다.</p>
+
+  <h2>5. 접근 권한 철회</h2>
+  <p>Google 계정의 <a href="https://myaccount.google.com/permissions">서드 파티 연결 관리</a>에서 언제든 접근 권한을 철회할 수 있습니다. 철회하면 도구는 더 이상 Drive에 접근하지 못합니다.</p>
+
+  <h2>6. 문의</h2>
+  <p><a href="mailto:seoyoung@anewbyeol.kr">seoyoung@anewbyeol.kr</a></p>
+
+  <h2>English summary</h2>
+  <p class="en">This policy covers internal tools operated by A New Byeol Studio for its own work, such as a backup tool (rclone ComMini) that copies the studio's files to the studio's own Google Drive. The tools use only the Google sign-in token and the studio's own Drive file metadata and content, solely for backup, verification and organization. Tokens stay on the studio's computers. No data is sold, shared with third parties, used for advertising or used to train AI models. Use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements. Access can be revoked at any time at myaccount.google.com/permissions. Contact: seoyoung@anewbyeol.kr.</p>
+
+  <footer>© 2023–2026 어느별 스튜디오 · A New Byeol Studio · <a href="/">홈</a></footer>
+</main>
+</body>
+</html>
