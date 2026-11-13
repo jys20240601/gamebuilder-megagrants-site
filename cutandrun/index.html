@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>CUT &amp; RUN 개발 현황</title>
+<style>
+:root{--bg:#0e1118;--card:#171b26;--fg:#e8eaf0;--mut:#8e95a8;--acc:#f5b83d;--line:#262c3b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:1.9rem;margin:.2em 0 .1em}
+h2{font-size:1.2rem;margin:2.2em 0 .7em;padding-left:.6em;border-left:4px solid var(--acc)}
+p.desc{margin:.2em 0;color:var(--mut)}
+#upd{color:var(--mut);font-size:.9rem}
+.art{display:grid;gap:12px;grid-template-columns:1fr}
+.art .row{display:grid;gap:12px;grid-template-columns:2fr 1fr}
+img{display:block;width:100%;height:auto;border-radius:8px;background:var(--card)}
+a{color:inherit}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+figure img{border-radius:0;aspect-ratio:16/9;object-fit:cover}
+figcaption{padding:8px 12px 10px;font-size:.92rem}
+figcaption time{display:block;color:var(--mut);font-size:.8rem}
+.skills{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+.skills figure{text-align:center;padding:8px}
+.skills img{aspect-ratio:1;object-fit:contain;background:none}
+.skills figcaption{padding:6px 0 0;font-size:.82rem}
+#msg{color:#ff9a8a}
+@media(max-width:560px){.art .row{grid-template-columns:1fr}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<main>
+<h1>CUT &amp; RUN 개발 현황</h1>
+<p class="desc">촬영소를 배경으로 한 1인칭 멀티플레이 경찰과 도둑 게임. 2026 Epic AI MegaJam 출품작 (Unreal Engine 5.9), 현재 개발 중입니다.</p>
+<p id="upd">마지막 업데이트: 불러오는 중...</p>
+
+<h2>키아트</h2>
+<div class="art">
+<a href="art/keyart_title_1920x1080.jpg" target="_blank" rel="noopener"><img src="art/keyart_title_1920x1080.jpg" alt="키아트 (타이틀)"></a>
+<div class="row">
+<a href="art/keyart_clean_1920x1080.jpg" target="_blank" rel="noopener"><img src="art/keyart_clean_1920x1080.jpg" alt="키아트 (타이틀 없음)"></a>
+<a href="art/cover_630x500.jpg" target="_blank" rel="noopener"><img src="art/cover_630x500.jpg" alt="커버 이미지"></a>
+</div>
+</div>
+
+<h2>최신 스크린샷</h2>
+<p id="msg"></p>
+<div class="grid" id="shots"></div>
+
+<h2>스킬 아이콘</h2>
+<div class="skills" id="skills"></div>
+</main>
+<script>
+(function(){
+var SK=[["dash","대시"],["smoke","연막탄"],["decoy","대역 판넬"],["quickhands","빠른 손"],["silentfeet","조용한 발"],["jumpcut","점프컷"],["sprint","질주"],["cuffs","수갑 던지기"],["tracker","발자국 추적"],["widebeam","넓은 손전등"],["drone","드론"],["jailalarm","강화 자물쇠"]];
+function mk(t,p){var e=document.createElement(t);if(p)for(var k in p)e[k]=p[k];return e}
+function fmt(s){var d=new Date(s);if(isNaN(d))return s||"";return d.toLocaleString("ko-KR",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false})+" (KST)"}
+var sk=document.getElementById("skills");
+SK.forEach(function(s){var f=mk("figure"),a=mk("a",{href:"art/skills/skill_"+s[0]+".png",target:"_blank",rel:"noopener"});
+a.appendChild(mk("img",{src:"art/skills/skill_"+s[0]+".png",alt:s[1],loading:"lazy"}));f.appendChild(a);f.appendChild(mk("figcaption",{textContent:s[1]}));sk.appendChild(f)});
+var grid=document.getElementById("shots"),msg=document.getElementById("msg"),upd=document.getElementById("upd"),last=null;
+function load(){
+fetch("shots.json?t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+msg.textContent="";upd.textContent="마지막 업데이트: "+fmt(d.updated);
+var sig=JSON.stringify(d);if(sig===last)return;last=sig;grid.textContent="";
+var l=d.shots||[];if(!l.length)msg.textContent="아직 스크린샷이 없습니다.";
+l.forEach(function(s){var f=mk("figure"),a=mk("a",{href:s.file,target:"_blank",rel:"noopener"});
+a.appendChild(mk("img",{src:s.file,alt:s.caption||"스크린샷",loading:"lazy"}));f.appendChild(a);
+var c=mk("figcaption",{textContent:s.caption||""});c.appendChild(mk("time",{textContent:fmt(s.time)}));f.appendChild(c);grid.appendChild(f)});
+}).catch(function(){msg.textContent="스크린샷 목록을 불러오지 못했습니다. 잠시 후 다시 시도합니다."});
+}
+load();setInterval(load,60000);
+})();
+</script>
+</body>
+</html>
