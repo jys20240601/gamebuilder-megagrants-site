@@ -35,24 +35,26 @@ figcaption time{display:block;color:var(--mut);font-size:.8rem}
 <body>
 <main>
 <h1>CUT &amp; RUN 개발 현황</h1>
-<p class="desc">조선 민속촌 세트에서 벌어지는 1인칭 이름표 경도. 포졸은 잡고, 도둑은 숨고 도망치고, 옥에 갇힌 동료를 구출합니다. (2026 Epic AI MegaJam, Unreal Engine 5.9)</p>
+<p class="desc">퇴근하고 동네 공원에 모인 어른들이 정색하고 하는 1인칭 경도(경찰과 도둑). 경찰은 잡고, 도둑은 숨고 도망치고, 감옥나무에 줄 선 동료를 구출합니다. (2026 Epic AI MegaJam, Unreal Engine 5.9)</p>
 <p id="upd">마지막 업데이트: 불러오는 중...</p>
 
 <h2>지금 규칙</h2>
 <ul class="rules">
-<li>포졸이 도둑에게 닿으면 이름표가 뜯기고 가운데 옥에 갇힙니다.</li>
-<li>자유로운 도둑이 구출문에서 E를 3초 누르면 갇힌 도둑이 모두 풀려납니다.</li>
-<li>도둑이 전원 갇히면 포졸 승리. 시간이 끝났을 때 자유로운 도둑이 갇힌 도둑보다 많으면 도둑 승리.</li>
-<li>임무를 하면 경험치로 스킬을 얻습니다 (포졸은 잡기 쉽게, 도둑은 도망치기 쉽게).</li>
+<li>경찰이 도둑에게 닿으면 이름표가 뜯기고, 가운데 감옥나무에서 손에 손을 잡은 인간줄에 섭니다.</li>
+<li>자유로운 도둑이 줄 옆에서 E를 꾹 누르면 모두 풀려납니다. 줄이 길수록 더 빨리 끊깁니다.</li>
+<li>공원 방송이 공지를 내리면 도둑도 경찰도 움직여야 합니다. 해내면 보상, 무시하면 벌칙.</li>
+<li>Shift로 엎드리면 피크닉 테이블·탁구대 밑에 숨을 수 있습니다.</li>
+<li>도둑이 전원 잡히면 경찰 승리. 시간이 끝났을 때 자유로운 도둑이 잡힌 도둑만큼 많으면 도둑 승리.</li>
 </ul>
 
 <h2>키아트</h2>
 <div class="art">
-<a href="art/keyart_title_1920x1080.jpg?v=2" target="_blank" rel="noopener"><img src="art/keyart_title_1920x1080.jpg?v=2" alt="키아트 (타이틀)"></a>
+<a href="art/keyart_title_1920x1080.jpg?v=3" target="_blank" rel="noopener"><img src="art/keyart_title_1920x1080.jpg?v=3" alt="키아트 (타이틀)"></a>
 <div class="row">
-<a href="art/keyart_clean_1920x1080.jpg?v=2" target="_blank" rel="noopener"><img src="art/keyart_clean_1920x1080.jpg?v=2" alt="키아트 (타이틀 없음)"></a>
-<a href="art/cover_630x500.jpg?v=2" target="_blank" rel="noopener"><img src="art/cover_630x500.jpg?v=2" alt="커버 이미지"></a>
+<a href="art/keyart_clean_1920x1080.jpg?v=3" target="_blank" rel="noopener"><img src="art/keyart_clean_1920x1080.jpg?v=3" alt="키아트 (타이틀 없음)"></a>
+<a href="art/cover_630x500.jpg?v=3" target="_blank" rel="noopener"><img src="art/cover_630x500.jpg?v=3" alt="커버 이미지"></a>
 </div>
+<a href="art/cast_1920x1080.jpg?v=3" target="_blank" rel="noopener"><img src="art/cast_1920x1080.jpg?v=3" alt="출연진"></a>
 </div>
 
 <h2>최신 스크린샷</h2>
@@ -64,12 +66,12 @@ figcaption time{display:block;color:var(--mut);font-size:.8rem}
 </main>
 <script>
 (function(){
-var SK=[["dash", "줄행랑"], ["smoke", "연막탄"], ["decoy", "허수아비"], ["quickhands", "빠른 손"], ["silentfeet", "고양이 발"], ["jumpcut", "점프컷"], ["sprint", "돌진"], ["cuffs", "오랏줄"], ["tracker", "발자국 추적"], ["widebeam", "큰 등불"], ["drone", "매"], ["jailalarm", "쇠자물쇠"]];
+var SK=[["dash", "줄행랑"], ["smoke", "소독차 연기"], ["decoy", "가짜 도둑"], ["quickhands", "날쌘 손"], ["silentfeet", "고양이 발"], ["jumpcut", "점프 컷"], ["sprint", "돌격"], ["cuffs", "줄넘기 올가미"], ["tracker", "발자국 추적"], ["widebeam", "대형 손전등"], ["drone", "드론"], ["jailalarm", "꽉 잡아"]];
 function mk(t,p){var e=document.createElement(t);if(p)for(var k in p)e[k]=p[k];return e}
 function fmt(s){var d=new Date(s);if(isNaN(d))return s||"";return d.toLocaleString("ko-KR",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false})+" (KST)"}
 var sk=document.getElementById("skills");
-SK.forEach(function(s){var f=mk("figure"),a=mk("a",{href:"art/skills/skill_"+s[0]+".png?v=2",target:"_blank",rel:"noopener"});
-a.appendChild(mk("img",{src:"art/skills/skill_"+s[0]+".png?v=2",alt:s[1],loading:"lazy"}));f.appendChild(a);f.appendChild(mk("figcaption",{textContent:s[1]}));sk.appendChild(f)});
+SK.forEach(function(s){var f=mk("figure"),a=mk("a",{href:"art/skills/skill_"+s[0]+".png?v=3",target:"_blank",rel:"noopener"});
+a.appendChild(mk("img",{src:"art/skills/skill_"+s[0]+".png?v=3",alt:s[1],loading:"lazy"}));f.appendChild(a);f.appendChild(mk("figcaption",{textContent:s[1]}));sk.appendChild(f)});
 var grid=document.getElementById("shots"),msg=document.getElementById("msg"),upd=document.getElementById("upd"),last=null;
 function load(){
 fetch("shots.json?t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
