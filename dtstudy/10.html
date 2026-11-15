@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>수질 · 침수 · 가스 · 화재 센서</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+td:first-child{min-width:5.5em}
+td:last-child{min-width:11em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><a class="side" href="./">목차</a></div></header>
+<main>
+<h1 id="수질-침수-가스-화재-센서">수질 · 침수 · 가스 · 화재 센서</h1>
+<p>삼우이머션 자갈치시장 안전관리 트윈의 네 기능(해수 수질, 침수, 공기질 유해물질, 화재)에 쓰일 만한 센서를 종류별로 정리했다. 자갈치 사례에서 실제로 어떤 제품을 썼는지는 공개 자료에 없다.</p>
+<h2 id="한눈에">한눈에</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>분야</th>
+<th>대표 센서</th>
+<th>단위 예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>수질</td>
+<td>pH, 용존산소(DO), 수온, 전기전도도·염분, 탁도, 잔류염소, 클로로필</td>
+<td>pH, mg/L, ℃, mS/cm·PSU, NTU</td>
+</tr>
+<tr>
+<td>침수</td>
+<td>침수 감지(접점식), 누수 감지 케이블, 플로트 스위치, 초음파·레이더·압력식 수위계, 강우량계</td>
+<td>감지/미감지, cm·m, mm/h</td>
+</tr>
+<tr>
+<td>가스</td>
+<td>전기화학식(독성·산소), 접촉연소식(가연성), NDIR(CO2·메탄), 반도체식, PID(VOC), 미세먼지</td>
+<td>ppm, %LEL, %VOL, ㎍/㎥</td>
+</tr>
+<tr>
+<td>화재</td>
+<td>열감지기(정온식·차동식), 광전식 연기감지기, 불꽃감지기(UV·IR), 공기흡입형, 광섬유 선형 열감지, 열화상·영상 AI</td>
+<td>감지/미감지, ℃</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="1-수질-센서">1. 수질 센서</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>센서</th>
+<th>무엇을 재나</th>
+<th>원리·특징</th>
+<th>쓰임</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pH</td>
+<td>산성·알칼리성</td>
+<td>유리 전극. 정기 교정이 필요</td>
+<td>수조, 하천, 수처리</td>
+</tr>
+<tr>
+<td>용존산소 (DO)</td>
+<td>물에 녹은 산소량</td>
+<td>광학식(형광)과 전극식. 광학식이 관리가 쉬움</td>
+<td>수산물 수조, 양식장, 하천 생태</td>
+</tr>
+<tr>
+<td>수온</td>
+<td>물 온도</td>
+<td>서미스터, 백금 측온저항(Pt100)</td>
+<td>거의 모든 수질 센서에 함께 들어감</td>
+</tr>
+<tr>
+<td>전기전도도 (EC) · 염분</td>
+<td>녹은 이온 양, 바닷물 짠 정도</td>
+<td>전도도로 염분 계산</td>
+<td>해수 수조, 담수 유입 감시</td>
+</tr>
+<tr>
+<td>탁도</td>
+<td>물이 흐린 정도</td>
+<td>빛 산란을 잼(NTU)</td>
+<td>오염, 퇴적물 유입</td>
+</tr>
+<tr>
+<td>ORP</td>
+<td>산화·환원 상태</td>
+<td>전극</td>
+<td>수처리, 소독 관리</td>
+</tr>
+<tr>
+<td>잔류염소</td>
+<td>소독용 염소 남은 양</td>
+<td>전극·비색</td>
+<td>상수도, 수처리</td>
+</tr>
+<tr>
+<td>암모니아</td>
+<td>질소 오염</td>
+<td>이온 선택성 전극</td>
+<td>양식장, 하수</td>
+</tr>
+<tr>
+<td>클로로필·남조류</td>
+<td>조류 양</td>
+<td>형광</td>
+<td>적조·녹조 감시</td>
+</tr>
+<tr>
+<td>다항목 측정기 (멀티 프로브)</td>
+<td>위 항목 여러 개를 한 번에</td>
+<td>센서 여러 개를 한 몸통에</td>
+<td>해양·하천 상시 관측</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>바닷물에서는 센서에 생물이 붙어(생물 부착) 값이 서서히 틀어진다.</strong> 세척 와이퍼, 정기 교정, 그리고 데이터 쪽의 드리프트(값이 천천히 한쪽으로 밀림) 감지가 필요하다. 06 문서의 정제 단계와 이어진다.</li>
+</ul>
+<h2 id="2-침수-센서">2. 침수 센서</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>센서</th>
+<th>무엇을 재나</th>
+<th>원리·특징</th>
+<th>쓰임</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>침수 감지 센서 (접점식)</td>
+<td>바닥에 물이 찼는가</td>
+<td>전극 두 개 사이에 물이 닿으면 전기가 통함. 켜짐·꺼짐 신호</td>
+<td>지하 기계실, 전기실, 시장 바닥</td>
+</tr>
+<tr>
+<td>누수 감지 케이블</td>
+<td>긴 구간의 물 새는 위치</td>
+<td>케이블 어디가 젖었는지 위치까지 알려 주는 제품도 있음</td>
+<td>전산실, 배관 아래</td>
+</tr>
+<tr>
+<td>플로트(부자) 스위치</td>
+<td>정해진 수위에 닿았는가</td>
+<td>물에 뜨는 부자가 올라가면 접점 동작</td>
+<td>집수정, 배수 펌프 제어</td>
+</tr>
+<tr>
+<td>초음파 수위계</td>
+<td>수면까지 거리(수위)</td>
+<td>비접촉. 소리 반사 시간</td>
+<td>하천, 배수로, 지하차도</td>
+</tr>
+<tr>
+<td>레이더 수위계</td>
+<td>수위</td>
+<td>비접촉. 바람·온도 영향이 적어 정확</td>
+<td>하천, 항만, 저수지</td>
+</tr>
+<tr>
+<td>압력식(투입형) 수위계</td>
+<td>수위</td>
+<td>물속에 넣어 수압으로 계산</td>
+<td>우물, 수조, 관측공</td>
+</tr>
+<tr>
+<td>강우량계</td>
+<td>비 오는 양</td>
+<td>전도형(빗물이 일정량 차면 기울어지며 셈)</td>
+<td>침수 예측 입력</td>
+</tr>
+<tr>
+<td>조위계</td>
+<td>바다 물 높이</td>
+<td>레이더·압력식</td>
+<td>항만 만조·해일 대비</td>
+</tr>
+<tr>
+<td>영상 수위 인식</td>
+<td>수위, 물 고임</td>
+<td>CCTV + AI</td>
+<td>지하차도, 도로</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>트윈에서는 수위 값으로 언리얼 물 표면 높이를 올리고, 강우량·조위로 침수 범위를 미리 시뮬레이션한다.</li>
+</ul>
+<h2 id="3-가스-공기질-센서">3. 가스 · 공기질 센서</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>방식</th>
+<th>잘 재는 가스</th>
+<th>특징</th>
+<th>쓰임</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>전기화학식</td>
+<td>일산화탄소(CO), 황화수소(H2S), 암모니아, 염소, 산소(O2)</td>
+<td>독성 가스와 산소 결핍 측정의 표준. 센서 수명이 있음(보통 수년)</td>
+<td>밀폐공간, 하수, 수산물 처리장</td>
+</tr>
+<tr>
+<td>접촉연소식</td>
+<td>메탄, LPG, 수소 같은 가연성 가스</td>
+<td>폭발 하한(LEL) 대비 %로 표시</td>
+<td>가스 배관, 주방, 연료 시설</td>
+</tr>
+<tr>
+<td>NDIR (비분산 적외선)</td>
+<td>이산화탄소(CO2), 메탄</td>
+<td>적외선 흡수로 측정. 오염·중독에 강하고 안정적</td>
+<td>실내 환기, 냉동창고, 가연성 가스</td>
+</tr>
+<tr>
+<td>반도체식 (MOS)</td>
+<td>가연성 가스, 냄새, VOC</td>
+<td>싸고 작지만 정확도는 낮음</td>
+<td>가정용 가스 경보기</td>
+</tr>
+<tr>
+<td>PID (광이온화)</td>
+<td>휘발성 유기화합물(VOC)</td>
+<td>매우 낮은 농도까지 감지</td>
+<td>화학 공장, 도장 작업장</td>
+</tr>
+<tr>
+<td>미세먼지</td>
+<td>PM2.5, PM10</td>
+<td>빛 산란</td>
+<td>실내외 공기질</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>단위</strong>: ppm(백만분의 1), %LEL(폭발 하한 대비), %VOL(부피 비율), ㎍/㎥.</li>
+<li><strong>고정식 vs 휴대용</strong>: 벽·천장에 다는 고정식과, 작업자가 차는 휴대용 복합 가스 측정기가 있다. 밀폐공간은 작업 전에 산소와 유해가스를 재야 한다.</li>
+<li><strong>설치 높이가 중요하다.</strong> 공기보다 무거운 LPG·황화수소는 바닥 가까이, 가벼운 메탄·수소는 천장 가까이 단다.</li>
+<li>수산시장은 생선이 썩을 때 나오는 황화수소·암모니아, 냉동설비 냉매(암모니아 등) 누출, 밀폐된 저장 공간의 산소 결핍이 주요 위험이다.</li>
+</ul>
+<h2 id="4-화재-감지">4. 화재 감지</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>감지기</th>
+<th>원리</th>
+<th>특징</th>
+<th>쓰임</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>정온식 열감지기</td>
+<td>정해진 온도에 닿으면 동작</td>
+<td>단순·튼튼. 늦게 감지</td>
+<td>주방, 보일러실</td>
+</tr>
+<tr>
+<td>차동식 열감지기</td>
+<td>온도가 빠르게 오르면 동작</td>
+<td>정온식보다 빠름</td>
+<td>사무실, 창고</td>
+</tr>
+<tr>
+<td>광전식 연기감지기</td>
+<td>연기가 빛을 산란시키는 것을 감지</td>
+<td>가장 흔한 연기감지기</td>
+<td>실내 대부분</td>
+</tr>
+<tr>
+<td>불꽃감지기 (UV·IR·복합)</td>
+<td>불꽃에서 나오는 자외선·적외선</td>
+<td>넓은 공간·옥외에서 빠름</td>
+<td>창고, 항만 야적장, 플랜트</td>
+</tr>
+<tr>
+<td>공기흡입형 (ASD)</td>
+<td>공기를 빨아들여 아주 미세한 연기까지 분석</td>
+<td>매우 이른 감지</td>
+<td>데이터센터, 전산실</td>
+</tr>
+<tr>
+<td>광섬유 선형 열감지 (DTS)</td>
+<td>긴 광섬유를 따라 온도 분포 측정</td>
+<td>수 km 구간, 위치까지 앎</td>
+<td>터널, 컨베이어, 케이블 트레이</td>
+</tr>
+<tr>
+<td>열화상 카메라 · 영상 AI</td>
+<td>열 분포, 연기·불꽃 영상 인식</td>
+<td>넓은 야외를 한 번에 감시</td>
+<td>야적장, 배터리 보관소</td>
+</tr>
+<tr>
+<td>CO 감지</td>
+<td>불완전 연소 초기 징후</td>
+<td>연기보다 먼저 나올 때가 있음</td>
+<td>보조 감지</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>소방 설비는 따로 인증된 제품을 쓰고, 신호는 화재수신기(수신반)로 모인다.</strong> 디지털트윈은 감지기에 직접 붙기보다 수신반의 접점 신호나 통신 출력, 건물자동제어(BMS)의 BACnet 같은 규격으로 받아 오는 경우가 많다.</li>
+<li>트윈에서는 화재 위치를 3D로 표시하고, Niagara로 연기를 보여 주고, 막힌 구역을 피한 대피 경로를 안내한다(자갈치 사례의 "화재 감지 및 탈출 경로 유도").</li>
+</ul>
+<h2 id="5-공통-센서를-트윈에-붙일-때">5. 공통: 센서를 트윈에 붙일 때</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>출력 방식</td>
+<td>접점 신호(켜짐·꺼짐), 4–20mA 아날로그(산업 표준 전류 신호), RS-485 Modbus RTU, SDI-12(환경 센서용), 무선(LoRa, NB-IoT, 5G)</td>
+</tr>
+<tr>
+<td>연결</td>
+<td>센서 → 게이트웨이·엣지 서버(형식 변환) → MQTT·oneM2M → 플랫폼 → 언리얼. 자갈치는 신규 IoT는 5G로 oneM2M 서버에, 레거시는 엣지 서버로 모았다</td>
+</tr>
+<tr>
+<td>경보 단계</td>
+<td>주의 → 경고 → 위험처럼 단계로 나누고, 단계마다 화면 색과 알림 대상을 정함</td>
+</tr>
+<tr>
+<td>오탐 줄이기</td>
+<td>두 종류 이상 감지(예: 연기 + 열)가 겹칠 때 확정, 일정 시간 지속될 때만 경보</td>
+</tr>
+<tr>
+<td>교정·점검</td>
+<td>센서마다 교정 주기와 수명이 있음. 장비 대장에 교정일·교체일을 같이 관리</td>
+</tr>
+<tr>
+<td>데이터 품질</td>
+<td>드리프트, 생물 부착, 통신 끊김을 정제 단계에서 표시</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="인터뷰용-한-문단">인터뷰용 한 문단</h2>
+<p>"자갈치시장 같은 안전관리 트윈은 수질(pH, 용존산소, 염분, 탁도), 침수(접점식 감지, 수위계, 강우량계), 가스(전기화학식 독성가스, 접촉연소식 가연성 가스, NDIR 이산화탄소), 화재(열·연기·불꽃 감지기, 열화상)를 함께 받습니다. 센서마다 출력 방식이 4–20mA, Modbus, 접점, 무선으로 달라서 게이트웨이에서 MQTT 같은 공통 형식으로 바꾸고, 바닷물 생물 부착이나 드리프트 같은 품질 문제는 정제 단계에서 걸러야 실제로 쓸 수 있는 데이터가 됩니다."</p><nav class="pager"><a href="09.html"><small>← 이전</small>09 ISO 23247 제조 디지털트윈 표준</a><a class="n" href="08.html"><small>다음 →</small>08 현업 용어집</a></nav><p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준이라 홍보 성격이 있습니다.</p>
+</main>
+</body>
+</html>

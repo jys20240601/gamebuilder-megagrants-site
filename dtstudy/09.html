@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>ISO 23247: 제조 디지털트윈 국제표준</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+td:first-child{min-width:5.5em}
+td:last-child{min-width:11em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><a class="side" href="./">목차</a></div></header>
+<main>
+<h1 id="iso-23247-제조-디지털트윈-국제표준">ISO 23247: 제조 디지털트윈 국제표준</h1>
+<p>전체 흐름은 <a href="02.html">02 디지털트윈 빅데이터가공</a>, 용어는 <a href="08.html">08 용어집</a> 참고.</p>
+<h2 id="한-줄">한 줄</h2>
+<blockquote>
+<p><strong>ISO 23247은 "제조 현장의 디지털트윈을 어떤 구조로 만들지"를 정한 국제표준 틀(프레임워크)이다.</strong> 특정 프로그램이나 데이터 형식을 강제하지 않고, 무엇을 트윈으로 만들고(대상), 어떤 층으로 나누고(참조 구조), 무엇을 기록하고(디지털 표현), 어떻게 주고받을지(정보 교환)의 뼈대를 준다.</p>
+</blockquote>
+<ul>
+<li>정식 이름: Automation systems and integration — Digital twin framework for manufacturing</li>
+<li>표준의 정의: 제조 디지털트윈은 "관측 가능한 제조 요소를 목적에 맞게(fit for purpose) 디지털로 표현한 것으로, 요소와 그 표현 사이에 동기화가 있는 것"이다.</li>
+<li><strong>한국 주도 표준이다.</strong> ETRI가 신규 제안 4건을 내 2018년 1월 표준 개발이 승인됐고, 1~4부가 2021년 발간됐다. 5·6부도 ETRI가 제안해 2026년 발간됐다. 디지털트윈 분야의 첫 국제표준으로 소개된다.</li>
+<li>바탕은 IoT 참조 구조 표준 ISO/IEC 30141이다.</li>
+</ul>
+<h2 id="6개-부">6개 부</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>부</th>
+<th>이름</th>
+<th>발간</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1부</td>
+<td>개요와 일반 원칙</td>
+<td>2021</td>
+<td>용어 정의, 디지털트윈 프레임워크의 요구사항</td>
+</tr>
+<tr>
+<td>2부</td>
+<td>참조 아키텍처</td>
+<td>2021</td>
+<td>도메인·엔티티로 나눈 참조 모델, 기능 관점(기능 엔티티)</td>
+</tr>
+<tr>
+<td>3부</td>
+<td>제조 요소의 디지털 표현</td>
+<td>2021</td>
+<td>관측 가능한 제조 요소(OME)별 기본 정보 항목. 정적 정보(설계 사양)와 동적 정보(실시간 센서 값)를 함께 다룸. 특정 데이터 형식이나 통신 규격은 정하지 않음</td>
+</tr>
+<tr>
+<td>4부</td>
+<td>정보 교환</td>
+<td>2021</td>
+<td>참조 구조 안의 엔티티끼리 정보를 주고받을 때의 기술 요구사항</td>
+</tr>
+<tr>
+<td>5부</td>
+<td>디지털트윈을 위한 디지털 스레드</td>
+<td>2026</td>
+<td>설계, 생산 공정, 설비 상태, 검사 결과처럼 수명주기 여러 단계의 데이터를 한 흐름으로 연결. 예: 품질 문제가 생기면 설계·생산 조건·설비 이력·검사 데이터를 함께 추적</td>
+</tr>
+<tr>
+<td>6부</td>
+<td>디지털트윈 결합(composition)</td>
+<td>2026</td>
+<td>제품·설비·공정 단위 트윈을 블록처럼 조합해 생산라인·공장 단위 트윈을 만드는 방법. 결합 방식으로 통합형(integrated), 단일화형(unified), 연합형(federated)을 다룸</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>국가기술표준원이 2026-07-28에 5·6부 발간을 발표했다. 미국, 스웨덴 등의 기업·기관도 논의에 참여했다.</li>
+<li>국내 KS 표준으로는 KS X ISO 23247-1~4가 있다(2022년 12월 제정으로 소개되나 원문은 미확인).</li>
+</ul>
+<h2 id="관측-가능한-제조-요소-ome">관측 가능한 제조 요소 (OME)</h2>
+<p>트윈으로 만들 대상을 "관측 가능한 제조 요소(Observable Manufacturing Element)"라고 부른다. 3부가 정한 기본 8종을 터미널에 대입하면 이렇다.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>OME</th>
+<th>뜻</th>
+<th>항만 터미널에 대입</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>인원 (Personnel)</td>
+<td>작업자</td>
+<td>스마트 헬멧을 쓴 작업자</td>
+</tr>
+<tr>
+<td>장비 (Equipment)</td>
+<td>기계·설비</td>
+<td>안벽 크레인, 야드 트랙터</td>
+</tr>
+<tr>
+<td>자재 (Material)</td>
+<td>다루는 물건</td>
+<td>컨테이너</td>
+</tr>
+<tr>
+<td>공정 (Process)</td>
+<td>작업 절차</td>
+<td>양하·적하, 반출입</td>
+</tr>
+<tr>
+<td>시설 (Facility)</td>
+<td>건물·구역</td>
+<td>안벽, 야드, 게이트</td>
+</tr>
+<tr>
+<td>환경 (Environment)</td>
+<td>주변 조건</td>
+<td>풍속, 조도, 해수 수질</td>
+</tr>
+<tr>
+<td>제품 (Product)</td>
+<td>만들어 내는 것</td>
+<td>(제조업에서는 완성품. 터미널은 처리된 물동량)</td>
+</tr>
+<tr>
+<td>지원 문서 (Supporting documents)</td>
+<td>사양서, 매뉴얼, 작업 지시</td>
+<td>장비 사양, 정비 매뉴얼</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="참조-아키텍처-2부-4개-도메인">참조 아키텍처 (2부): 4개 도메인</h2>
+<pre><code> ┌─ 사용자 도메인 ───────── 사람, 앱, 다른 시스템 (관제 화면, 알람 앱, ERP)
+ │
+ ├─ 디지털트윈 도메인(핵심) ─ 트윈 모델 운영·관리, 분석·시뮬레이션·최적화 서비스,
+ │                          다른 시스템·트윈과의 연결
+ │
+ ├─ 장치 통신 도메인 ──────── 데이터 수집(센서·프로토콜) + 장치 제어(명령 전달)
+ │
+ └─ 관측 가능한 제조 도메인 ─ OME (실제 현장. 표준 틀 밖에 있는 실물)
+
+ 교차 시스템 엔티티 (모든 도메인에 걸침): 데이터 변환, 데이터 보증(품질), 보안 지원
+</code></pre>
+<ul>
+<li>각 도메인에는 기능을 맡는 엔티티가 있다. 장치 통신 엔티티는 <strong>데이터 수집</strong>과 <strong>장치 제어</strong>, 디지털트윈 엔티티는 <strong>운영·관리</strong>, <strong>응용·서비스</strong>, <strong>자원 접근·교환</strong>, 사용자 엔티티는 <strong>사용자 인터페이스</strong>로 나뉜다(2부 요약 자료 기준).</li>
+<li>트윈은 "목적에 맞게" 만든다. 목적에 따라 담을 정보, 모델 정밀도, 동기화 주기가 달라진다.</li>
+<li>제조사는 이 블록들 중 필요한 것만 골라 자기 트윈을 설계하고, 블록마다 맞는 표준을 골라 쓴다.</li>
+</ul>
+<h2 id="우리-내용과-맞춰-보기">우리 내용과 맞춰 보기</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ISO 23247</th>
+<th>우리 문서의 단계</th>
+<th>삼우이머션 터미널 예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>관측 가능한 제조 도메인 (OME)</td>
+<td>현장</td>
+<td>크레인, 작업자, 컨테이너</td>
+</tr>
+<tr>
+<td>장치 통신 도메인: 데이터 수집</td>
+<td>② 수집 (MQTT, oneM2M, 엣지 서버)</td>
+<td>장비 GPS 1초 5회, 헬멧</td>
+</tr>
+<tr>
+<td>장치 통신 도메인: 장치 제어</td>
+<td>⑤ 활용의 제어(역방향)</td>
+<td>언리얼 버튼 → 명령 발행</td>
+</tr>
+<tr>
+<td>교차 시스템: 데이터 변환·보증</td>
+<td>③ 정제·정합 (06 문서)</td>
+<td>좌표 변환, 튀는 값 표시</td>
+</tr>
+<tr>
+<td>교차 시스템: 보안 지원</td>
+<td>보안 (TLS, 인증, 망분리)</td>
+<td>항만 관제망</td>
+</tr>
+<tr>
+<td>디지털트윈 도메인</td>
+<td>저장·처리·분석·예측, 3D 트윈</td>
+<td>VARLOS, 생산성 예측</td>
+</tr>
+<tr>
+<td>사용자 도메인</td>
+<td>언리얼 관제 화면, 알람 앱</td>
+<td>관제실, 모바일 앱</td>
+</tr>
+<tr>
+<td>5부 디지털 스레드</td>
+<td>07 문서의 결합(운영·정비 이력 붙이기)</td>
+<td>정비 이력과 센서 데이터 연결</td>
+</tr>
+<tr>
+<td>6부 트윈 결합</td>
+<td>장비 트윈 → 터미널 전체 트윈</td>
+<td>크레인 트윈들을 묶은 터미널 트윈</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="함께-쓰는-표준-정보-교환에-쓰이는-것">함께 쓰는 표준 (정보 교환에 쓰이는 것)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>표준</th>
+<th>무엇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OPC UA</td>
+<td>공장 설비 데이터 교환 표준</td>
+</tr>
+<tr>
+<td>MTConnect</td>
+<td>공작기계·장비 데이터를 공통 어휘로 내보내는 표준</td>
+</tr>
+<tr>
+<td>AutomationML</td>
+<td>공장 설비 설계 정보를 주고받는 XML 기반 형식</td>
+</tr>
+<tr>
+<td>STEP (ISO 10303)</td>
+<td>CAD 제품 모델 데이터 교환 표준</td>
+</tr>
+<tr>
+<td>QIF</td>
+<td>측정·검사 품질 정보 표준. 디지털 스레드에 쓰임</td>
+</tr>
+<tr>
+<td>ISO/IEC 30141</td>
+<td>IoT 참조 구조. ISO 23247의 바탕</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="검증-사례-nist">검증 사례 (NIST)</h2>
+<p>미국 NIST 연구진은 표준을 시험하려고 로봇 드릴·필 작업의 설비 가동률 향상, 항공기 체결 부품 크기 최적화, CNC 절삭 공구 수명 최적화 트윈을 구현했다. 또 UR5e 로봇팔 데이터를 MTConnect로 모으고 STEP 설계 모델과 QIF 측정 데이터를 연결한 사례를 소개했다.</p>
+<h2 id="인터뷰에서-쓰는-법">인터뷰에서 쓰는 법</h2>
+<ul>
+<li>"디지털트윈은 아직 회사마다 제각각 만드는 경우가 많은데, 제조 분야에는 한국 ETRI가 주도한 국제표준 ISO 23247이 있습니다. 우리 과정은 이 표준의 4개 도메인, 즉 현장 → 장치 통신(수집·제어) → 트윈 핵심(저장·분석·시뮬레이션) → 사용자(언리얼 관제 화면) 순서와 같은 흐름으로 구성돼 있습니다."</li>
+<li>"표준이 특정 데이터 형식을 강제하지 않기 때문에, MQTT, OPC UA 같은 실제 통신 규격과 언리얼 같은 도구를 골라 쓰는 역량이 필요합니다. 그 선택과 연결을 과정에서 실습합니다."</li>
+<li>"2026년에 나온 5부(디지털 스레드)와 6부(트윈 결합)는 장비 단위 트윈을 공장·항만 단위로 키우는 방법입니다. 캡스톤에서 장비 트윈을 모아 현장 전체 트윈으로 확장하는 것이 이 방향과 같습니다."</li>
+</ul>
+<h2 id="출처">출처</h2>
+<ul>
+<li>데일리안, 한국 주도 제조 디지털트윈 국제표준 2건 공식 발간(2026-07): <a href="https://www.dailian.co.kr/news/view/1671605/">https://www.dailian.co.kr/news/view/1671605/</a></li>
+<li>ISO 23247-5:2026 카탈로그: <a href="https://www.iso.org/standard/87425.html">https://www.iso.org/standard/87425.html</a></li>
+<li>ISO 23247-6:2026 카탈로그: <a href="https://www.iso.org/standard/87426.html">https://www.iso.org/standard/87426.html</a></li>
+<li>iTeh 23247-5·6 요약: <a href="https://standards.iteh.ai/catalog/standards/iso/d17087ab-9836-40e5-a6a4-7f4b9de6565b/iso-23247-5-2026">https://standards.iteh.ai/catalog/standards/iso/d17087ab-9836-40e5-a6a4-7f4b9de6565b/iso-23247-5-2026</a> , <a href="https://standards.iteh.ai/catalog/standards/iso/cf8cd11a-7f33-4a82-af4d-5425c18fb0d9/iso-23247-6-2026">https://standards.iteh.ai/catalog/standards/iso/cf8cd11a-7f33-4a82-af4d-5425c18fb0d9/iso-23247-6-2026</a></li>
+<li>BSI 23247-3 소개: <a href="https://knowledge.bsigroup.com/products/automation-systems-and-integration-digital-twin-framework-for-manufacturing-digital-representation-of-manufacturing-elements">https://knowledge.bsigroup.com/products/automation-systems-and-integration-digital-twin-framework-for-manufacturing-digital-representation-of-manufacturing-elements</a></li>
+<li>NIST, Digital Twins for Advanced Manufacturing: The Standardized Approach: <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957417">https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957417</a></li>
+<li>ETRI 전자통신동향분석(ISO 23247 해설): <a href="https://ettrends.etri.re.kr/ettrends/208/0905208008/079-086.%20%EC%9C%A0%EC%83%81%EA%B7%BC_208%ED%98%B8%20%EC%B5%9C%EC%A2%85.pdf">https://ettrends.etri.re.kr/ettrends/208/0905208008/079-086.%20%EC%9C%A0%EC%83%81%EA%B7%BC_208%ED%98%B8%20%EC%B5%9C%EC%A2%85.pdf</a></li>
+<li>ISO 23247 구현 논문(드론 공장, VR): <a href="https://arxiv.org/abs/2508.14580">https://arxiv.org/abs/2508.14580</a></li>
+</ul><nav class="pager"><a href="07.html"><small>← 이전</small>07 쓸모 있는 데이터 만들기</a><a class="n" href="10.html"><small>다음 →</small>10 수질 · 침수 · 가스 · 화재 센서</a></nav><p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준이라 홍보 성격이 있습니다.</p>
+</main>
+</body>
+</html>
