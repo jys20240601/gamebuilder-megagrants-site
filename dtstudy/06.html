@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>정제, 정합, DB 저장은 어떻게 하나</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><a class="side" href="./">목차</a></div></header>
+<main>
+<h1 id="정제-정합-db-저장은-어떻게-하나">정제, 정합, DB 저장은 어떻게 하나</h1>
+<p>개념은 <a href="02.html">02 디지털트윈 빅데이터가공</a>, MQTT는 <a href="04.html">04 MQTT</a> 참고.</p>
+<h2 id="어디서-하나">어디서 하나</h2>
+<p>MQTT를 구독한 <strong>Python 저장기</strong> 안에서, 메시지 한 통이 올 때마다 아래 순서로 처리한다(실시간). 밤에는 하루치를 다시 검사하고 집계한다(배치).</p>
+<pre><code>받기 → ⓪ 원본 보관 → ① 정제 → ② 정합 → ③ DB 저장 → ④ 조회(언리얼·분석)
+</code></pre>
+<h2 id="①-정제-검사하고-고치고-표시하고-버린다">① 정제: 검사하고, 고치고, 표시하고, 버린다</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>문제</th>
+<th>규칙</th>
+<th>처리</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>형식 오류 (JSON 잘림, 필수 칸 없음)</td>
+<td>JSON이 풀리는가, device·value·time이 있는가</td>
+<td>버림, 원본과 오류 기록만 남김</td>
+</tr>
+<tr>
+<td>범위 밖 (온도 999)</td>
+<td>물리적으로 가능한 범위(예: -20~120℃)</td>
+<td>out_of_range 표시</td>
+</tr>
+<tr>
+<td>튀는 값 (1초 만에 32 → 85)</td>
+<td>직전 정상값과 차이가 기준(예: 5℃)을 넘는가</td>
+<td>spike 표시 (지우지 않음)</td>
+</tr>
+<tr>
+<td>중복 (QoS 1 재전송)</td>
+<td>같은 장비·시각·값</td>
+<td>하나만 남김</td>
+</tr>
+<tr>
+<td>단위 섞임 (화씨 장비)</td>
+<td>장비 대장의 단위</td>
+<td>℃로 변환</td>
+</tr>
+<tr>
+<td>시계 틀림 (장비 시각이 2분 늦음)</td>
+<td>수신 시각과 차이가 허용치(예: 5초)를 넘는가</td>
+<td>수신 시각 사용, clock_fixed 표시</td>
+</tr>
+<tr>
+<td>누락 (값이 안 옴)</td>
+<td>기대 주기 안에 값이 있는가</td>
+<td>짧으면 앞뒤 보간, 길면 "끊김" 표시</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="②-정합-같은-대상-같은-시간-같은-좌표">② 정합: 같은 대상, 같은 시간, 같은 좌표</h2>
+<ul>
+<li><strong>장비 대장</strong>이 중심이다. 센서 ID, 3D 물체(언리얼 액터) 이름, 보내는 단위, 정상 범위, 최대 변화량, 설치 위치를 한 표에 둔다.</li>
+</ul>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>센서 ID</th>
+<th>언리얼 액터</th>
+<th>단위</th>
+<th>정상 범위</th>
+<th>1초 최대 변화</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pump03</td>
+<td>BP_Pump_03</td>
+<td>C</td>
+<td>-20~120</td>
+<td>5</td>
+</tr>
+<tr>
+<td>pump05</td>
+<td>BP_Pump_05</td>
+<td>F</td>
+<td>-20~120(℃ 기준)</td>
+<td>5</td>
+</tr>
+<tr>
+<td>crane07</td>
+<td>BP_Crane_07</td>
+<td>위경도</td>
+<td>터미널 구역 안</td>
+<td>이동 5m</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>대상</strong>: 메시지의 device로 대장을 찾아 액터 이름을 붙인다. 대장에 없으면 보류 표로 보내고 담당자에게 알린다.</li>
+<li><strong>시간</strong>: 모두 UTC로 저장한다. <code>10:00:00+09:00</code> → <code>01:00:00Z</code>. 주기가 다른 데이터(1초 5회, 1초 2회)는 1초 칸으로 다시 나눠 같은 순간끼리 나란히 놓는다.</li>
+<li><strong>좌표</strong>: 위경도 <code>35.10560, 129.08200</code> → 터미널 원점 <code>35.10500, 129.08000</code> 기준 동쪽 182.3m, 북쪽 66.6m → 언리얼 cm 18,230 · 6,660. 실제로는 pyproj나 언리얼 Georeferencing이 계산하고, 축 방향은 Georeferencing 설정을 따른다.</li>
+</ul>
+<h2 id="③-db-저장">③ DB 저장</h2>
+<p><strong>시각 · 무엇 · 값</strong> 세 칸에 품질 표시를 더한 형태가 시계열 DB의 기본이다.</p>
+<pre><code class="language-sql">-- PostgreSQL + TimescaleDB 예
+CREATE TABLE sensor_data (
+  time      TIMESTAMPTZ NOT NULL,  -- 측정 시각(UTC)
+  asset_id  TEXT NOT NULL,         -- 3D 물체와 연결되는 ID
+  metric    TEXT NOT NULL,         -- temp, east_m ...
+  value     DOUBLE PRECISION,
+  quality   TEXT                   -- ok, spike, clock_fixed ...
+);
+SELECT create_hypertable('sensor_data', 'time');  -- 시간순 대용량 저장용으로 지정
+</code></pre>
+<p>InfluxDB를 쓰면 같은 내용을 measurement(표 이름), tag(asset_id 같은 구분), field(값)로 나눠 적는다.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>저장 위치</th>
+<th>무엇</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>최신값</td>
+<td>메모리 캐시, MQTT Retained</td>
+<td>지금 화면</td>
+</tr>
+<tr>
+<td>이력</td>
+<td>시계열 DB</td>
+<td>그래프, 재생, 분석</td>
+</tr>
+<tr>
+<td>원본</td>
+<td>받은 그대로의 파일(JSON 줄 묶음, Parquet)</td>
+<td>규칙을 바꿔 다시 정제</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="④-조회">④ 조회</h2>
+<pre><code class="language-sql">-- 지난 1시간, 장비별 1분 평균(정상값만)
+SELECT time_bucket('1 minute', time) AS minute, asset_id, avg(value)
+FROM sensor_data
+WHERE metric = 'temp' AND quality = 'ok' AND time &gt; now() - interval '1 hour'
+GROUP BY minute, asset_id;
+
+-- 사고 시각 10분 재생(언리얼 타임라인용)
+SELECT * FROM sensor_data
+WHERE time BETWEEN '2026-11-15 01:00:00Z' AND '2026-11-15 01:10:00Z'
+ORDER BY time;
+</code></pre>
+<p>데이터가 쌓이면 보관 규칙을 정한다. 예: 1초 원값은 30일, 1분 평균은 1년.</p>
+<h2 id="저장기-코드-뼈대-python">저장기 코드 뼈대 (Python)</h2>
+<pre><code class="language-python">def on_message(client, userdata, msg):
+    raw = msg.payload.decode()
+    save_raw(raw)                                   # ⓪ 원본 그대로 보관
+    try:
+        d = json.loads(raw)                         # ① 형식 검사
+    except ValueError:
+        return log_error(raw)
+    asset = REGISTRY.get(d.get(&quot;device&quot;))           # ② 대상 정합: 센서 → 3D 물체
+    if asset is None:
+        return hold_unknown(d)
+    v = to_celsius(d[&quot;value&quot;], asset.unit)          # ① 단위 통일
+    t = fix_time(d[&quot;time&quot;], received_at=now_utc())  # ② 시간 정합(UTC, 시계 보정)
+    if is_duplicate(asset.id, t, v):                # ① 중복 제거
+        return
+    q = &quot;ok&quot;
+    if not asset.min &lt;= v &lt;= asset.max:
+        q = &quot;out_of_range&quot;
+    elif abs(v - last_ok[asset.id]) &gt; asset.max_jump:
+        q = &quot;spike&quot;
+    db.insert(t, asset.id, &quot;temp&quot;, v, q)            # ③ 저장
+    if q == &quot;ok&quot;:
+        last_ok[asset.id] = v
+</code></pre>
+<h2 id="다섯-가지-원칙-인터뷰용">다섯 가지 원칙 (인터뷰용)</h2>
+<ol>
+<li><strong>원본은 지우지 않는다.</strong> 규칙을 바꾸면 원본으로 다시 정제한다.</li>
+<li><strong>지우기보다 표시한다.</strong> quality 칸에 표시하고 분석할 때 걸러 쓴다.</li>
+<li><strong>시간은 UTC로 저장한다.</strong> 한국 시간은 화면에서만 바꾼다.</li>
+<li><strong>장비 대장이 정합의 중심이다.</strong></li>
+<li><strong>규칙은 코드가 아니라 표로 관리한다.</strong> 장비를 추가할 때 대장에 한 줄만 넣으면 된다.</li>
+</ol>
+<h2 id="도구">도구</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>도구 예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>정제·정합</td>
+<td>Python(pandas), pyproj(좌표 변환)</td>
+</tr>
+<tr>
+<td>저장</td>
+<td>PostgreSQL + TimescaleDB, InfluxDB</td>
+</tr>
+<tr>
+<td>코드 없이 연결</td>
+<td>Node-RED, Telegraf</td>
+</tr>
+<tr>
+<td>확인</td>
+<td>SQL, Grafana 대시보드, 언리얼 화면</td>
+</tr>
+</tbody>
+</table></div><nav class="pager"><a href="05.html"><small>← 이전</small>05 IoT 개념</a><a class="n" href="07.html"><small>다음 →</small>07 쓸모 있는 데이터 만들기</a></nav><p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준이라 홍보 성격이 있습니다.</p>
+</main>
+</body>
+</html>

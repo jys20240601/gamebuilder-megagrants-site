@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>디지털트윈 인터뷰 노트</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><span class="side">2026-11-17 인터뷰 대비</span></div></header>
+<main>
+<h1>KDT 디지털트윈 과정 인터뷰 노트</h1>
+<p class="lead">언리얼 기반 디지털 트윈 시스템 개발자 양성과정 · 2026-11-16 사전미팅, 11-17 인터뷰 심사 대비. 메인 참여기업 삼우이머션의 사업과 디지털트윈 · IoT · 빅데이터 가공을 정리했습니다.</p>
+<h2>한눈에 보기</h2>
+<ul class="key">
+<li><b>디지털트윈 = 3D 공간 + IoT 데이터 + 빅데이터 가공 + 활용</b></li>
+<li>흐름: 공간을 짓고 → 데이터를 모으고 → 다듬어서 → 언리얼에 연결하고 → 화면으로 쓴다</li>
+<li>빅데이터 가공의 핵심은 <b>정합</b>: 같은 대상, 같은 시간, 같은 좌표로 맞추기</li>
+<li>MQTT는 배달 방법, JSON은 편지 쓰는 형식</li>
+<li>장비 100대 × 1초 5회 = 하루 <b>4,320만 건</b></li>
+<li>쓸모 있는 데이터 = 질문에 바로 답할 수 있는 데이터</li>
+</ul>
+<h2>문서</h2>
+<div class="cards"><a class="card big" href="08.html"><b><span class="no">08</span>현업 용어집</b><span>275개 · ★ 인터뷰 필수 107개 · 검색과 분야별 보기</span></a><a class="card" href="01.html"><b><span class="no">01</span>삼우이머션 파악</b><span>회사, 디지털트윈 사례, 공통 구조, 사전미팅 확인 사항, 예상 질문</span></a><a class="card" href="02.html"><b><span class="no">02</span>디지털트윈을 위한 빅데이터 가공</b><span>데이터 5종, 가공 7단계, 정합, 부산항 사례, NCS 대응</span></a><a class="card" href="03.html"><b><span class="no">03</span>전체 흐름 쉽게</b><span>3D 구축 → 수집 → 가공 → 언리얼 연동 → 활용</span></a><a class="card" href="04.html"><b><span class="no">04</span>MQTT</b><span>개념, JSON·일반 통신과 차이, 약속의 내용, 구축, 언리얼 플러그인</span></a><a class="card" href="05.html"><b><span class="no">05</span>IoT 개념</b><span>정의, 4계층, IoT에 필요한 것 전체</span></a><a class="card" href="06.html"><b><span class="no">06</span>정제 · 정합 · DB</b><span>정제 규칙, 장비 대장, 시계열 DB, 조회 SQL</span></a><a class="card" href="07.html"><b><span class="no">07</span>쓸모 있는 데이터 만들기</b><span>질문 → 탐색 → 집계 → 지표 → 활용</span></a></div>
+<h2>눌러 보는 예시</h2>
+<p class="lead">실제 통신이 아니라 동작 방식을 흉내 낸 시뮬레이션입니다.</p>
+<div class="cards"><a class="card" href="demo-mqtt.html"><b>MQTT와 JSON</b><span>봉투와 내용물, 발행·구독, 알람, 유언 메시지, Retained</span></a><a class="card" href="demo-http-vs-mqtt.html"><b>일반 통신 vs MQTT</b><span>같은 센서를 HTTP와 MQTT로 볼 때 통신량 비교</span></a><a class="card" href="demo-mqtt-bytes.html"><b>MQTT 약속의 실제 모습</b><span>대화 순서와 실제 바이트</span></a><a class="card" href="demo-clean-db.html"><b>정제 · 정합 · DB 저장</b><span>메시지 9통이 DB에 들어가기까지</span></a></div>
+<p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준입니다.</p>
+</main>
+</body>
+</html>

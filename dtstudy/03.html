@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>디지털트윈 전체 흐름 (쉽게, 큰 틀)</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><a class="side" href="./">목차</a></div></header>
+<main>
+<h1 id="디지털트윈-전체-흐름-쉽게-큰-틀">디지털트윈 전체 흐름 (쉽게, 큰 틀)</h1>
+<p>자세한 내용은 <a href="01.html">01</a>, <a href="02.html">02</a> 참고.</p>
+<h2 id="한-줄">한 줄</h2>
+<blockquote>
+<p><strong>공간을 짓고 → 데이터를 모으고 → 다듬어서 → 언리얼에 연결하고 → 화면으로 쓴다.</strong></p>
+</blockquote>
+<pre><code> ① 3D 현장 만들기     ② 데이터 모으기       ③ 다듬고 저장        ④ 언리얼 연동         ⑤ 활용
+ 지형·건물·설비   →   센서·GPS·CCTV    →   정제·정합·DB    →   수신 → 물체 갱신  →  관제·알람·예측
+ (언리얼)             (MQTT 브로커)         (서버·Python)        (블루프린트·UI)       ↺ 제어 명령
+</code></pre>
+<h2 id="①-3d-현장-만들기-움직이지-않는-무대">① 3D 현장 만들기: 움직이지 않는 무대</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>무엇</th>
+<th>어떻게</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>땅과 지도</td>
+<td>브이월드·DEM 지형, Cesium for Unreal로 넓은 지역 스트리밍</td>
+</tr>
+<tr>
+<td>건물·설비</td>
+<td>CAD·BIM은 Datasmith로 가져오기, 실물은 포토그래메트리·3D 스캔(포인트 클라우드)</td>
+</tr>
+<tr>
+<td>위치 맞추기</td>
+<td>Georeferencing으로 언리얼 좌표와 실제 위경도(WGS84)를 일치</td>
+</tr>
+<tr>
+<td>이름표 붙이기</td>
+<td>데이터를 받을 물체(펌프, 크레인, 선박)마다 ID 지정</td>
+</tr>
+</tbody>
+</table></div>
+<p>결과: 실제 위치와 똑같은 곳에 놓인 3D 현장. 아직 움직이지 않는다.</p>
+<h2 id="②-데이터-모으기-현장의-신호를-한곳으로">② 데이터 모으기: 현장의 신호를 한곳으로</h2>
+<ul>
+<li>센서·장비가 값을 보낸다: 온도, 진동, GPS 위치, AIS, CCTV 인식 결과.</li>
+<li>대부분 <strong>MQTT</strong>로 보낸다. MQTT는 우체국과 비슷하다.</li>
+<li>센서가 "주소(토픽)"를 붙여 편지를 보낸다(발행). 예: <code>terminal/crane07/position</code></li>
+<li>우체국(브로커)이 그 주소를 구독한 쪽에 편지를 전달한다.</li>
+<li>옛 설비는 프로토콜이 달라서(Modbus 등) 현장 엣지 서버가 한 번 모아 MQTT로 바꿔 준다.</li>
+</ul>
+<h2 id="③-다듬고-저장하기-쓸-수-있는-데이터로">③ 다듬고 저장하기: 쓸 수 있는 데이터로</h2>
+<ol>
+<li><strong>정제</strong>: 끊긴 값, 튀는 값, 중복을 처리한다.</li>
+<li><strong>정합</strong>: 좌표를 맞추고, 시간을 맞추고, 센서 ID를 3D 물체 ID에 연결한다.</li>
+<li><strong>저장</strong>: 최신값은 바로 꺼낼 수 있게, 이력은 시계열 DB에 쌓는다.</li>
+<li><strong>계산</strong>: 기준을 넘으면 알람, 이력으로 고장·생산성을 예측한다.</li>
+</ol>
+<p>주로 Python과 서버에서 한다. 빅데이터 가공의 본체가 이 단계다.</p>
+<h2 id="④-언리얼-연동-무대-위-물체를-움직이기">④ 언리얼 연동: 무대 위 물체를 움직이기</h2>
+<p><strong>받는 방법</strong> (셋 중 상황에 맞게)</p>
+<ul>
+<li>언리얼이 MQTT를 직접 구독한다(엔진 내장 플러그인 또는 마켓 플러그인).</li>
+<li>서버가 정리한 값을 WebSocket이나 REST API로 받는다.</li>
+<li>Python이 중간에서 받아 언리얼로 넘긴다(초보자 실습에 쉬움).</li>
+</ul>
+<p><strong>받은 뒤 언리얼 안에서</strong></p>
+<ol>
+<li>메시지에서 ID를 읽고, 그 ID가 붙은 물체를 찾는다.</li>
+<li>값을 화면에 반영한다.
+   - 위치: 위경도를 언리얼 좌표로 바꿔 이동
+   - 상태: 색 변경(정상 초록, 경고 빨강)
+   - 숫자: UMG 위젯에 표시</li>
+<li>데이터가 드문드문 오면 그 사이를 보간해 부드럽게 움직이고, 끊기면 회색으로 표시한다.</li>
+</ol>
+<h2 id="⑤-활용-보는-것에서-움직이는-것까지">⑤ 활용: 보는 것에서 움직이는 것까지</h2>
+<ul>
+<li><strong>모니터링</strong>: 지금 현장이 어떤지 본다.</li>
+<li><strong>알람</strong>: 위험을 화면과 앱으로 알린다.</li>
+<li><strong>재생</strong>: 지난 시간을 되돌려 본다(사고 분석, 동선 검증).</li>
+<li><strong>예측·시뮬레이션</strong>: "이대로 가면" 어떻게 되는지 미리 본다.</li>
+<li><strong>제어</strong>(역방향): 언리얼 버튼 → MQTT 발행 → 현장 장비나 로봇이 움직인다.</li>
+</ul>
+<h2 id="가장-작은-예-온도-센서-하나">가장 작은 예: 온도 센서 하나</h2>
+<p>과정 첫 실습으로 쓰기 좋은 크기다.</p>
+<ol>
+<li>라즈베리파이와 온도 센서가 1초마다 <code>factory/pump03/temp</code>로 <code>{"value": 42.5}</code>를 발행한다.</li>
+<li>MQTT 브로커(Mosquitto)가 받는다.</li>
+<li>Python이 구독해 튀는 값을 거르고 시계열 DB에 저장한다. 40도를 넘으면 경고를 만든다.</li>
+<li>언리얼이 구독해 <code>pump03</code> 펌프를 빨갛게 바꾸고 화면에 42.5℃를 띄운다.</li>
+<li>언리얼의 "냉각 시작" 버튼이 <code>factory/pump03/cmd</code>로 명령을 발행하면 실제 팬이 돈다.</li>
+</ol>
+<p>센서 하나가 장비 100대, 선박 수천 척으로 늘어나면 그대로 부산항 터미널 관제가 된다. 여기서 늘어나는 것은 ③ 데이터 가공의 양과 난이도다.</p>
+<h2 id="삼우이머션-사례로-보면">삼우이머션 사례로 보면</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>부산항 터미널</th>
+<th>자갈치시장</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 3D</td>
+<td>DEM 지형, 전자해도, 크레인·장비 모델</td>
+<td>CityGML 주변 건물, DEM, 펌프 3D 스캔</td>
+</tr>
+<tr>
+<td>② 수집</td>
+<td>장비 GPS 1초 5회, 헬멧, CCTV / MQTT</td>
+<td>수질·침수·가스·화재 센서 / 5G, oneM2M, 엣지 서버, MQTT</td>
+</tr>
+<tr>
+<td>③ 가공</td>
+<td>위경도 → WGS84 통일, 장비 ID 연결, 위험 거리 계산</td>
+<td>레거시 데이터 취합, 임계값 판정</td>
+</tr>
+<tr>
+<td>④ 연동</td>
+<td>장비가 실시간으로 움직임</td>
+<td>센서 상태를 3D에 표시</td>
+</tr>
+<tr>
+<td>⑤ 활용</td>
+<td>위험 알람, 생산성 예측, 동선 검증</td>
+<td>화재 시 탈출 경로 안내</td>
+</tr>
+</tbody>
+</table></div><nav class="pager"><a href="02.html"><small>← 이전</small>02 디지털트윈을 위한 빅데이터 가공</a><a class="n" href="04.html"><small>다음 →</small>04 MQTT</a></nav><p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준이라 홍보 성격이 있습니다.</p>
+</main>
+</body>
+</html>

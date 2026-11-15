@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root{--background:#fff;--foreground:#171717;--card:#fff;--card-foreground:#171717;--muted:#f4f4f5;--muted-foreground:#737373;--border:#e5e5e5;--input:#e5e5e5;--ring:#a3a3a3;--primary:#171717;--primary-foreground:#fafafa;--secondary:#f4f4f5;--secondary-foreground:#171717;--accent:#f4f4f5;--accent-foreground:#171717;--destructive:#dc2626}
+@media (prefers-color-scheme:dark){:root{--background:#0f1115;--foreground:#e8eaf0;--card:#171b22;--card-foreground:#e8eaf0;--muted:#222833;--muted-foreground:#9aa3b2;--border:#2a3140;--input:#2a3140;--ring:#6b7280;--primary:#e8eaf0;--primary-foreground:#111318;--secondary:#222833;--secondary-foreground:#e8eaf0;--accent:#2a3140;--accent-foreground:#fff;--destructive:#f87171}}
+.dt-back{display:block;font:600 14px/1.4 system-ui,-apple-system,"Malgun Gothic",sans-serif;padding:0 0 12px;color:var(--foreground);text-decoration:none}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>일반 통신과 MQTT 비교</title>
+<style>
+  body{margin:0;padding:16px;background:var(--background,#fff);color:var(--foreground,#171717);
+    font-family:var(--font-sans,system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif);font-size:14px;line-height:1.55}
+  h2{font-size:17px;margin:2px 0 6px}
+  h3{font-size:15px;margin:0 0 2px}
+  p{margin:0 0 10px}
+  .muted{color:var(--muted-foreground,#737373)}
+  .small{font-size:12px}
+  .mono{font-family:var(--font-mono,ui-monospace,Consolas,monospace)}
+  .card{background:var(--card,#fff);color:var(--card-foreground,#171717);border:1px solid var(--border,#e5e5e5);
+    border-radius:var(--radius,10px);padding:12px 14px}
+  button{font:inherit;font-size:13px;cursor:pointer;border-radius:calc(var(--radius,10px) - 2px);padding:6px 11px;
+    border:1px solid var(--border,#e5e5e5);background:var(--secondary,#f4f4f5);color:var(--secondary-foreground,#171717)}
+  button:hover{background:var(--accent,#f4f4f5);color:var(--accent-foreground,#171717)}
+  button.primary{background:var(--primary,#171717);color:var(--primary-foreground,#fafafa);border-color:transparent}
+  button:focus-visible{outline:2px solid var(--ring,#a3a3a3);outline-offset:2px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:10px 0 12px}
+  .sensor{font-size:13px}
+  .sensor b{font-size:16px}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--border,#e5e5e5);color:var(--muted-foreground,#737373);margin-bottom:6px}
+  svg{width:100%;height:auto;display:block;margin:4px 0 8px}
+  .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:8px}
+  .stat{background:var(--muted,#f4f4f5);border-radius:calc(var(--radius,10px) - 2px);padding:6px 8px}
+  .stat .n{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+  .stat .l{font-size:11.5px;color:var(--muted-foreground,#737373)}
+  .stat.warn .n{color:var(--cmp-warn)}
+  .stat.good .n{color:var(--cmp-good)}
+  ul.log{list-style:none;margin:0;padding:0;font-size:12px;height:148px;overflow:hidden}
+  ul.log li{border-top:1px solid var(--border,#e5e5e5);padding:3px 0}
+  ul.log li.quiet{color:var(--muted-foreground,#737373)}
+  .changed{color:var(--cmp-good);font-weight:600}
+  .same{color:var(--muted-foreground,#737373)}
+  .summary{margin-top:12px}
+  .wrap{--cmp-warn:#d97706;--cmp-good:#16a34a;--cmp-flash:#2563eb}
+  .ln{transition:stroke .15s,stroke-width .15s}
+  .ln.on{stroke:var(--cmp-flash) !important;stroke-width:3}
+  @media (max-width:640px){ .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<a class="dt-back" href="./">← 디지털트윈 인터뷰 노트</a>
+<div class="wrap">
+  <h2>일반 통신(전화 걸기) vs MQTT(구독 알림)</h2>
+  <p class="muted">같은 온도 센서 하나를 언리얼, 저장기, 알람 앱 세 곳이 지켜봅니다. 왼쪽은 각자 1초마다 센서에게 직접 묻고(HTTP 요청-응답), 오른쪽은 센서가 값이 바뀔 때 한 번 보내면 브로커가 세 곳에 나눠 줍니다(MQTT 발행-구독). 실제 통신이 아닌 시뮬레이션입니다.</p>
+
+  <div class="controls">
+    <button id="runBtn" class="primary">⏸ 일시정지</button>
+    <button id="changeBtn">지금 온도 바꾸기</button>
+    <button id="resetBtn">처음부터</button>
+    <span class="sensor">센서 현재값 <b id="cur" class="mono">32.0℃</b></span>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>일반 통신 (HTTP)</h3>
+      <span class="tag">각자 직접 묻는다 · 물어봐야 답이 온다</span>
+      <svg viewBox="0 0 300 120" aria-hidden="true">
+        <g id="hLines">
+          <line class="ln" x1="62" y1="60" x2="208" y2="22" style="stroke:var(--border,#d4d4d4);stroke-width:2"/>
+          <line class="ln" x1="62" y1="60" x2="208" y2="60" style="stroke:var(--border,#d4d4d4);stroke-width:2"/>
+          <line class="ln" x1="62" y1="60" x2="208" y2="98" style="stroke:var(--border,#d4d4d4);stroke-width:2"/>
+        </g>
+        <circle cx="38" cy="60" r="24" style="fill:var(--muted,#f4f4f5);stroke:var(--foreground,#171717)"/>
+        <text x="38" y="64" font-size="11" text-anchor="middle" style="fill:var(--foreground,#171717)">센서</text>
+        <g font-size="11" style="fill:var(--foreground,#171717)">
+          <rect x="208" y="10" width="84" height="24" rx="5" style="fill:var(--muted,#f4f4f5);stroke:var(--border,#d4d4d4)"/><text x="250" y="26" text-anchor="middle">언리얼</text>
+          <rect x="208" y="48" width="84" height="24" rx="5" style="fill:var(--muted,#f4f4f5);stroke:var(--border,#d4d4d4)"/><text x="250" y="64" text-anchor="middle">저장기</text>
+          <rect x="208" y="86" width="84" height="24" rx="5" style="fill:var(--muted,#f4f4f5);stroke:var(--border,#d4d4d4)"/><text x="250" y="102" text-anchor="middle">알람 앱</text>
+        </g>
+        <text x="135" y="52" font-size="10" text-anchor="middle" style="fill:var(--muted-foreground,#737373)">"지금 몇 도?" ⇄ "32.0"</text>
+      </svg>
+      <div class="stats">
+        <div class="stat"><div class="n" id="hReq">0</div><div class="l">요청 수</div></div>
+        <div class="stat warn"><div class="n" id="hWaste">0</div><div class="l">헛요청 (값 그대로)</div></div>
+        <div class="stat"><div class="n" id="hSensor">0</div><div class="l">센서가 답한 횟수</div></div>
+      </div>
+      <ul class="log" id="hLog"></ul>
+    </div>
+
+    <div class="card">
+      <h3>MQTT</h3>
+      <span class="tag">구독해 두면 새 값이 알아서 온다</span>
+      <svg viewBox="0 0 300 120" aria-hidden="true">
+        <g id="mLines">
+          <line class="ln" x1="62" y1="60" x2="118" y2="60" style="stroke:var(--border,#d4d4d4);stroke-width:2"/>
+          <line class="ln" x1="170" y1="60" x2="208" y2="22" style="stroke:var(--border,#d4d4d4);stroke-width:2"/>
+          <line class="ln" x1="170" y1="60" x2="208" y2="60" style="stroke:var(--border,#d4d4d4);stroke-width:2"/>
+          <line class="ln" x1="170" y1="60" x2="208" y2="98" style="stroke:var(--border,#d4d4d4);stroke-width:2"/>
+        </g>
+        <circle cx="38" cy="60" r="24" style="fill:var(--muted,#f4f4f5);stroke:var(--foreground,#171717)"/>
+        <text x="38" y="64" font-size="11" text-anchor="middle" style="fill:var(--foreground,#171717)">센서</text>
+        <rect x="118" y="44" width="52" height="32" rx="6" style="fill:var(--primary,#171717)"/>
+        <text x="144" y="64" font-size="11" text-anchor="middle" style="fill:var(--primary-foreground,#fafafa)">브로커</text>
+        <g font-size="11" style="fill:var(--foreground,#171717)">
+          <rect x="208" y="10" width="84" height="24" rx="5" style="fill:var(--muted,#f4f4f5);stroke:var(--border,#d4d4d4)"/><text x="250" y="26" text-anchor="middle">언리얼</text>
+          <rect x="208" y="48" width="84" height="24" rx="5" style="fill:var(--muted,#f4f4f5);stroke:var(--border,#d4d4d4)"/><text x="250" y="64" text-anchor="middle">저장기</text>
+          <rect x="208" y="86" width="84" height="24" rx="5" style="fill:var(--muted,#f4f4f5);stroke:var(--border,#d4d4d4)"/><text x="250" y="102" text-anchor="middle">알람 앱</text>
+        </g>
+      </svg>
+      <div class="stats">
+        <div class="stat"><div class="n" id="mPub">0</div><div class="l">센서가 보낸 횟수</div></div>
+        <div class="stat"><div class="n" id="mDeliver">0</div><div class="l">브로커가 전달</div></div>
+        <div class="stat good"><div class="n" id="mWaste">0</div><div class="l">헛메시지</div></div>
+      </div>
+      <ul class="log" id="mLog"></ul>
+    </div>
+  </div>
+
+  <div class="card summary" id="summary">-</div>
+  <p class="muted small" style="margin-top:8px">참고: MQTT 센서도 정해진 주기(예: 1초마다)로 보내게 설정할 수 있습니다. 그래도 센서는 받는 곳이 몇 군데든 <b>한 번만</b> 보내고, 받는 쪽은 <b>묻지 않아도</b> 받습니다. 이 두 가지가 핵심 차이입니다.</p>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2,'0');
+  const clock = () => { const d = new Date(); return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); };
+  const CLIENTS = 3;
+  let value, lastSeen, h, m, secs, running = true, changedThisTick;
+
+  function reset(){
+    value = 32.0; lastSeen = Array(CLIENTS).fill(32.0);
+    h = { req:0, waste:0 }; m = { pub:0, deliver:0 }; secs = 0; changedThisTick = false;
+    $('hLog').innerHTML = ''; $('mLog').innerHTML = '';
+    render();
+  }
+
+  function flash(groupId){
+    document.querySelectorAll('#'+groupId+' .ln').forEach(l => l.classList.add('on'));
+    setTimeout(() => document.querySelectorAll('#'+groupId+' .ln').forEach(l => l.classList.remove('on')), 300);
+  }
+  function addLog(id, html, cls){
+    const ul = $(id), li = document.createElement('li');
+    li.innerHTML = '<span class="mono muted">'+clock()+'</span> '+html;
+    if (cls) li.className = cls;
+    ul.insertBefore(li, ul.firstChild);
+    while (ul.children.length > 7) ul.removeChild(ul.lastChild);
+  }
+
+  function changeValue(){
+    const delta = (Math.random() < 0.5 ? -1 : 1) * (0.5 + Math.random() * 1.5);
+    value = Math.round((value + delta) * 10) / 10;
+    // MQTT: 바뀌는 순간 센서가 한 번 발행 → 브로커가 세 곳에 전달
+    m.pub++; m.deliver += CLIENTS;
+    flash('mLines');
+    addLog('mLog', '센서 발행 <b>1번</b> → 브로커가 3곳에 전달 <span class="changed">'+value.toFixed(1)+'℃ (바로 앎)</span>');
+    changedThisTick = true;
+    render();
+  }
+
+  function tick(){
+    if (!running) return;
+    secs++;
+    if (Math.random() < 0.22) changeValue();
+    // HTTP: 세 곳이 각자 1초마다 묻는다
+    let waste = 0;
+    for (let i = 0; i < CLIENTS; i++){
+      h.req++;
+      if (lastSeen[i] === value) { h.waste++; waste++; }
+      lastSeen[i] = value;
+    }
+    flash('hLines');
+    if (waste === CLIENTS){
+      addLog('hLog', '요청 3번 → 응답 3번 <span class="same">'+value.toFixed(1)+'℃ (그대로, 헛걸음)</span>');
+    } else {
+      addLog('hLog', '요청 3번 → 응답 3번 <span class="changed">'+value.toFixed(1)+'℃ (바뀐 걸 이제야 앎, 최대 1초 늦음)</span>');
+    }
+    if (!changedThisTick && secs % 3 === 0) addLog('mLog', '보낼 게 없어서 조용함 (통신 0)', 'quiet');
+    changedThisTick = false;
+    render();
+  }
+
+  function render(){
+    $('cur').textContent = value.toFixed(1)+'℃';
+    $('hReq').textContent = h.req; $('hWaste').textContent = h.waste; $('hSensor').textContent = h.req;
+    $('mPub').textContent = m.pub; $('mDeliver').textContent = m.deliver; $('mWaste').textContent = 0;
+    $('summary').innerHTML = secs === 0 ? '시작하면 두 방식의 통신량이 쌓입니다.'
+      : '<b>'+secs+'초</b> 동안 · 일반 통신: 센서가 <b>'+h.req+'번</b> 답했고 그중 <b>'+h.waste+'번</b>은 값이 그대로였습니다. · MQTT: 센서는 <b>'+m.pub+'번</b>만 보냈습니다. 받는 곳이 3곳이 아니라 100곳이어도 센서가 보내는 횟수는 같습니다.';
+  }
+
+  $('runBtn').addEventListener('click', () => { running = !running; $('runBtn').textContent = running ? '⏸ 일시정지' : '▶ 다시 시작'; });
+  $('changeBtn').addEventListener('click', changeValue);
+  $('resetBtn').addEventListener('click', reset);
+  reset();
+  setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>

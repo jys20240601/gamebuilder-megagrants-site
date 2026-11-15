@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>디지털트윈을 위한 빅데이터 가공</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><a class="side" href="./">목차</a></div></header>
+<main>
+<h1 id="디지털트윈을-위한-빅데이터-가공">디지털트윈을 위한 빅데이터 가공</h1>
+<p><a href="01.html">01 삼우이머션 파악</a>의 다음 단계. 과정의 핵심을 "디지털트윈 + 그것을 움직이는 빅데이터 가공"으로 보고 정리했다.</p>
+<h2 id="0-한-문장으로">0. 한 문장으로</h2>
+<blockquote>
+<p>디지털트윈의 빅데이터 가공은 <strong>현장에서 쏟아지는 서로 다른 데이터를 같은 좌표, 같은 시간, 같은 대상으로 맞추고, 실시간 3D가 감당할 양으로 줄여서 트윈에 흘려보내는 일</strong>이다.</p>
+</blockquote>
+<p>일반 빅데이터 과정과 다른 점:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>일반 빅데이터 분석</th>
+<th>디지털트윈의 빅데이터</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>결과물</td>
+<td>보고서, 대시보드, 모델</td>
+<td>실시간으로 움직이는 3D 현장</td>
+</tr>
+<tr>
+<td>시간</td>
+<td>지난 데이터를 모아 분석(배치)</td>
+<td>지금 데이터를 바로 반영(스트림) + 이력 분석</td>
+</tr>
+<tr>
+<td>데이터</td>
+<td>주로 표 데이터</td>
+<td>표 + <strong>공간(좌표, 3D)</strong> + 영상</td>
+</tr>
+<tr>
+<td>가장 어려운 일</td>
+<td>분석 모델</td>
+<td><strong>정합</strong>: 센서 값이 3D 화면의 어느 물체, 어느 위치, 어느 시점인지 맞추기</td>
+</tr>
+</tbody>
+</table></div>
+<p>심사에서는 "3D는 마지막 표현층이고, 그 앞의 수집·정제·정합·적재·처리·분석이 모두 빅데이터 작업"이라고 말하면 디지털트윈 과정을 빅데이터 과정으로 설명할 수 있다.</p>
+<hr />
+<h2 id="1-디지털트윈에-들어오는-데이터-5종-역방향-1종">1. 디지털트윈에 들어오는 데이터 5종 (+ 역방향 1종)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>종류</th>
+<th>예</th>
+<th>특성</th>
+<th>삼우이머션 사례</th>
+<th>가공 포인트</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>공간 데이터</strong> (정적)</td>
+<td>DEM 지형, 항공사진, 포인트 클라우드, CityGML·shapefile, CAD/BIM, 전자해도</td>
+<td>용량이 크고 좌표계가 제각각</td>
+<td>자갈치(CityGML, shapefile, DEM, 포인트 클라우드 리토폴로지), 터미널(DEM, 전자해도 S-63)</td>
+<td>좌표계 통일, 경량화(LOD, 3D Tiles, Nanite), 객체마다 ID 붙이기</td>
+</tr>
+<tr>
+<td><strong>센서 시계열</strong> (동적)</td>
+<td>온도, 진동, 수질, 공기질, 화재, 전력</td>
+<td>빈도가 높고 끊기거나 튀는 값이 섞임</td>
+<td>자갈치(해수 수질, 침수, 유해가스, 화재), 한화오션(온도, 강도, 피로)</td>
+<td>결측·이상치 처리, 리샘플링, 단위 통일, 임계값 판정, 집계</td>
+</tr>
+<tr>
+<td><strong>위치 궤적</strong></td>
+<td>장비 GPS, 작업자 헬멧·워치, 선박 AIS, 레이더</td>
+<td>시간 + 좌표. 양이 가장 빨리 커짐</td>
+<td>터미널(장비 1초 5회 ±10cm, 헬멧 1초 2회 ±1m), 해상공사(AIS·레이더), 부산대 PoC(대용량 AIS/GPS)</td>
+<td>좌표 변환, 튀는 점 제거, 화면용 보간, 궤적 압축, 정박·운항 구분</td>
+</tr>
+<tr>
+<td><strong>영상</strong></td>
+<td>CCTV</td>
+<td>원본은 트윈에 넣기에 너무 큼</td>
+<td>터미널(번호 인식, 트럭 대기열), 해상공사(딥러닝 선박 인식)</td>
+<td>영상을 AI로 <strong>이벤트 데이터</strong>(무엇이, 어디서, 언제)로 바꿔서 넣음</td>
+</tr>
+<tr>
+<td><strong>운영·업무 데이터</strong></td>
+<td>작업 지시, 선적 계획, 설비 사양, 문서</td>
+<td>다른 시스템(DB, ERP)에 있음</td>
+<td>터미널 운영 데이터, 한화오션(사양, PDF 문서 뷰어)</td>
+<td>센서·위치 데이터와 조인(장비 ID, 시간 기준)</td>
+</tr>
+<tr>
+<td><strong>합성 데이터</strong> (역방향)</td>
+<td>트윈에서 렌더링한 이미지와 자동 라벨</td>
+<td>트윈이 데이터를 <strong>만들어 냄</strong></td>
+<td>해상공사 선박 인식 학습 데이터 증강(각도, 색감, 좌우반전)</td>
+<td>밤·비·안개 같은 조건을 바꿔 AI 학습 데이터 생성(도메인 랜덤화)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="2-가공-파이프라인-7단계">2. 가공 파이프라인 7단계</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>하는 일</th>
+<th>디지털트윈에서 특히 중요한 점</th>
+<th>도구 예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 수집</td>
+<td>센서, 장비, 외부 API, 파일에서 데이터를 받음</td>
+<td>프로토콜이 파편화돼 있다. 신규 장비는 MQTT, 옛 설비는 Modbus·OPC UA, 외부는 REST API. 그래서 <strong>엣지 서버</strong>에서 한 번 모은다(자갈치)</td>
+<td>MQTT 브로커(Mosquitto 등), oneM2M, Python 수집기</td>
+</tr>
+<tr>
+<td>② 정제</td>
+<td>결측, 이상치, 중복, 시간 오류 처리</td>
+<td>센서가 끊기면 트윈 속 물체가 멈추거나 순간이동한다. 화면에 바로 보이는 품질 문제다</td>
+<td>Python(pandas), 필터(이동평균, 칼만 필터)</td>
+</tr>
+<tr>
+<td>③ <strong>정합</strong></td>
+<td>공간, 시간, 대상을 맞춤</td>
+<td><strong>디지털트윈 특유의 핵심 단계.</strong> 아래 2-1 참고</td>
+<td>pyproj(좌표 변환), UE Georeferencing, Cesium, ID 매핑 테이블</td>
+</tr>
+<tr>
+<td>④ 적재</td>
+<td>용도별로 저장</td>
+<td>실시간(최신값), 이력(시계열), 원본 보관을 나눈다</td>
+<td>최신값 캐시(Redis 등), 시계열 DB(InfluxDB, TimescaleDB 등), 원본 파일(Parquet, 오브젝트 스토리지)</td>
+</tr>
+<tr>
+<td>⑤ 처리</td>
+<td>스트림 집계, 배치 집계, 이벤트 판정</td>
+<td>"1분 평균 진동이 기준치를 넘으면 알람"처럼 <strong>시간 창 단위로 계산해 이벤트를 만든다</strong></td>
+<td>스트림 처리(Kafka 계열), SQL 집계, 룰 엔진</td>
+</tr>
+<tr>
+<td>⑥ 분석·AI</td>
+<td>이상탐지, 고장·생산성 예측, 충돌 위험, 비전 인식</td>
+<td>결과를 다시 트윈에 표시(위험 장비를 빨갛게, 예측 경로를 선으로)</td>
+<td>scikit-learn, 시계열 예측 모델, YOLO류 비전</td>
+</tr>
+<tr>
+<td>⑦ 전달·시각화</td>
+<td>트윈이 받을 수 있는 형태로 보냄</td>
+<td>데이터 주기와 화면 주기가 다르다. 아래 2-2 참고</td>
+<td>UE MQTT 플러그인, WebSocket, REST, UMG 차트, 머티리얼 파라미터</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="2-1-정합-세-가지를-맞춘다">2-1. 정합: 세 가지를 맞춘다</h3>
+<ol>
+<li><strong>공간 정합 (좌표)</strong>
+   - 한국 공간 데이터는 좌표계가 섞여 있다. EPSG:4326(WGS84 경위도, GPS·AIS), EPSG:5186(국토지리정보원 표준 중부원점 TM), EPSG:5179(UTM-K) 등이다.
+   - 언리얼은 cm 단위 직교 좌표를 쓴다. 그래서 "원본 좌표계 → WGS84 → 언리얼 원점 기준 로컬 좌표"로 바꾼다. 삼우이머션도 지오레퍼런싱 플러그인으로 여러 좌표계를 WGS84로 통일했다.
+   - 넓은 지역은 3D Tiles로 바꿔 Cesium for Unreal로 스트리밍한다. 국내 도구 mago 3DTiler는 <code>-crs 5186</code>처럼 원본 좌표계를 지정해 3D Tiles로 변환한다.
+   - 원점에서 멀어지면 부동소수점 오차로 물체가 떨린다. 원점 재설정(Large World Coordinates)이 필요한 이유다.</li>
+<li><strong>시간 정합 (동기화)</strong>
+   - 센서마다 시계가 다르고 보내는 주기도 다르다(장비 1초 5회, 헬멧 1초 2회, AIS 수 초~수 분).
+   - 모든 데이터를 같은 기준 시간(UTC 등)으로 맞추고, 같은 시간 격자로 리샘플링해야 "그 순간의 현장"을 재현하고 되돌려 볼 수 있다(재생 기능).</li>
+<li><strong>대상 정합 (ID 매핑)</strong>
+   - "센서 TEMP-0231"이 3D 화면의 "3번 펌프"라는 사실을 매핑 테이블로 관리한다.
+   - 이 테이블이 없으면 데이터와 3D가 따로 논다. 실무에서 시간이 가장 많이 드는 부분이다.</li>
+</ol>
+<h3 id="2-2-트윈으로-보내기-전에-줄이기">2-2. 트윈으로 보내기 전에 줄이기</h3>
+<ul>
+<li><strong>보간</strong>: 데이터는 1초 5회 오는데 화면은 1초 60프레임이다. 그 사이를 보간해서 부드럽게 움직인다. AIS처럼 드문 데이터는 속도·침로로 위치를 추정한다(추측 항법).</li>
+<li><strong>변경분만 전송</strong>: 값이 바뀐 것만 보낸다.</li>
+<li><strong>데이터 LOD</strong>: 멀리서는 구역별 평균·히트맵, 가까이 가면 개별 센서 원값을 보여 준다.</li>
+<li><strong>이벤트 우선</strong>: 원본 영상 대신 "트럭 대기열 12대" 같은 이벤트만 보낸다.</li>
+</ul>
+<hr />
+<h2 id="3-사례로-처음부터-끝까지-부산항-터미널">3. 사례로 처음부터 끝까지: 부산항 터미널</h2>
+<p>인터뷰에서 1분 안에 말할 수 있게 연습할 예시다.</p>
+<ol>
+<li><strong>수집</strong>: 항만 장비 GPS가 1초에 5번 위치를 MQTT로 보낸다. 작업자 스마트 헬멧은 1초에 2번 위치와 생체신호를 보낸다. CCTV는 컨테이너 번호와 트럭 대기열을 인식한다.</li>
+<li><strong>규모</strong>: 장비 1대가 하루에 432,000건(5 × 86,400초)을 만든다. 장비 100대라면 하루 4,320만 건이다. 여기에 헬멧과 CCTV 이벤트가 더해진다. 이것이 디지털트윈 빅데이터의 규모 감각이다.</li>
+<li><strong>정제</strong>: ±10cm 오차를 넘어 튀는 점을 걸러내고, 끊긴 구간을 표시한다.</li>
+<li><strong>정합</strong>: WGS84 좌표를 언리얼 좌표로 바꾸고, 장비 ID를 3D 크레인·차량 액터에 연결하고, 모든 시각을 하나의 기준 시간으로 맞춘다.</li>
+<li><strong>적재</strong>: 최신 위치는 캐시, 이동 이력은 시계열 DB, 원본은 파일로 보관한다.</li>
+<li><strong>처리</strong>: 작업자와 장비 거리가 기준보다 가까우면 위험 알람을 낸다. 시간대별 크레인 작업량을 집계한다.</li>
+<li><strong>분석</strong>: 작업량 이력으로 생산성을 예측한다. 이상 진동으로 고장을 미리 진단한다.</li>
+<li><strong>시각화</strong>: 언리얼에서 장비가 보간되어 움직이고, 위험 구역은 빨갛게, 대기열은 숫자로 보인다. 지난 시간을 되돌려 보며 동선을 검증한다.</li>
+</ol>
+<p>해양 쪽은 AIS로 같은 흐름을 만들 수 있다. AIS·레이더 위치 → 좌표 정합 → 충돌 위험 계산 → CCTV 영상 위 AR 표시(해상공사 안전 모니터링).</p>
+<hr />
+<h2 id="4-과정에-녹이는-방법">4. 과정에 녹이는 방법</h2>
+<h3 id="4-1-6월-설계안-stage에-데이터-가공을-짝짓기">4-1. 6월 설계안 Stage에 데이터 가공을 짝짓기</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>데이터 규모</th>
+<th>배우는 가공 단계</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 집·스마트홈</td>
+<td>센서 몇 개, 소량 시계열</td>
+<td>① 수집(MQTT) ② 정제 기초 ⑦ 실시간 바인딩. 룰 기반 알람</td>
+</tr>
+<tr>
+<td>2 도시</td>
+<td>대규모 공간 + 스트림</td>
+<td>③ <strong>공간 정합</strong>(좌표계, 3D Tiles, Cesium) ④ 시계열 DB 적재 ⑥ 간단한 예측</td>
+</tr>
+<tr>
+<td>3·4 산업 도메인</td>
+<td>고빈도·다변량</td>
+<td>③ 대상 정합(ID 매핑) ⑤ 스트림 처리·이벤트 ⑥ 이상탐지·예측</td>
+</tr>
+<tr>
+<td>5 캡스톤</td>
+<td>기업 실데이터</td>
+<td>①~⑦ 전체를 하나로 통합</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="4-2-실습-데이터를-어디서-구하나">4-2. 실습 데이터를 어디서 구하나</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>출처</th>
+<th>내용</th>
+<th>확인된 조건</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>공공데이터포털 "해양수산부_선박 AIS 동적정보"</td>
+<td>지정 해역의 선박 경로·위치</td>
+<td>2018-09 ~ 2023-03, 선박 식별번호(MMSI)는 가려서 제공, 이용 제한 없음</td>
+</tr>
+<tr>
+<td>브이월드(국토교통부)</td>
+<td>3D 지도와 공간정보 오픈 API</td>
+<td>회원가입과 인증키 필요. 3D 형식은 glb, gltf, 3D Tiles 등. 3D 건물 API는 2019-07 보안 정책으로 중단된 이력이 있어 현재 제공 범위는 확인 필요</td>
+</tr>
+<tr>
+<td>참여기업 실데이터</td>
+<td>삼우이머션 현장 데이터</td>
+<td>비식별·보안 처리 범위를 기업과 협의해야 함</td>
+</tr>
+<tr>
+<td>직접 생성</td>
+<td>교육용 센서 키트, 시뮬레이터, ROS2 로봇</td>
+<td>데이터 생성부터 가공까지 전 과정을 통제할 수 있음</td>
+</tr>
+<tr>
+<td>트윈이 만든 합성 데이터</td>
+<td>언리얼 렌더링 + 자동 라벨</td>
+<td>비전 AI 학습용</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="4-3-ncs-빅데이터플랫폼구축-능력단위와의-대응">4-3. NCS "빅데이터플랫폼구축" 능력단위와의 대응</h3>
+<p>KDT 빅데이터 분야로 심사받는다면 이 표가 근거가 된다. 능력단위 이름은 채용 직무설명서·직업정보 사이트 같은 2차 자료 기준이고, ncs.go.kr 공식 확인은 아직 하지 않았다.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>능력단위</th>
+<th>우리 과정에서</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>빅데이터 플랫폼 요구사항 분석</td>
+<td>캡스톤 기획서(참여기업 요구 분석)</td>
+</tr>
+<tr>
+<td>빅데이터 플랫폼 아키텍처 설계</td>
+<td>센서 → 플랫폼 → 트윈 구성도</td>
+</tr>
+<tr>
+<td>빅데이터 수집시스템 개발 (2001020903_19v2)</td>
+<td>MQTT·API 수집기, 엣지 수집</td>
+</tr>
+<tr>
+<td>빅데이터 저장시스템 개발 (2001020904_19v2)</td>
+<td>시계열 DB, 원본 보관</td>
+</tr>
+<tr>
+<td>빅데이터 처리시스템 개발 (2001020905_19v2)</td>
+<td>실시간·이벤트 처리(알람), 정합</td>
+</tr>
+<tr>
+<td>빅데이터 분석시스템 개발</td>
+<td>이상탐지·예측 모델</td>
+</tr>
+<tr>
+<td>빅데이터 품질관리시스템 개발</td>
+<td>정제, 누락·지연 감시</td>
+</tr>
+<tr>
+<td>빅데이터 플랫폼 테스트</td>
+<td>부하 테스트(장비 수를 늘려 시험), 트윈 동기화 검증</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="5-빅데이터-관점-예상-질문">5. 빅데이터 관점 예상 질문</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>질문</th>
+<th>답변 포인트</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>디지털트윈 과정이 왜 빅데이터 과정인가?</td>
+<td>트윈은 데이터 파이프라인의 끝에 붙은 화면이다. 7단계 중 앞의 6단계가 수집·정제·정합·적재·처리·분석이다. NCS 빅데이터플랫폼구축 능력단위와 대응된다</td>
+</tr>
+<tr>
+<td>실제로 "빅" 데이터를 다루나?</td>
+<td>장비 100대가 1초 5회면 하루 4,320만 건이다. 공공 AIS는 수년치 선박 궤적이다. 규모를 키운 부하 테스트를 실습에 넣는다</td>
+</tr>
+<tr>
+<td>데이터는 어디서 구하나?</td>
+<td>공공데이터(AIS, 브이월드), 참여기업 비식별 데이터, 직접 만든 센서·로봇 데이터, 트윈이 만든 합성 데이터</td>
+</tr>
+<tr>
+<td>Hadoop·Spark 같은 분산처리는?</td>
+<td>실시간 트윈의 중심은 스트림 처리와 시계열 DB다. 대량 이력 분석은 배치 처리로 다루되, 범위는 최종 커리큘럼에 맞춰 답한다</td>
+</tr>
+<tr>
+<td>일반 빅데이터 과정과 무엇이 다른가?</td>
+<td>공간·시간·대상 <strong>정합</strong>을 다룬다. 결과물이 보고서가 아니라 실시간으로 움직이는 현장이라, 데이터 품질 문제가 화면에 바로 드러난다</td>
+</tr>
+<tr>
+<td>데이터 보안은?</td>
+<td>AIS 식별번호 비식별화, 항만·국가시설 공간정보 보안(3D 건물 API 중단 사례), 기업 데이터 반출 범위 협의</td>
+</tr>
+<tr>
+<td>AI는 어디에 쓰나?</td>
+<td>두 방향이다. 트윈 <strong>안에서</strong> 이상탐지·예측·비전, 트윈<strong>으로</strong> 합성 학습 데이터 생성. 여기에 AI 보조 코딩으로 개발 속도를 높인다</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6-오늘-공부-순서-23시간">6. 오늘 공부 순서 (2~3시간)</h2>
+<ol>
+<li>0장의 한 문장과 2장의 7단계 표를 보지 않고 말해 본다.</li>
+<li>2-1의 정합 세 가지(공간, 시간, 대상)를 예시와 함께 설명해 본다.</li>
+<li>3장 부산항 사례를 1분 안에 처음부터 끝까지 말해 본다. 432,000건 계산을 외운다.</li>
+<li>용어를 확인한다: MQTT(브로커, 토픽, 발행/구독, QoS), 시계열 DB, EPSG:4326·5186, 3D Tiles, 보간과 추측 항법.</li>
+<li>5장 질문 7개를 소리 내어 답해 본다.</li>
+</ol>
+<hr />
+<h2 id="출처">출처</h2>
+<ul>
+<li>해양수산부 선박 AIS 동적정보(공공데이터포털): <a href="https://www.data.go.kr/data/15130156/fileData.do">https://www.data.go.kr/data/15130156/fileData.do</a></li>
+<li>해양교통 빅데이터 플랫폼 관련 논문: <a href="https://koreascience.kr/article/JAKO202407845745505.pdf">https://koreascience.kr/article/JAKO202407845745505.pdf</a></li>
+<li>브이월드 2단계 고도화(스마트시티 코리아): <a href="https://smartcity.go.kr/2024/07/01/7월-1일부터-브이월드-2단계-고도화-서비스/">https://smartcity.go.kr/2024/07/01/7월-1일부터-브이월드-2단계-고도화-서비스/</a></li>
+<li>브이월드 3단계 서비스: <a href="https://smartcity.go.kr/2025/01/15/16일부터-브이월드v-world-3단계-서비스-시작/">https://smartcity.go.kr/2025/01/15/16일부터-브이월드v-world-3단계-서비스-시작/</a></li>
+<li>3D 건물 API 중단 이력 논문: <a href="https://koreascience.kr/article/JAKO202404861569434.pdf">https://koreascience.kr/article/JAKO202404861569434.pdf</a></li>
+<li>mago 3DTiler(좌표계 지정 3D Tiles 변환): <a href="https://github.com/Gaia3D/mago-3d-tiler">https://github.com/Gaia3D/mago-3d-tiler</a></li>
+<li>Cesium 커뮤니티(EPSG:5186 CityGML 처리): <a href="https://community.cesium.com/t/cesium-on-premise-from-the-start/16601">https://community.cesium.com/t/cesium-on-premise-from-the-start/16601</a></li>
+<li>UE MQTT 플러그인 API 색인: <a href="https://dev.epicgames.com/documentation/unreal-engine/API/PluginIndex/MQTT">https://dev.epicgames.com/documentation/unreal-engine/API/PluginIndex/MQTT</a></li>
+<li>UE 5.2 내장 MQTT 플러그인 포럼: <a href="https://forums.unrealengine.com/t/ue5-2-official-mqtt-plugin/1276381/2">https://forums.unrealengine.com/t/ue5-2-official-mqtt-plugin/1276381/2</a></li>
+<li>언리얼 디지털트윈 데이터 시각화 웨비나: <a href="https://www.unrealengine.com/blog/webinar-visualizing-data-in-digital-twins-with-unreal-engine?lang=ko">https://www.unrealengine.com/blog/webinar-visualizing-data-in-digital-twins-with-unreal-engine?lang=ko</a></li>
+<li>언리얼과 SAS 디지털트윈·합성 데이터(바이라인네트워크): <a href="https://byline.network/2025/05/8-342">https://byline.network/2025/05/8-342</a></li>
+<li>디지털트윈 기반 AI 학습 환경(알체라): <a href="https://www.alchera.ai/resource/blog/data-digital-twin-based-ai-learning-environment-creation">https://www.alchera.ai/resource/blog/data-digital-twin-based-ai-learning-environment-creation</a></li>
+<li>NCS 빅데이터플랫폼구축(직업백과): <a href="https://job.asamaru.net/%EC%A7%81%EB%AC%B4/%EB%B9%85%EB%8D%B0%EC%9D%B4%ED%84%B0%ED%94%8C%EB%9E%AB%ED%8F%BC%EA%B5%AC%EC%B6%95/">https://job.asamaru.net/%EC%A7%81%EB%AC%B4/%EB%B9%85%EB%8D%B0%EC%9D%B4%ED%84%B0%ED%94%8C%EB%9E%AB%ED%8F%BC%EA%B5%AC%EC%B6%95/</a></li>
+<li>NCS 개발보고서(PDMS): <a href="https://pdms.ncs.go.kr/cdv/sch/pub/retrieveTracseDevRptSchDtl.do?schTracseReqstSeq=65375&amp;schTracseSeq=56318&amp;schRptTy=NPDMS">https://pdms.ncs.go.kr/cdv/sch/pub/retrieveTracseDevRptSchDtl.do?schTracseReqstSeq=65375&amp;schTracseSeq=56318&amp;schRptTy=NPDMS</a></li>
+<li>삼우이머션 사례 출처는 01 문서 참고</li>
+</ul><nav class="pager"><a href="01.html"><small>← 이전</small>01 삼우이머션 파악</a><a class="n" href="03.html"><small>다음 →</small>03 전체 흐름 쉽게</a></nav><p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준이라 홍보 성격이 있습니다.</p>
+</main>
+</body>
+</html>

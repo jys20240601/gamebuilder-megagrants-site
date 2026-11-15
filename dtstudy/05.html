@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>IoT(사물인터넷)의 정확한 개념</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><a class="side" href="./">목차</a></div></header>
+<main>
+<h1 id="iot사물인터넷의-정확한-개념">IoT(사물인터넷)의 정확한 개념</h1>
+<p>MQTT는 <a href="04.html">04 MQTT</a>, 전체 흐름은 <a href="03.html">03 전체흐름 쉽게</a> 참고.</p>
+<h2 id="정의">정의</h2>
+<blockquote>
+<p><strong>IoT(Internet of Things, 사물인터넷)는 사물에 센서와 통신 기능을 넣어 네트워크로 연결하고, 사람이 일일이 개입하지 않아도 사물이 스스로 상태를 감지하고, 데이터를 주고받고, 필요하면 동작하게 하는 기술과 환경이다.</strong></p>
+</blockquote>
+<ul>
+<li>"사물"은 센서, 장비, 차량, 설비, 건물, 사람이 착용한 기기까지 포함한다.</li>
+<li>용어는 1999년 케빈 애슈턴이 RFID로 공급망을 추적하자는 발표에서 처음 썼다.</li>
+<li>국제전기통신연합(ITU-T Y.2060, 2012)은 "기존·차세대 정보통신 기술로 물리적·가상의 사물을 서로 연결해 고도화된 서비스를 가능하게 하는 정보사회의 전 지구적 기반"으로 정의한다.</li>
+</ul>
+<h2 id="핵심은-네-동작">핵심은 네 동작</h2>
+<pre><code> 감지(Sense)  →  연결(Connect)  →  판단(Analyze)  →  동작(Act)
+ 센서가 측정      네트워크로 전송     플랫폼·AI가 분석     장비를 제어
+ 온도 42.5℃      MQTT로 브로커에    40℃ 넘음 → 위험     냉각 팬 켜기
+</code></pre>
+<p>데이터를 모으기만 하면 원격 모니터링이고, 판단해서 다시 사물을 움직이면 완전한 IoT다.</p>
+<h2 id="구성-4계층">구성 4계층</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>계층</th>
+<th>하는 일</th>
+<th>예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 디바이스</td>
+<td>감지(센서)와 구동(액추에이터)</td>
+<td>온도·진동·GPS 센서, 스마트 헬멧, 모터, 밸브, 팬</td>
+</tr>
+<tr>
+<td>② 네트워크</td>
+<td>데이터를 실어 나름</td>
+<td>Wi-Fi, 5G·LTE, 저전력 광역망(LoRa, NB-IoT), 블루투스, 유선(이더넷, RS-485)</td>
+</tr>
+<tr>
+<td>③ 플랫폼</td>
+<td>수집, 기기 관리, 저장, 규칙 처리</td>
+<td>MQTT 브로커, oneM2M 플랫폼, 클라우드 IoT 서비스, DB</td>
+</tr>
+<tr>
+<td>④ 서비스</td>
+<td>사람이 쓰는 기능</td>
+<td>관제 화면, 알람 앱, 분석, <strong>디지털트윈</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>통신 규칙(프로토콜)은 ②와 ③ 사이에 걸친다. 대표적으로 MQTT, CoAP, HTTP가 있고, 공장 설비에는 Modbus, OPC UA가 쓰인다.</p>
+<h2 id="iot에-필요한-것-전체-mqtt는-그중-하나">IoT에 필요한 것 전체 (MQTT는 그중 하나)</h2>
+<p>MQTT는 ②와 ③ 사이에서 "어떻게 말할지"를 정한 통신 규칙 하나다. IoT를 실제로 만들려면 계층마다 필요한 것이 있고, 모든 계층에 걸치는 보안과 운영이 따로 있다.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>구분</th>
+<th>필요한 것</th>
+<th>예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 디바이스</td>
+<td>센서, 액추에이터</td>
+<td>온도·진동·가스·GPS 센서, 카메라 / 모터, 밸브, 릴레이, 팬</td>
+</tr>
+<tr>
+<td></td>
+<td>두뇌 보드</td>
+<td>아두이노, ESP32(와이파이 내장 소형 보드), 라즈베리파이, 산업용 PLC</td>
+</tr>
+<tr>
+<td></td>
+<td>전원</td>
+<td>배터리, 상시 전원, PoE(랜선으로 전원 공급)</td>
+</tr>
+<tr>
+<td>② 네트워크</td>
+<td>근거리 무선</td>
+<td>Wi-Fi, 블루투스(BLE), Zigbee(스마트홈 센서)</td>
+</tr>
+<tr>
+<td></td>
+<td>원거리 무선</td>
+<td>LTE·5G, 저전력 광역망 LoRa·NB-IoT(배터리로 수년, 수 km)</td>
+</tr>
+<tr>
+<td></td>
+<td>유선</td>
+<td>이더넷, RS-485(공장 설비 배선)</td>
+</tr>
+<tr>
+<td>통신 규칙</td>
+<td>기기 → 플랫폼</td>
+<td><strong>MQTT</strong>(실시간 스트림), HTTP·REST(가끔 보내기, 조회), CoAP(초저전력 기기용 가벼운 HTTP), WebSocket(브라우저 실시간)</td>
+</tr>
+<tr>
+<td></td>
+<td>산업·분야별</td>
+<td>Modbus(옛 공장 설비), OPC UA(최신 공장 설비 표준), AIS·NMEA(선박 위치, GPS 문장 형식)</td>
+</tr>
+<tr>
+<td></td>
+<td>서버끼리 대용량</td>
+<td>Kafka, AMQP(서버 사이 메시지 대량 전달)</td>
+</tr>
+<tr>
+<td>게이트웨이·엣지</td>
+<td>통신 방식 변환, 현장 1차 처리</td>
+<td>Modbus를 읽어 MQTT로 발행하는 장치, 자갈치 엣지 서버</td>
+</tr>
+<tr>
+<td>③ 플랫폼</td>
+<td>메시지 중계</td>
+<td>MQTT 브로커(Mosquitto, EMQX)</td>
+</tr>
+<tr>
+<td></td>
+<td>기기 관리</td>
+<td>기기 등록, 인증서 발급, 상태 감시, 원격 펌웨어 업데이트(OTA), 관리 표준 LwM2M</td>
+</tr>
+<tr>
+<td></td>
+<td>공통 플랫폼 표준</td>
+<td>oneM2M(국내 공공 IoT, 자갈치 사례)</td>
+</tr>
+<tr>
+<td></td>
+<td>저장·처리</td>
+<td>시계열 DB(InfluxDB 등), 규칙 엔진(기준 넘으면 알람), 분석·AI</td>
+</tr>
+<tr>
+<td>④ 서비스</td>
+<td>사람이 쓰는 화면</td>
+<td>대시보드(Grafana 등), 알람 앱, <strong>언리얼 디지털트윈</strong></td>
+</tr>
+<tr>
+<td>보안 (전 계층)</td>
+<td>기기·통신·접근 보호</td>
+<td>기기 인증(계정, 인증서), TLS 암호화, 토픽·데이터 접근 권한, 펌웨어 보안 업데이트, 망 분리</td>
+</tr>
+<tr>
+<td>운영 (전 계층)</td>
+<td>오래 안정적으로 돌리기</td>
+<td>시간 동기화(NTP, 시간 정합의 전제), 끊긴 기기 감시(Last Will), 배터리·통신 상태 점검, 장애 알림</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="과정-실습-키트로-줄이면">과정 실습 키트로 줄이면</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>계층</th>
+<th>실습 구성</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>디바이스</td>
+<td>라즈베리파이 또는 ESP32 + 온도 센서 + 팬(릴레이). 6월 설계안의 ROS2 로봇도 디바이스 계층</td>
+</tr>
+<tr>
+<td>네트워크·통신</td>
+<td>교실 Wi-Fi + MQTT, 비교용 HTTP</td>
+</tr>
+<tr>
+<td>플랫폼</td>
+<td>Mosquitto + Python 저장기 + 시계열 DB</td>
+</tr>
+<tr>
+<td>서비스</td>
+<td>언리얼 디지털트윈 관제 화면</td>
+</tr>
+<tr>
+<td>보안·운영</td>
+<td>계정·TLS 설정, Last Will로 끊김 감지, NTP 시간 맞추기</td>
+</tr>
+</tbody>
+</table></div>
+<p>인터뷰용: "IoT는 센서, 통신, 플랫폼, 서비스에 보안과 운영까지 갖춰야 돌아가고, MQTT는 그중 통신 규칙 하나입니다. 과정은 센서 보드부터 언리얼 관제 화면까지 한 줄로 이어지는 키트로 전체를 직접 만들어 봅니다."</p>
+<h2 id="같이-알아야-할-용어">같이 알아야 할 용어</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>용어</th>
+<th>뜻</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M2M</td>
+<td>기계끼리 1:1로 직접 통신하는 것. IoT는 이것을 인터넷 규모, 다대다, 플랫폼과 데이터 중심으로 넓힌 개념이다</td>
+</tr>
+<tr>
+<td>IIoT(산업용 IoT)</td>
+<td>공장, 항만, 플랜트의 IoT. 신뢰성, 옛 설비 프로토콜(Modbus, OPC UA), 보안이 더 중요하다</td>
+</tr>
+<tr>
+<td>엣지 컴퓨팅</td>
+<td>데이터를 클라우드로 다 보내기 전에 현장 가까이에서 먼저 모으고 처리하는 것. 자갈치시장의 멀티 프로토콜 엣지 서버가 예</td>
+</tr>
+<tr>
+<td>oneM2M</td>
+<td>한국 TTA를 포함한 여러 나라 표준화 기구가 만든 IoT 공통 플랫폼 표준. 국내 공공 IoT에서 많이 쓴다(오픈소스 구현 예: KETI의 Mobius). 자갈치시장 사례가 이 표준을 따랐다</td>
+</tr>
+<tr>
+<td>게이트웨이</td>
+<td>서로 다른 통신 방식을 바꿔 주는 중계 장치. 예: Modbus 설비 값을 읽어 MQTT로 발행</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="흔한-오해">흔한 오해</h2>
+<ul>
+<li><strong>"인터넷"이라고 꼭 공용 인터넷에 붙는 것은 아니다.</strong> 공장 내부망, 항만 전용망 안에서만 돌아도 IoT다.</li>
+<li><strong>IoT는 스마트홈 가전만 뜻하지 않는다.</strong> 산업 현장이 더 큰 시장이다.</li>
+<li><strong>IoT는 기기 하나가 아니라 체계다.</strong> 센서만 달아 놓고 데이터를 모으고 쓰는 구조가 없으면 IoT라고 하기 어렵다.</li>
+</ul>
+<h2 id="예시">예시</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>분야</th>
+<th>예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>일상</td>
+<td>앱으로 켜는 에어컨, 스마트워치 심박 측정, 공유 킥보드 GPS</td>
+</tr>
+<tr>
+<td>농업</td>
+<td>스마트팜 온습도 센서와 자동 환기</td>
+</tr>
+<tr>
+<td>삼우이머션 사례</td>
+<td>부산항 터미널: 장비 GPS(1초 5회), 스마트 헬멧·워치(위치, 생체신호), 지능형 CCTV / 자갈치시장: 수질·침수·유해가스·화재 센서를 5G로 oneM2M 서버에 연결</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="iot-빅데이터-디지털트윈의-관계">IoT, 빅데이터, 디지털트윈의 관계</h2>
+<pre><code> IoT              →   빅데이터            →   디지털트윈
+ 현장의 감각과 손발      쏟아지는 데이터 가공       3D로 재현·분석·시뮬레이션
+ (센서, 통신, 제어)     (정제, 정합, 저장, 분석)    (관제, 예측, 원격 제어)
+</code></pre>
+<ul>
+<li>IoT가 없으면 디지털트윈은 움직이지 않는 3D 모델일 뿐이다.</li>
+<li>디지털트윈이 없으면 IoT 데이터는 숫자 표로만 남는다.</li>
+<li>그 사이에서 데이터를 쓸 수 있게 만드는 일이 빅데이터 가공이다.</li>
+</ul>
+<h2 id="인터뷰용-한-문단">인터뷰용 한 문단</h2>
+<p>"IoT는 사물에 센서와 통신을 넣어 사람 개입 없이 감지, 연결, 판단, 동작하게 하는 체계입니다. 디바이스, 네트워크, 플랫폼, 서비스 네 계층으로 이루어지고, 디지털트윈은 그중 서비스 계층에서 IoT 데이터를 3D로 재현하고 분석하는 역할입니다. 우리 과정은 IoT로 현장 데이터를 모으고, 빅데이터로 가공하고, 언리얼 디지털트윈으로 보여 주고 제어하는 흐름 전체를 다룹니다."</p><nav class="pager"><a href="04.html"><small>← 이전</small>04 MQTT</a><a class="n" href="06.html"><small>다음 →</small>06 정제 · 정합 · DB</a></nav><p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준이라 홍보 성격이 있습니다.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root{--background:#fff;--foreground:#171717;--card:#fff;--card-foreground:#171717;--muted:#f4f4f5;--muted-foreground:#737373;--border:#e5e5e5;--input:#e5e5e5;--ring:#a3a3a3;--primary:#171717;--primary-foreground:#fafafa;--secondary:#f4f4f5;--secondary-foreground:#171717;--accent:#f4f4f5;--accent-foreground:#171717;--destructive:#dc2626}
+@media (prefers-color-scheme:dark){:root{--background:#0f1115;--foreground:#e8eaf0;--card:#171b22;--card-foreground:#e8eaf0;--muted:#222833;--muted-foreground:#9aa3b2;--border:#2a3140;--input:#2a3140;--ring:#6b7280;--primary:#e8eaf0;--primary-foreground:#111318;--secondary:#222833;--secondary-foreground:#e8eaf0;--accent:#2a3140;--accent-foreground:#fff;--destructive:#f87171}}
+.dt-back{display:block;font:600 14px/1.4 system-ui,-apple-system,"Malgun Gothic",sans-serif;padding:0 0 12px;color:var(--foreground);text-decoration:none}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MQTT와 JSON 예시</title>
+<style>
+  body{margin:0;padding:16px;background:var(--background,#fff);color:var(--foreground,#171717);
+    font-family:var(--font-sans,system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif);font-size:14px;line-height:1.55}
+  h2{font-size:17px;margin:4px 0 6px}
+  h3{font-size:14px;margin:0 0 6px}
+  p{margin:0 0 10px}
+  code,.mono,pre{font-family:var(--font-mono,ui-monospace,Consolas,monospace)}
+  .muted{color:var(--muted-foreground,#737373)}
+  .card{background:var(--card,#fff);color:var(--card-foreground,#171717);border:1px solid var(--border,#e5e5e5);
+    border-radius:var(--radius,10px);padding:12px 14px;transition:box-shadow .2s,background .2s}
+  .section{margin-bottom:22px}
+  button{font:inherit;font-size:13px;cursor:pointer;border-radius:calc(var(--radius,10px) - 2px);padding:6px 11px;
+    border:1px solid var(--border,#e5e5e5);background:var(--secondary,#f4f4f5);color:var(--secondary-foreground,#171717)}
+  button:hover{background:var(--accent,#f4f4f5);color:var(--accent-foreground,#171717)}
+  button.primary{background:var(--primary,#171717);color:var(--primary-foreground,#fafafa);border-color:transparent}
+  button[aria-pressed="true"]{background:var(--primary,#171717);color:var(--primary-foreground,#fafafa);border-color:transparent}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--ring,#a3a3a3);outline-offset:2px}
+
+  /* 봉투 */
+  .env{border:2px dashed var(--border,#d4d4d4);border-radius:var(--radius,10px);padding:12px}
+  .env-title{font-size:12px;font-weight:600;color:var(--muted-foreground,#737373);margin-bottom:8px}
+  .env-head{display:flex;flex-wrap:wrap;gap:8px 18px;margin-bottom:10px}
+  .lbl{display:block;font-size:11px;color:var(--muted-foreground,#737373)}
+  .env-head code{font-size:13px;font-weight:600}
+  .letter{background:var(--muted,#f4f4f5);border-radius:calc(var(--radius,10px) - 2px);padding:10px 12px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}
+  .tabs button{padding:4px 10px;font-size:12px}
+  pre{margin:0;white-space:pre-wrap;word-break:break-all;font-size:13px}
+  .compare{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+  .compare th,.compare td{border-top:1px solid var(--border,#e5e5e5);padding:6px 8px;text-align:left;vertical-align:top}
+  .compare th{font-weight:600;white-space:nowrap}
+
+  /* 데모 */
+  .controls{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-bottom:12px}
+  .controls label{display:flex;align-items:center;gap:6px;font-size:13px}
+  .controls input[type=range]{width:130px;accent-color:var(--primary,#171717)}
+  .flow{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+  .arrow{display:flex;align-items:center;justify-content:center;color:var(--muted-foreground,#737373);font-size:20px}
+  .pub{margin-bottom:8px}
+  .pub:last-child{margin-bottom:0}
+  .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--sc-ok);flex:none}
+  .dot.off{background:var(--sc-off)}
+  .small{font-size:12px}
+  .topic{font-family:var(--font-mono,ui-monospace,Consolas,monospace);font-size:12px;word-break:break-all}
+  .chip{display:inline-block;font-family:var(--font-mono,ui-monospace,Consolas,monospace);font-size:11.5px;padding:1px 7px;border-radius:999px;
+    background:var(--muted,#f4f4f5);color:var(--foreground,#171717);border:1px solid var(--border,#e5e5e5);margin:2px 4px 2px 0}
+  .route{font-size:12px;margin-top:6px}
+  .route span{display:inline-block;margin-right:8px}
+  .yes{font-weight:600}
+  .no{color:var(--muted-foreground,#737373)}
+  .down{text-align:center;color:var(--muted-foreground,#737373);font-size:12px;margin:8px 0}
+  .subs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #sub-unreal{grid-column:1 / -1;min-height:0}
+  #twin{max-width:520px;margin-left:auto;margin-right:auto}
+  .sub{min-height:210px}
+  .hit{box-shadow:0 0 0 2px var(--ring,#a3a3a3);background:var(--accent,#f4f4f5)}
+  .parse{font-size:11.5px;margin-top:6px;min-height:34px}
+  table.db{width:100%;border-collapse:collapse;font-size:12px}
+  table.db th,table.db td{padding:3px 4px;border-top:1px solid var(--border,#e5e5e5);text-align:left}
+  table.db td.num{font-variant-numeric:tabular-nums}
+  ul.alarms{list-style:none;margin:0;padding:0;font-size:12.5px}
+  ul.alarms li{padding:4px 0;border-top:1px solid var(--border,#e5e5e5)}
+  .log{font-size:12px}
+  .log .item{border-top:1px solid var(--border,#e5e5e5);padding:6px 0}
+  .log .item:first-child{border-top:0}
+  .badge{display:inline-block;font-size:11px;padding:0 6px;border-radius:999px;border:1px solid var(--border,#e5e5e5);color:var(--muted-foreground,#737373)}
+  .payload{font-family:var(--font-mono,ui-monospace,Consolas,monospace);font-size:11.5px;word-break:break-all;color:var(--muted-foreground,#737373)}
+  /* 상태 색: 이 데모 안에서만 쓰는 고정 팔레트 */
+  .demo{--sc-ok:#16a34a;--sc-warn:#d97706;--sc-bad:#dc2626;--sc-off:#9ca3af}
+  .lvl-bad{color:var(--sc-bad);font-weight:600}
+  .lvl-ok{color:var(--sc-ok);font-weight:600}
+  .lvl-off{color:var(--sc-off);font-weight:600}
+  @media (max-width:720px){
+    .flow{grid-template-columns:1fr}
+    .arrow{transform:rotate(90deg);height:20px}
+    .subs{grid-template-columns:1fr}
+    .sub{min-height:0}
+  }
+  @keyframes pulse{0%{opacity:.9}50%{opacity:.25}100%{opacity:.9}}
+  .pulse{animation:pulse 1s infinite}
+</style>
+</head>
+<body>
+<a class="dt-back" href="./">← 디지털트윈 인터뷰 노트</a>
+
+<div class="section">
+  <h2>MQTT는 '배달 방법', JSON은 '편지 쓰는 형식'</h2>
+  <p class="muted">MQTT 메시지 하나는 <b>봉투</b>(받는 주소인 토픽, 배달 옵션)와 <b>내용물</b>(payload)로 되어 있습니다. 내용물을 JSON으로 쓰는 경우가 가장 많지만, MQTT는 내용물 형식을 따지지 않습니다.</p>
+
+  <div class="env">
+    <div class="env-title">✉ MQTT 메시지 = 봉투</div>
+    <div class="env-head">
+      <div><span class="lbl">토픽 (받는 주소)</span><code>busan/terminal/pump03/temp</code></div>
+      <div><span class="lbl">QoS (배달 보장)</span><code>1</code></div>
+      <div><span class="lbl">Retained (마지막 값 보관)</span><code>true</code></div>
+    </div>
+    <div class="letter">
+      <div class="env-title" style="margin-bottom:2px">📄 내용물 (payload): 어떤 형식으로 쓸까?</div>
+      <div class="tabs" role="group" aria-label="내용물 형식">
+        <button data-fmt="json" aria-pressed="true">JSON</button>
+        <button data-fmt="plain" aria-pressed="false">숫자만</button>
+        <button data-fmt="csv" aria-pressed="false">CSV</button>
+      </div>
+      <pre id="payloadView"></pre>
+      <p id="fmtNote" class="muted small" style="margin:8px 0 0"></p>
+    </div>
+  </div>
+
+  <table class="compare">
+    <tr><th></th><th>MQTT</th><th>JSON</th></tr>
+    <tr><th>무엇</th><td>데이터를 <b>어떻게 보내나</b> (통신 규칙)</td><td>데이터를 <b>어떻게 적나</b> (표기 형식)</td></tr>
+    <tr><th>비유</th><td>우체국, 배달</td><td>편지 양식</td></tr>
+    <tr><th>같이 쓰는 것</th><td>JSON, 숫자, CSV, 바이너리 무엇이든 실어 나름</td><td>MQTT, 웹(HTTP), 파일 어디에나 쓰임</td></tr>
+  </table>
+</div>
+
+<div class="section demo">
+  <h2>직접 보내 보기: 가상 부산항 터미널</h2>
+  <p class="muted small">실제 통신이 아니라, MQTT가 메시지를 어떻게 배달하는지 흉내 낸 시뮬레이션입니다. 온도를 40℃ 넘게 올려 보고, 크레인 전원도 끊어 보세요.</p>
+
+  <div class="controls">
+    <button id="runBtn" class="primary">⏸ 일시정지</button>
+    <label>펌프 온도 <input id="tempSlider" type="range" min="20" max="60" step="0.5" value="32" aria-label="펌프 온도"> <b id="tempVal" class="mono">32.0℃</b></label>
+    <button id="cutBtn">크레인 전원 끊기</button>
+    <button id="restartBtn">언리얼 재시작</button>
+  </div>
+
+  <div class="flow">
+    <div>
+      <h3>발행자 (보내는 쪽)</h3>
+      <div class="card pub" id="pub-crane">
+        <div class="row"><span class="dot" id="craneDot"></span><b>크레인07 GPS</b></div>
+        <div class="topic muted">busan/terminal/crane07/position</div>
+        <div class="small muted">1초마다 · QoS 0 · Retained (실제 장비는 1초 5회)</div>
+      </div>
+      <div class="card pub" id="pub-pump">
+        <div class="row"><span class="dot"></span><b>펌프03 온도 센서</b></div>
+        <div class="topic muted">busan/terminal/pump03/temp</div>
+        <div class="small muted">2초마다 · QoS 1 · Retained</div>
+      </div>
+    </div>
+    <div class="arrow" aria-hidden="true">➜</div>
+    <div>
+      <h3>브로커 (우체국)</h3>
+      <div class="card" id="broker">
+        <div class="small muted">받은 메시지</div>
+        <div><b id="brokerCount" style="font-size:20px">0</b> 건</div>
+        <div class="small muted" style="margin-top:6px">방금 받은 토픽</div>
+        <div class="topic" id="brokerTopic">-</div>
+        <div class="route" id="brokerRoute"></div>
+        <div class="small muted" style="margin-top:6px">보관 중인 마지막 값 (Retained)</div>
+        <div id="retainedList" class="small"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="down">⬇ 브로커는 토픽 필터가 맞는 구독자에게만 전달합니다 ( <code>+</code> = 한 단계, <code>#</code> = 아래 전부 )</div>
+
+  <div class="subs">
+    <div class="card sub" id="sub-unreal">
+      <h3>언리얼 트윈</h3>
+      <div><span class="chip">busan/terminal/#</span></div>
+      <svg id="twin" viewBox="0 0 300 130" role="img" aria-label="부산항 터미널 미니 트윈" style="width:100%;height:auto;display:block;margin-top:6px">
+        <rect style="fill:var(--chart-2,#60a5fa)" x="0" y="92" width="300" height="38" opacity="0.28"/>
+        <rect style="fill:var(--muted,#e5e7eb);stroke:var(--border,#d4d4d4)" x="0" y="70" width="300" height="22"/>
+        <line style="stroke:var(--muted-foreground,#9ca3af)" x1="10" y1="74" x2="210" y2="74" stroke-dasharray="4 3"/>
+        <text style="fill:var(--muted-foreground,#737373)" x="8" y="124" font-size="9">바다</text>
+        <text style="fill:var(--muted-foreground,#737373)" x="8" y="86" font-size="9">안벽</text>
+        <g id="crane" transform="translate(30,0)">
+          <rect style="stroke:var(--sc-ok)" id="craneBody" x="-14" y="22" width="28" height="48" rx="2" fill="none" stroke-width="2.5"/>
+          <line style="stroke:var(--sc-ok)" id="craneBoom" x1="-14" y1="26" x2="34" y2="26" stroke-width="2.5"/>
+          <line style="stroke:var(--muted-foreground,#9ca3af)" x1="28" y1="26" x2="28" y2="96" stroke-width="1"/>
+          <text style="fill:var(--foreground,#171717)" id="craneLabel" x="0" y="16" font-size="9" text-anchor="middle">크레인07</text>
+        </g>
+        <g transform="translate(255,48)">
+          <circle style="stroke:var(--sc-bad)" id="pumpRing" r="21" fill="none" stroke-width="2" opacity="0"/>
+          <circle style="fill:var(--sc-off)" id="pump" r="15"/>
+          <text id="pumpTemp" y="4" font-size="9" text-anchor="middle" fill="#fff" font-weight="700">--</text>
+          <text style="fill:var(--foreground,#171717)" y="-26" font-size="9" text-anchor="middle">펌프03</text>
+        </g>
+        <text style="fill:var(--muted-foreground,#737373)" id="twinMsg" x="150" y="62" font-size="10" text-anchor="middle"></text>
+      </svg>
+      <div class="parse muted mono" id="unrealParse">대기 중…</div>
+    </div>
+
+    <div class="card sub" id="sub-store">
+      <h3>Python 저장기</h3>
+      <div><span class="chip">busan/terminal/+/temp</span></div>
+      <p class="small muted" style="margin:4px 0 6px">MQTT는 지난 값을 쌓지 않아서 저장기가 DB에 쌓습니다. 40℃를 넘으면 알람을 <b>다시 발행</b>합니다.</p>
+      <table class="db">
+        <thead><tr><th>시각</th><th>장비</th><th>값</th></tr></thead>
+        <tbody id="dbRows"></tbody>
+      </table>
+      <div class="small muted" style="margin-top:4px">저장된 행 <b id="dbCount">0</b>개</div>
+    </div>
+
+    <div class="card sub" id="sub-alarm">
+      <h3>알람 앱</h3>
+      <div><span class="chip">busan/terminal/+/alarm</span><span class="chip">busan/terminal/+/status</span></div>
+      <p class="small muted" style="margin:4px 0 6px">위치·온도 원값은 받지 않고, 알람과 연결 상태만 받습니다.</p>
+      <ul class="alarms" id="alarmList"><li class="muted">알람 없음</li></ul>
+    </div>
+  </div>
+
+  <div class="card log" style="margin-top:12px">
+    <h3>메시지 기록 (최근 5건)</h3>
+    <div id="log"><div class="muted">-</div></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- 1. 봉투 속 내용물 형식 ----------
+  const fmts = {
+    json: { text: '{\n  "device": "pump03",\n  "value": 42.5,\n  "unit": "C",\n  "time": "2026-11-15T10:00:00+09:00"\n}',
+            note: '가장 많이 쓰는 형식입니다. 값마다 이름표가 붙어 있어 사람이 읽기 쉽고, 언리얼과 Python이 바로 풀어 읽습니다.' },
+    plain:{ text: '42.5',
+            note: '가장 가볍습니다. 대신 단위와 시각은 토픽 이름이나 따로 정한 약속으로 알아야 합니다.' },
+    csv:  { text: 'pump03,42.5,C,2026-11-15T10:00:00+09:00',
+            note: '짧지만, 몇 번째 칸이 무엇인지 순서를 미리 약속해야 합니다.' }
+  };
+  const pv = document.getElementById('payloadView'), fn = document.getElementById('fmtNote');
+  function setFmt(k){
+    pv.textContent = fmts[k].text; fn.textContent = fmts[k].note;
+    document.querySelectorAll('[data-fmt]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.fmt === k)));
+  }
+  document.querySelectorAll('[data-fmt]').forEach(b => b.addEventListener('click', () => setFmt(b.dataset.fmt)));
+  setFmt('json');
+
+  // ---------- 2. 시뮬레이션 ----------
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2,'0');
+  const clock = () => { const d = new Date(); return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); };
+  const iso = () => { const d = new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+clock()+'+09:00'; };
+
+  function match(filter, topic){
+    const f = filter.split('/'), t = topic.split('/');
+    for (let i = 0; i < f.length; i++){
+      if (f[i] === '#') return true;
+      if (i >= t.length) return false;
+      if (f[i] !== '+' && f[i] !== t[i]) return false;
+    }
+    return f.length === t.length;
+  }
+
+  const broker = { count: 0, retained: new Map() };
+  const logItems = [];
+  const subs = [
+    { id:'unreal', name:'언리얼', filters:['busan/terminal/#'], on:onUnreal },
+    { id:'store',  name:'저장기', filters:['busan/terminal/+/temp'], on:onStore },
+    { id:'alarm',  name:'알람 앱', filters:['busan/terminal/+/alarm','busan/terminal/+/status'], on:onAlarm }
+  ];
+
+  function flash(el){ el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 450); }
+
+  function publish(from, topic, obj, opt){
+    opt = opt || {};
+    const msg = { from, topic, payload: JSON.stringify(obj), qos: opt.qos || 0, retain: !!opt.retain, note: opt.note || '' };
+    broker.count++;
+    if (msg.retain) broker.retained.set(topic, msg);
+    const route = subs.map(s => ({ s, ok: s.filters.some(f => match(f, topic)) }));
+    $('brokerCount').textContent = broker.count;
+    $('brokerTopic').textContent = topic;
+    $('brokerRoute').innerHTML = route.map(r => '<span class="'+(r.ok?'yes':'no')+'">'+(r.ok?'✓ ':'✗ ')+r.s.name+'</span>').join('');
+    flash($('broker'));
+    renderRetained();
+    route.filter(r => r.ok).forEach(r => setTimeout(() => { flash($('sub-'+r.s.id)); r.s.on(msg); }, 180));
+    addLog(msg, route.filter(r => r.ok).map(r => r.s.name));
+  }
+
+  function renderRetained(){
+    $('retainedList').innerHTML = broker.retained.size
+      ? [...broker.retained.keys()].map(t => '<div class="topic">'+t+'</div>').join('')
+      : '<span class="muted">없음</span>';
+  }
+
+  function esc(s){ return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  function addLog(msg, to){
+    logItems.unshift({ t: clock(), msg, to });
+    if (logItems.length > 5) logItems.pop();
+    $('log').innerHTML = logItems.map(it =>
+      '<div class="item"><div class="row"><span class="mono muted">'+it.t+'</span><span class="badge">'+esc(it.msg.from)+'</span>'+
+      '<span class="badge">QoS '+it.msg.qos+'</span>'+(it.msg.retain?'<span class="badge">Retained</span>':'')+
+      (it.msg.note?'<span class="badge">'+esc(it.msg.note)+'</span>':'')+'</div>'+
+      '<div class="topic">'+esc(it.msg.topic)+'</div>'+
+      '<div class="payload">'+esc(it.msg.payload)+'</div>'+
+      '<div class="small">→ '+(it.to.length ? it.to.join(', ') : '<span class="muted">받는 구독자 없음</span>')+'</div></div>'
+    ).join('');
+  }
+
+  // ----- 구독자: 언리얼 -----
+  const twin = { started: false };
+  const QUAY_X0 = 30, QUAY_X1 = 200, LON0 = 129.0800, LON1 = 129.0840;
+  function onUnreal(msg){
+    const d = JSON.parse(msg.payload);
+    if (msg.topic.endsWith('/position')){
+      const x = QUAY_X0 + (d.lon - LON0) / (LON1 - LON0) * (QUAY_X1 - QUAY_X0);
+      $('crane').setAttribute('transform', 'translate('+x.toFixed(1)+',0)');
+      $('crane').style.display = '';
+      $('unrealParse').textContent = 'JSON.parse → lon '+d.lon+' → 화면 x '+x.toFixed(0)+' (위경도를 언리얼 좌표로 변환)';
+    } else if (msg.topic.endsWith('/temp')){
+      const c = d.value > 40 ? 'var(--sc-bad)' : d.value > 35 ? 'var(--sc-warn)' : 'var(--sc-ok)';
+      $('pump').style.fill = c;
+      $('pumpTemp').textContent = d.value.toFixed(1);
+      $('unrealParse').textContent = 'JSON.parse → value '+d.value+' → 펌프 색 '+(d.value>40?'빨강':d.value>35?'주황':'초록');
+    } else if (msg.topic.endsWith('/alarm')){
+      const on = d.level === 'warning';
+      $('pumpRing').setAttribute('opacity', on ? '1' : '0');
+      $('pumpRing').classList.toggle('pulse', on);
+    } else if (msg.topic.endsWith('/status')){
+      const off = d.state === 'offline';
+      const col = off ? 'var(--sc-off)' : 'var(--sc-ok)';
+      $('craneBody').style.stroke = col; $('craneBoom').style.stroke = col;
+      $('craneLabel').textContent = off ? '크레인07 (연결 끊김)' : '크레인07';
+      $('crane').style.display = '';
+      $('unrealParse').textContent = 'status → '+d.state+(off ? ' → 크레인을 회색으로 표시' : ' → 정상 표시');
+    }
+  }
+
+  // ----- 구독자: 저장기 -----
+  let dbRows = [], dbCount = 0, alarmOn = false;
+  function onStore(msg){
+    const d = JSON.parse(msg.payload);
+    dbCount++; dbRows.unshift([clock(), d.device, d.value.toFixed(1)+'℃']);
+    if (dbRows.length > 6) dbRows.pop();
+    $('dbRows').innerHTML = dbRows.map(r => '<tr><td class="mono">'+r[0]+'</td><td>'+r[1]+'</td><td class="num'+(parseFloat(r[2])>40?' lvl-bad':'')+'">'+r[2]+'</td></tr>').join('');
+    $('dbCount').textContent = dbCount;
+    if (d.value > 40 && !alarmOn){
+      alarmOn = true;
+      setTimeout(() => publish('Python 저장기', 'busan/terminal/'+d.device+'/alarm', { device:d.device, level:'warning', msg:'온도 40℃ 초과', value:d.value, time:iso() }, { qos:1, note:'구독자가 다시 발행' }), 400);
+    } else if (d.value <= 40 && alarmOn){
+      alarmOn = false;
+      setTimeout(() => publish('Python 저장기', 'busan/terminal/'+d.device+'/alarm', { device:d.device, level:'clear', msg:'정상 복귀', value:d.value, time:iso() }, { qos:1, note:'구독자가 다시 발행' }), 400);
+    }
+  }
+
+  // ----- 구독자: 알람 앱 -----
+  let alarms = [];
+  function onAlarm(msg){
+    const d = JSON.parse(msg.payload);
+    let html;
+    if (msg.topic.endsWith('/alarm')){
+      html = d.level === 'warning'
+        ? '<span class="lvl-bad">⚠ '+d.device+' '+d.msg+'</span> ('+d.value.toFixed(1)+'℃)'
+        : '<span class="lvl-ok">✓ '+d.device+' '+d.msg+'</span> ('+d.value.toFixed(1)+'℃)';
+    } else {
+      html = d.state === 'offline'
+        ? '<span class="lvl-off">● '+d.device+' 연결 끊김</span> <span class="muted">(유언 메시지)</span>'
+        : '<span class="lvl-ok">● '+d.device+' 연결됨</span>';
+    }
+    alarms.unshift('<span class="mono muted">'+clock()+'</span> '+html);
+    if (alarms.length > 6) alarms.pop();
+    $('alarmList').innerHTML = alarms.map(a => '<li>'+a+'</li>').join('');
+  }
+
+  // ----- 발행자 -----
+  let running = true, craneOnline = true, phase = 0, lwtTimer = null;
+  function craneTick(){
+    if (!running || !craneOnline) return;
+    phase += 0.18;
+    const k = (Math.sin(phase) + 1) / 2;
+    const lon = +(LON0 + k * (LON1 - LON0)).toFixed(5);
+    flash($('pub-crane'));
+    publish('크레인07', 'busan/terminal/crane07/position', { device:'crane07', lat:35.10512, lon, time:iso() }, { qos:0, retain:true });
+  }
+  function pumpTick(){
+    if (!running) return;
+    const base = parseFloat($('tempSlider').value);
+    const v = +(base + (Math.random() - 0.5) * 1.2).toFixed(1);
+    flash($('pub-pump'));
+    publish('펌프03', 'busan/terminal/pump03/temp', { device:'pump03', value:v, unit:'C', time:iso() }, { qos:1, retain:true });
+  }
+
+  $('runBtn').addEventListener('click', () => {
+    running = !running;
+    $('runBtn').textContent = running ? '⏸ 일시정지' : '▶ 다시 시작';
+  });
+  $('tempSlider').addEventListener('input', e => { $('tempVal').textContent = parseFloat(e.target.value).toFixed(1)+'℃'; });
+
+  $('cutBtn').addEventListener('click', () => {
+    if (craneOnline){
+      craneOnline = false;
+      $('craneDot').classList.add('off');
+      $('cutBtn').textContent = '크레인 다시 연결';
+      $('twinMsg').textContent = '크레인 신호 없음… (Keep Alive 대기)';
+      lwtTimer = setTimeout(() => {
+        $('twinMsg').textContent = '';
+        publish('브로커 (유언 메시지)', 'busan/terminal/crane07/status', { device:'crane07', state:'offline', reason:'keep-alive 시간 초과', time:iso() }, { qos:1, retain:true, note:'Last Will' });
+      }, 2500);
+    } else {
+      clearTimeout(lwtTimer); $('twinMsg').textContent = '';
+      craneOnline = true;
+      $('craneDot').classList.remove('off');
+      $('cutBtn').textContent = '크레인 전원 끊기';
+      publish('크레인07', 'busan/terminal/crane07/status', { device:'crane07', state:'online', time:iso() }, { qos:1, retain:true });
+    }
+  });
+
+  $('restartBtn').addEventListener('click', () => {
+    // 언리얼 화면 초기화
+    $('crane').style.display = 'none';
+    $('pump').style.fill = 'var(--sc-off)'; $('pumpTemp').textContent = '--';
+    $('pumpRing').setAttribute('opacity', '0'); $('pumpRing').classList.remove('pulse');
+    $('twinMsg').textContent = '언리얼 재시작 중…';
+    $('unrealParse').textContent = '화면이 비었습니다. 브로커에 다시 구독 요청…';
+    setTimeout(() => {
+      $('twinMsg').textContent = '';
+      const sent = [];
+      broker.retained.forEach(msg => {
+        if (subs[0].filters.some(f => match(f, msg.topic))){
+          onUnreal(msg); sent.push(msg.topic);
+          addLog(Object.assign({}, msg, { from:'브로커', note:'Retained 재전송' }), ['언리얼']);
+        }
+      });
+      flash($('sub-unreal'));
+      $('unrealParse').textContent = 'Retained '+sent.length+'건을 바로 받아서, 다음 값을 기다리지 않고 현재 상태를 그렸습니다.';
+    }, 900);
+  });
+
+  // 시작
+  publish('크레인07', 'busan/terminal/crane07/status', { device:'crane07', state:'online', time:iso() }, { qos:1, retain:true });
+  setInterval(craneTick, 1000);
+  setInterval(pumpTick, 2000);
+  setTimeout(pumpTick, 300);
+})();
+</script>
+</body>
+</html>

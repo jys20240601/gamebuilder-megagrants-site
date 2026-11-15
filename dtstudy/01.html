@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>KDT 디지털트윈 과정 인터뷰 준비 1단계: 삼우이머션 파악</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><a class="side" href="./">목차</a></div></header>
+<main>
+<h1 id="kdt-디지털트윈-과정-인터뷰-준비-1단계-삼우이머션-파악">KDT 디지털트윈 과정 인터뷰 준비 1단계: 삼우이머션 파악</h1>
+<p>사전미팅 2026-11-16(월) 11:00, 인터뷰 심사 2026-11-17(화).</p>
+<h2 id="0-상황-정리">0. 상황 정리</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>과정</td>
+<td>언리얼 기반 디지털 트윈 시스템 개발자 양성과정 (KDT). 1차 서면 심사 통과, 2차 인터뷰 심사</td>
+</tr>
+<tr>
+<td>교육기관</td>
+<td>데이원컴퍼니(패스트캠퍼스) B2G 교육사업부. 2026-06-01 메일로 사전 논의를 시작했다</td>
+</tr>
+<tr>
+<td>참여기업</td>
+<td>삼우이머션이 메인 참여기업 중 하나. 나머지 기업은 아직 모름</td>
+</tr>
+<tr>
+<td>이전 이름</td>
+<td>2026-06 초안의 이름은 "AI Unreal 디지털트윈 엔지니어 양성과정"</td>
+</tr>
+</tbody>
+</table></div>
+<p>메일 첫 줄에 "KDT <strong>빅데이터</strong> 과정 인터뷰 심사"라고 적혀 있다. 이 과정이 KDT에서 빅데이터 분야로 접수됐다면 심사위원도 빅데이터 쪽 전문가일 수 있다(추정). 그렇다면 언리얼 시각화보다 <strong>데이터 수집, 저장, 분석 파이프라인</strong>을 설명하는 능력을 더 많이 볼 것이다. 사전미팅에서 꼭 확인한다.</p>
+<hr />
+<h2 id="1-삼우이머션-한눈에">1. 삼우이머션 한눈에</h2>
+<ul>
+<li>2011년 설립, 부산 동구 본사. 산업·국방 XR 교육훈련으로 시작해 지금은 <strong>XR 훈련 + 디지털트윈 + 자체 AI</strong>의 세 축으로 사업한다. 회사 소개 문구는 "14년간 축적된 XR 콘텐츠 제작 역량"이다.</li>
+<li>2025 사업계획 문서에 나온 목표: 조직 75명에서 90명, 목표 매출 144억 원. 실적이 아니라 계획치다. 투자는 pre-A 단계(thevc 기준).</li>
+<li>내부 개발 도구는 REDMINE, GitLab, Google Workspace. 자체 개발 표준(IMDF)과 그 표준 위의 개발 도구 IMBuilder가 있고, 블루프린트를 자동으로 만드는 IMBuilder-X를 내세운다.</li>
+</ul>
+<h3 id="제품-브랜드">제품 브랜드</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>브랜드</th>
+<th>무엇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>VARLOS</strong></td>
+<td>언리얼 기반 산업 디지털트윈 플랫폼. 이번 과정과 가장 직결된다</td>
+</tr>
+<tr>
+<td>IMXR / IMXR Defense</td>
+<td>XR 직무훈련, 국방 훈련 시뮬레이터</td>
+</tr>
+<tr>
+<td>OWLIX AI</td>
+<td>자체 소형 언어모델(sLM) 기반 AI. "LLM 대비 할루시네이션 감소"를 내세움</td>
+</tr>
+<tr>
+<td>IMBuilder / IMBuilder-X</td>
+<td>IMDF 표준 기반 개발 도구, 블루프린트 자동 생성</td>
+</tr>
+<tr>
+<td>CPR-X</td>
+<td>실제 마네킹과 가상 환자를 맞춘 CPR·AED XR 교육</td>
+</tr>
+<tr>
+<td>SWXR CAMPUS</td>
+<td>교육 사업부(아래 참고)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="교육-사업-swxr-캠퍼스-이미-비슷한-과정을-운영해-왔다">교육 사업 (SWXR 캠퍼스): 이미 비슷한 과정을 운영해 왔다</h3>
+<ul>
+<li>Epic 공인교육기관 <strong>UATC 실버</strong> 등급, 언리얼 공인강사(UAI) 보유.</li>
+<li>2024-01 동의대 로봇자동화공학과 "언리얼엔진 기반 디지털트윈 데이터 시각화 교육"(3일).</li>
+<li>2024-12 "디지털트윈 전문가 양성과정 1기" 시작. 첫날 주제는 포토그래메트리 기반 디지털트윈.</li>
+<li>2026-07~08 "언리얼엔진 기반 부산 디지털 트윈 구축 교육과정"(부산정보산업진흥원 주관, 10회차). 순서: 언리얼 이해 → 포토그래메트리로 부산 모델링 → <strong>Cesium for Unreal로 부산 디지털 지도</strong> → 블루프린트 → 머티리얼·포스트프로세스 → 레벨 블루프린트 → UI/UX → 부산 디지털트윈 프로젝트(3D 리소스) → 부산 디지털트윈 프로젝트(<strong>데이터 연동 및 시각화</strong>) → 언리얼페스트 참관.</li>
+<li>사보에 "6개월간 진행된 <strong>KDT 프로젝트 과정</strong>에서 기획부터 개발, 심사까지 전 과정에 참여"한 기록이 있다. KDT 기업 프로젝트 운영 경험이 있다는 뜻이다.</li>
+</ul>
+<p>→ 삼우이머션은 우리 과정에서 <strong>캡스톤 과제 출제, 멘토링, 심사, 채용</strong>을 맡을 수 있는 회사이고, 이미 해 본 회사다.</p>
+<hr />
+<h2 id="2-디지털트윈-개발-사례">2. 디지털트윈 개발 사례</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>사업</th>
+<th>고객·연도</th>
+<th>무엇을 했나</th>
+<th>데이터·기술</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>부산항 신선대 터미널 모니터링</strong> (VARLOS 3D Terminal)</td>
+<td>부산항만공사·BPT, 2022. 언리얼 공식 스포트라이트, 언리얼 서밋 2022 발표</td>
+<td>장비 위치, 작업 현황, 안전 정보를 실시간 3D로 관제. 크레인 생산성 예측, 선적 동선 사전 시뮬레이션, 충돌 검출</td>
+<td>항만 장비 위치 1초 5회(±10cm), 스마트 헬멧·워치 1초 2회(±1m)와 생체신호, 지능형 CCTV(컨테이너·차량 번호, 트럭 대기열), <strong>MQTT</strong>, <strong>WGS84 / UE Georeferencing</strong>, DEM 지형, 전자해도 S-63, AI 고장 진단·예측</td>
+</tr>
+<tr>
+<td>포스코 광양 제품출하부두 3D 모니터링 앱</td>
+<td>포스코(ICT), 2023</td>
+<td>부두 3D 모니터링 앱</td>
+<td>터미널 사례 확장</td>
+</tr>
+<tr>
+<td><strong>자갈치시장 안전관리</strong> (VARLOS 건물 관제)</td>
+<td>부산정보산업진흥원, 2023</td>
+<td>해수 수질, 침수 감지, 공기질 기반 유해물질 탐지, 화재 감지와 탈출 경로 유도</td>
+<td>신규 IoT는 <strong>5G → oneM2M 서버</strong>, 레거시 장비는 <strong>멀티 프로토콜 엣지 서버</strong>, 클라우드에서 <strong>MQTT</strong>로 취합. CityGML 주변 건물, shapefile 위경도·높이로 건물 자동 생성, DEM 지형. 설비는 포인트 클라우드를 리토폴로지. Lumen, Nanite, HLOD</td>
+</tr>
+<tr>
+<td><strong>한화오션 LNG 추진선 디지털트윈 PoC</strong></td>
+<td>한화오션(구 대우조선해양) R&amp;D센터, 2022-11 최종보고</td>
+<td>실측 데이터와 시뮬레이션 데이터를 실시간으로 연결해 선박 트윈에 표시</td>
+<td>강도, 피로, 온도, 고장 모드 시나리오(FG Vaporizer), 연료탱크 쿨다운 시간</td>
+</tr>
+<tr>
+<td>한화오션 LFS 선박 모니터링 / QG DT Onboard</td>
+<td>한화오션, 2023~2024</td>
+<td>Type-C LNG 연료탱크와 계통을 실제 형상대로 트윈화</td>
+<td>메뉴 11개: 시스템 개요, 장비 뷰, <strong>알람 모니터링, 데이터 모니터링</strong>, 사양, 제어 키패드, 문서 뷰어 등</td>
+</tr>
+<tr>
+<td><strong>해상공사 안전 모니터링</strong></td>
+<td>2022~2023 무렵</td>
+<td>공사 선박과 통항 선박의 충돌 방지</td>
+<td><strong>AIS·레이더</strong> 위치를 CCTV 영상에 AR로 겹침, AI 충돌위험 평가(AI-MASTER), 딥러닝 선박 인식, 전자해도 2D 맵, 항적 기록</td>
+</tr>
+<tr>
+<td>기타 디지털트윈</td>
+<td>현대중공업 조선소 DT, 현대오토에버 VF Builder 가상공장, 부산대 공급망 메타버스 PoC(<strong>대용량 AIS/GPS 운항 데이터</strong> 시각화), KOMERI 스마트해양 클라우드</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>구상 중</td>
+<td>북극항로 디지털트윈 플랫폼</td>
+<td>위성, AIS, IoT 센서를 VARLOS로 통합, 구독형(PaaS)</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="시뮬레이터-쪽-참고">시뮬레이터 쪽 (참고)</h3>
+<p>KAI KF-21·KUH VR 시뮬레이터 참여(모션 플랫폼, 실측 데이터 기반), 해군 고속상륙정 LSF-II 시뮬레이터, 잠수함 기관 정비 XR, 반도체 8대 공정 VR(가천대 반도체대학 도입). 기술 키워드는 <strong>Cesium 지형 타일 스트리밍</strong>, <strong>CIGI</strong>, <strong>HLA</strong>, <strong>nDisplay</strong>, Nanite, 실시간 레이트레이싱.</p>
+<h3 id="삼우이머션이-언리얼을-고른-이유-epic-스포트라이트">삼우이머션이 언리얼을 고른 이유 (Epic 스포트라이트)</h3>
+<ul>
+<li>WGS84 좌표계와 MQTT 데이터 연동을 지원한다. 지오레퍼런싱 플러그인으로 여러 좌표계를 WGS84로 통일했다.</li>
+<li>전체 소스 코드가 공개되어 데이터 통합에 유리하다.</li>
+<li>마켓플레이스 플러그인·에셋으로 개발 기간을 줄였다.</li>
+<li>다음 목표는 <strong>World Partition과 Nanite로 대규모 오픈월드 트윈으로 확장</strong>하는 것이다.</li>
+</ul>
+<hr />
+<h2 id="3-삼우이머션-디지털트윈의-공통-구조">3. 삼우이머션 디지털트윈의 공통 구조</h2>
+<p>여러 사례를 겹쳐 보면 구조가 거의 같다. 인터뷰에서 "디지털트윈 시스템이 뭐냐"는 질문에 이 그림으로 답하면 된다.</p>
+<pre><code>[현장]  IoT 센서(온도·진동·공기질·수질·화재), GPS 추적기, 스마트 헬멧,
+        AIS·레이더(선박), CCTV, 레거시 설비(PLC)
+   │
+[통신]  5G · MQTT · oneM2M · Modbus · HLA      ← 산업 표준 연동 허브
+   │
+[플랫폼] IoT 플랫폼 / 엣지 서버 / 클라우드
+        수집 → 저장(이력) → 임계값 알림 → AI 진단·예측
+   │
+[트윈]  Unreal Engine
+        지오레퍼런싱(WGS84)·Cesium, GIS(DEM·CityGML·전자해도), 3D 설비 모델
+        관제 UI(알람·데이터 모니터링), 시뮬레이션
+   │
+[사용자] 관제실 화면, 앱, 브라우저 접속(PC·모바일)
+</code></pre>
+<ul>
+<li>이 다섯 층에서 <strong>[통신]과 [플랫폼]이 빅데이터 부분</strong>이다. 공개 자료에는 DB나 스트림 처리 기술 이름이 나오지 않는다. 사전미팅에서 삼우이머션이 실제로 무엇을 쓰는지 물어볼 가치가 있다.</li>
+<li>VARLOS의 최신 소개에는 "AI 에이전트가 해결 워크플로를 제시·실행", "자연어 기반 통합 관제"가 들어 있다. 디지털트윈에 LLM 에이전트를 붙이는 방향이다.</li>
+</ul>
+<hr />
+<h2 id="4-내가-알아야-할-것">4. 내가 알아야 할 것</h2>
+<h3 id="4-1-반드시-설명할-수-있어야-하는-개념-우선순위-순">4-1. 반드시 설명할 수 있어야 하는 개념 (우선순위 순)</h3>
+<ol>
+<li><strong>디지털트윈의 단계</strong>: 3D 재현 → 실시간 모니터링 → 시뮬레이션·예측 → 제어. 삼우이머션 사례는 대부분 모니터링 단계이고, 한화오션 PoC와 터미널 생산성 예측이 예측 단계에 걸친다.</li>
+<li><strong>데이터 파이프라인 (빅데이터 심사 대비 핵심)</strong>: 수집(MQTT, OPC UA, Modbus) → 저장(시계열 DB: InfluxDB, TimescaleDB 같은 종류) → 처리(스트림, 배치) → 분석(이상탐지, 예측) → 시각화(언리얼). 단계마다 우리 과정의 어느 Stage에서 배우는지 짝지어 말할 수 있어야 한다.</li>
+<li><strong>MQTT</strong>: 브로커, 토픽, 발행/구독, QoS. 삼우이머션의 모든 관제 사례에 나온다. 언리얼에서 MQTT를 받는 방법(플러그인 또는 Python 중계)도 한 문장으로 말할 수 있게 한다.</li>
+<li><strong>공간정보</strong>: WGS84, 지오레퍼런싱, Cesium for Unreal, DEM, CityGML, shapefile, 전자해도(S-57/S-63). 도시·항만 트윈의 기본이다.</li>
+<li><strong>AIS 데이터</strong>: 선박이 위치, 속도, 침로를 주기적으로 방송하는 데이터. 양이 많고 시간과 공간이 함께 있는 대표적인 빅데이터이며, 삼우이머션 해양 사업의 핵심 데이터 소스다.</li>
+<li><strong>언리얼 관제 기술</strong>: UMG 관제 UI, Pixel Streaming(브라우저 접속), nDisplay(대형 관제 화면), World Partition, Nanite, Lumen, HLOD.</li>
+<li><strong>AI 활용</strong>: 센서 이상탐지·예측, 비전(YOLO류 선박·차량 인식), sLM 에이전트 관제.</li>
+</ol>
+<h3 id="4-2-6월-설계안과-삼우이머션-사업의-접점">4-2. 6월 설계안과 삼우이머션 사업의 접점</h3>
+<p>6월 초안 구성(960시간): 공통기초 60h → 스마트홈 170h → 디지털트윈 도시 130h → 산업 도메인 모듈 A·B 각 110h → 기업연계 캡스톤 290h(30.2%) → 취업·포트폴리오 90h. 산업 도메인은 스마트팩토리 + ROS2 실물 로봇(AMR) 연동을 우선 권고했다.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>6월 초안</th>
+<th>삼우이머션과의 접점</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stage 1 센서 수집(MQTT), 실시간 바인딩, 관제 UI</td>
+<td>삼우 관제 사례의 기본 구조와 같다</td>
+</tr>
+<tr>
+<td>Stage 2 도시: GIS·포인트 클라우드, 대규모 스트림, 시계열 DB</td>
+<td>삼우 부산 디지털트윈 과정(Cesium, 포토그래메트리), 자갈치(CityGML·DEM)와 거의 같다</td>
+</tr>
+<tr>
+<td>산업 도메인 카탈로그: 방재·재난, 물류</td>
+<td>자갈치(화재·침수·탈출 경로), 항만 터미널(장비 동선)과 맞닿는다</td>
+</tr>
+<tr>
+<td>캡스톤 290h</td>
+<td>삼우 실무 주제(항만 관제, 해양 안전, 시설 안전관리, 조선 설비 모니터링)를 과제로 받기 좋다</td>
+</tr>
+<tr>
+<td>LLM 자연어 작업 지시(선택 과제)</td>
+<td>VARLOS의 자연어 통합 관제, OWLIX AI 방향과 같다</td>
+</tr>
+<tr>
+<td>AI 보조 코딩 + "코드 설명 게이트"</td>
+<td>삼우의 IMBuilder-X(블루프린트 자동 생성)처럼 개발 자동화를 지향하는 회사라 설득하기 쉽다</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>간극</strong>: 6월 초안의 우선 도메인은 제조(공장 + 로봇)이고, 삼우이머션의 주력은 <strong>항만·조선·해양·공공시설</strong>이다. 최종 제출본이 어느 쪽으로 정리됐는지 모른다. 사전미팅에서 확인하고, 필요하면 "항만·해양 관제 도메인"을 캡스톤 주제로 넣는 안을 준비한다.</li>
+<li><strong>내 경험 연결 소재</strong>: 국내성 디지털트윈(UE 5.8, World Partition·HLOD 대규모 월드, VR 성능을 p95 프레임 시간으로 측정)은 삼우이머션이 스포트라이트에서 밝힌 다음 목표(World Partition·Nanite 대규모 확장)와 바로 이어진다.</li>
+</ul>
+<h3 id="4-3-사전미팅1116에서-확인할-것">4-3. 사전미팅(11/16)에서 확인할 것</h3>
+<ol>
+<li><strong>최종 제출 제안서</strong> 공유 요청: 과정명 변경 이유, 총 시수, Stage 구성, 장비(로봇 포함 여부), 강사 배치.</li>
+<li>참여기업 전체 구성과 <strong>삼우이머션의 역할</strong>: 캡스톤 과제 출제, 멘토링, 심사, 채용 약정 인원.</li>
+<li>"빅데이터 과정"이라는 표현의 의미: KDT 훈련분야가 빅데이터인지.</li>
+<li>인터뷰 형식: 발표 여부와 시간, 참석자(기관, 기업, 강사), 질문별 답변 담당.</li>
+<li>훈련 장소와 방식(부산인지 서울인지, 대면 여부).</li>
+<li>삼우이머션 실무에서 쓰는 데이터 스택(DB, 스트림 처리, 브라우저 배포 방식). 강의 내용을 실무와 맞추는 근거가 된다.</li>
+<li>언리얼 MQTT 연동 방식(엔진 내장 플러그인, 외부 플러그인, 자체 C++, 중계 서버). 내장 플러그인은 아직 실험 단계라 실무 방식을 알아 두면 커리큘럼 근거가 된다(<a href="04.html">04 MQTT</a> 3단계).</li>
+</ol>
+<h3 id="4-4-예상-질문과-답변-방향-강사-입장">4-4. 예상 질문과 답변 방향 (강사 입장)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>예상 질문</th>
+<th>답변 방향</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>왜 언리얼인가?</td>
+<td>WGS84·MQTT 연동, 전체 소스 공개, Cesium 대규모 지형, 실시간 렌더링. 삼우이머션이 실제로 같은 이유로 언리얼을 골랐다(Epic 스포트라이트)</td>
+</tr>
+<tr>
+<td>빅데이터 요소는 어디에 있나?</td>
+<td>수집 → 저장 → 처리 → 분석 → 시각화 단계를 Stage별로 짚는다. AIS 같은 대용량 시공간 데이터, 고빈도 센서 시계열</td>
+</tr>
+<tr>
+<td>비전공자가 6개월 안에 가능한가?</td>
+<td>나선형 PBL(같은 패턴을 집 → 도시 → 산업으로 키움), AI 보조 코딩, 코드 설명 게이트로 이해도 검증</td>
+</tr>
+<tr>
+<td>기업 프로젝트 30%는 어떻게 운영하나?</td>
+<td>참여기업 실무 주제 → 기획서 → 심사 → 팀 빌딩 → 수행 → 발표. 삼우이머션은 KDT 프로젝트를 기획부터 심사까지 해 본 경험이 있다</td>
+</tr>
+<tr>
+<td>수료생은 어디로 취업하나?</td>
+<td>XR·디지털트윈 기업(삼우이머션 등), SI, 항만·조선·제조, 공공·안전 관제</td>
+</tr>
+<tr>
+<td>강사는 실무를 아나?</td>
+<td>대규모 언리얼 디지털트윈 제작 경험, 성능 측정과 최적화, 강의 경력</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="5-다음-순서-제안">5. 다음 순서 제안</h2>
+<ol>
+<li>(오늘) 이 문서의 2장 표와 3장 그림을 외워서 말할 수 있게 한다.</li>
+<li>(오늘) 데이원컴퍼니에 최종 제출 제안서를 요청한다. 내일 미팅 전에 받아야 4-2의 간극을 정리할 수 있다.</li>
+<li>(사전미팅 뒤) 확정된 커리큘럼 기준으로 예상 질문 답변을 1분 분량 문장으로 다듬는다.</li>
+<li>(필요하면) 빅데이터 파이프라인 1장 그림과, 삼우이머션 사례를 우리 과정 캡스톤으로 바꾼 예시 과제 2~3개를 만든다.</li>
+</ol>
+<hr />
+<h2 id="주의">주의</h2>
+<ul>
+<li>삼우이머션 정보는 대부분 회사 홈페이지, 보도자료, 사보에서 왔다. 홍보 성격이고 제3자 검증은 없다. 매출, 인원 수치는 계획치다.</li>
+<li>자갈치 R&amp;D 원문 페이지와 한화오션 계약 공지 원문은 본문을 읽지 못했다. 같은 내용을 CAD&amp;Graphics 기사와 영문 포트폴리오로 확인했다.</li>
+<li>KDT 2차 인터뷰의 공식 평가항목은 공고문 첨부(hwpx) 안에 있어 아직 읽지 못했다. 정책 설명은 "신기술 분야 선도기업이 직접 훈련과정을 설계·운영하는 기업 맞춤형 훈련"이다. 6월 초안에는 "전체 과정의 30% 이상 기업 실전 프로젝트"가 KDT 요건으로 적혀 있다.</li>
+</ul>
+<h2 id="출처">출처</h2>
+<ul>
+<li>삼우이머션 VARLOS: <a href="https://www.samwooim.com/VARLOS">https://www.samwooim.com/VARLOS</a></li>
+<li>터미널 모니터링: <a href="https://www.samwooim.com/VARLOS_3Dterminal">https://www.samwooim.com/VARLOS_3Dterminal</a></li>
+<li>해상공사 안전 모니터링: <a href="https://www.samwooim.com/VARLOS_marine">https://www.samwooim.com/VARLOS_marine</a></li>
+<li>포트폴리오: <a href="https://www.samwooim.com/Portfolio">https://www.samwooim.com/Portfolio</a></li>
+<li>사업 운영 및 미래 전략: <a href="https://www.samwooim.com/231">https://www.samwooim.com/231</a></li>
+<li>기술솔루션: <a href="https://www.samwooim.com/395">https://www.samwooim.com/395</a></li>
+<li>IMXR Defense: <a href="https://www.samwooim.com/IMXR_Defense">https://www.samwooim.com/IMXR_Defense</a></li>
+<li>KF-21 VR 시뮬레이터: <a href="https://www.samwooim.com/IMXR_Defense/?bmode=view&amp;idx=16611720">https://www.samwooim.com/IMXR_Defense/?bmode=view&amp;idx=16611720</a></li>
+<li>Epic 스포트라이트(항만 물류): <a href="https://www.unrealengine.com/en-US/spotlights/samwoo-imersion-completes-an-efficient-port-logistics-with-digital-twins">https://www.unrealengine.com/en-US/spotlights/samwoo-imersion-completes-an-efficient-port-logistics-with-digital-twins</a></li>
+<li>자갈치시장 케이스 스터디(CAD&amp;Graphics 2023-03): <a href="https://www.cadgraphics.co.kr/newsview.php?pages=news&amp;sub=new01&amp;catecode=2&amp;num=72389">https://www.cadgraphics.co.kr/newsview.php?pages=news&amp;sub=new01&amp;catecode=2&amp;num=72389</a></li>
+<li>한화오션 QG DT: <a href="https://samwooim-eng.imweb.me/Portfolio/?bmode=view&amp;idx=167457601">https://samwooim-eng.imweb.me/Portfolio/?bmode=view&amp;idx=167457601</a></li>
+<li>LNG 추진선 DT PoC: <a href="https://samwooim-eng.imweb.me/VARLOS_vessel/?bmode=view&amp;idx=13726043">https://samwooim-eng.imweb.me/VARLOS_vessel/?bmode=view&amp;idx=13726043</a></li>
+<li>스마트 모니터링 정부과제: <a href="https://samwooim-eng.imweb.me/governmentproject/?bmode=view&amp;idx=11346883">https://samwooim-eng.imweb.me/governmentproject/?bmode=view&amp;idx=11346883</a></li>
+<li>디지털트윈 전문가 양성 1기: <a href="https://samwooim-eng.imweb.me/PR/?bmode=view&amp;idx=134749143">https://samwooim-eng.imweb.me/PR/?bmode=view&amp;idx=134749143</a></li>
+<li>부산 디지털 트윈 구축 교육과정(2026-06): <a href="https://www.samwooim.com/PR/?bmode=view&amp;idx=171962674">https://www.samwooim.com/PR/?bmode=view&amp;idx=171962674</a></li>
+<li>동의대 디지털트윈 데이터 시각화 교육(2024-01): <a href="https://samwooim.com/PR/?bmode=view&amp;idx=17712241">https://samwooim.com/PR/?bmode=view&amp;idx=17712241</a></li>
+<li>사보 Beyond News(KDT 프로젝트 과정 참여): <a href="https://stibee.com/api/v1.0/emails/share/8eVzzk1WCRiWnvnYEwQeLp3H323Yxrs">https://stibee.com/api/v1.0/emails/share/8eVzzk1WCRiWnvnYEwQeLp3H323Yxrs</a></li>
+<li>전자신문 부산국가혁신클러스터 성과: <a href="https://www.etnews.com/20221216000108">https://www.etnews.com/20221216000108</a></li>
+<li>기업 정보: <a href="https://thevc.kr/samwooimmersion">https://thevc.kr/samwooimmersion</a></li>
+<li>고용노동부 KDT 정책 설명: <a href="https://www.moel.go.kr/policyitrd/policyItrdView.do?policy_itrd_sn=85">https://www.moel.go.kr/policyitrd/policyItrdView.do?policy_itrd_sn=85</a></li>
+</ul><nav class="pager"><a href="./"><small>← 처음</small>목차</a><a class="n" href="02.html"><small>다음 →</small>02 디지털트윈을 위한 빅데이터 가공</a></nav><p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준이라 홍보 성격이 있습니다.</p>
+</main>
+</body>
+</html>

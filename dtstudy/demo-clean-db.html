@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root{--background:#fff;--foreground:#171717;--card:#fff;--card-foreground:#171717;--muted:#f4f4f5;--muted-foreground:#737373;--border:#e5e5e5;--input:#e5e5e5;--ring:#a3a3a3;--primary:#171717;--primary-foreground:#fafafa;--secondary:#f4f4f5;--secondary-foreground:#171717;--accent:#f4f4f5;--accent-foreground:#171717;--destructive:#dc2626}
+@media (prefers-color-scheme:dark){:root{--background:#0f1115;--foreground:#e8eaf0;--card:#171b22;--card-foreground:#e8eaf0;--muted:#222833;--muted-foreground:#9aa3b2;--border:#2a3140;--input:#2a3140;--ring:#6b7280;--primary:#e8eaf0;--primary-foreground:#111318;--secondary:#222833;--secondary-foreground:#e8eaf0;--accent:#2a3140;--accent-foreground:#fff;--destructive:#f87171}}
+.dt-back{display:block;font:600 14px/1.4 system-ui,-apple-system,"Malgun Gothic",sans-serif;padding:0 0 12px;color:var(--foreground);text-decoration:none}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>정제 정합 DB 저장</title>
+<style>
+  body{margin:0;padding:16px;background:var(--background,#fff);color:var(--foreground,#171717);
+    font-family:var(--font-sans,system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif);font-size:14px;line-height:1.55}
+  h2{font-size:17px;margin:2px 0 6px}
+  h3{font-size:14px;margin:12px 0 6px}
+  p{margin:0 0 8px}
+  .muted{color:var(--muted-foreground,#737373)}
+  .small{font-size:12px}
+  .mono,code,pre{font-family:var(--font-mono,ui-monospace,Consolas,monospace)}
+  .card{background:var(--card,#fff);color:var(--card-foreground,#171717);border:1px solid var(--border,#e5e5e5);
+    border-radius:var(--radius,10px);padding:12px 14px}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+  .tabs button{font:inherit;font-size:13px;cursor:pointer;border-radius:999px;padding:5px 12px;
+    border:1px solid var(--border,#e5e5e5);background:var(--secondary,#f4f4f5);color:var(--secondary-foreground,#171717)}
+  .tabs button:hover{background:var(--accent,#f4f4f5);color:var(--accent-foreground,#171717)}
+  .tabs button[aria-selected="true"]{background:var(--primary,#171717);color:var(--primary-foreground,#fafafa);border-color:transparent}
+  .tabs button:focus-visible{outline:2px solid var(--ring,#a3a3a3);outline-offset:2px}
+  .tw{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:5px 6px;border-top:1px solid var(--border,#e5e5e5);vertical-align:top}
+  th{font-weight:600;font-size:12px;color:var(--muted-foreground,#737373);border-top:0}
+  td.code{font-family:var(--font-mono,ui-monospace,Consolas,monospace);font-size:11.5px;word-break:break-all}
+  .v{display:inline-block;font-size:11.5px;font-weight:600;padding:0 7px;border-radius:999px;white-space:nowrap}
+  .ok{background:color-mix(in srgb,var(--cl-ok) 18%,transparent);color:var(--cl-ok)}
+  .flag{background:color-mix(in srgb,var(--cl-warn) 20%,transparent);color:var(--cl-warn)}
+  .drop{background:color-mix(in srgb,var(--cl-bad) 16%,transparent);color:var(--cl-bad)}
+  .fix{background:color-mix(in srgb,var(--cl-fix) 16%,transparent);color:var(--cl-fix)}
+  .wrap{--cl-ok:#16a34a;--cl-warn:#d97706;--cl-bad:#dc2626;--cl-fix:#2563eb}
+  tr.dim td{opacity:.45}
+  pre{margin:6px 0 0;padding:10px 12px;background:var(--muted,#f4f4f5);border-radius:calc(var(--radius,10px) - 2px);
+    white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.5}
+  .rule{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px;margin-top:6px}
+  .rule b{white-space:nowrap}
+  .nav{display:flex;justify-content:space-between;margin-top:12px}
+  .nav button{font:inherit;font-size:13px;cursor:pointer;border-radius:calc(var(--radius,10px) - 2px);padding:5px 11px;
+    border:1px solid var(--border,#e5e5e5);background:var(--secondary,#f4f4f5);color:var(--secondary-foreground,#171717)}
+  .nav button:hover{background:var(--accent,#f4f4f5);color:var(--accent-foreground,#171717)}
+  .principle{margin-top:14px}
+  .principle ol{margin:4px 0 0;padding-left:20px}
+  .principle li{margin:2px 0}
+</style>
+</head>
+<body>
+<a class="dt-back" href="./">← 디지털트윈 인터뷰 노트</a>
+<div class="wrap">
+  <h2>메시지 9통이 DB에 들어가기까지</h2>
+  <p class="muted small">가상 부산항 터미널에서 5초 동안 들어온 MQTT 메시지 9통을, Python 저장기가 정제 → 정합 → 저장하는 과정입니다. 단계를 눌러 보세요.</p>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div class="card" id="panel"></div>
+  <div class="nav"><button id="prev">◀ 이전 단계</button><button id="next">다음 단계 ▶</button></div>
+
+  <div class="card principle">
+    <b>다섯 가지 원칙</b>
+    <ol class="small">
+      <li><b>원본은 지우지 않는다.</b> 규칙을 바꾸면 원본으로 다시 정제할 수 있어야 한다.</li>
+      <li><b>지우기보다 표시한다.</b> 튀는 값은 quality 칸에 표시하고, 분석할 때 걸러 쓴다.</li>
+      <li><b>시간은 UTC로 저장한다.</b> 한국 시간은 화면에 보여 줄 때만 바꾼다.</li>
+      <li><b>장비 대장이 정합의 중심이다.</b> 센서 ID, 3D 물체 이름, 위치, 단위, 정상 범위를 한 표에 둔다.</li>
+      <li><b>규칙은 코드가 아니라 표로 관리한다.</b> 장비를 추가할 때 대장에 한 줄만 넣으면 된다.</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+(function(){
+  const raw = [
+    {n:1, rt:'10:00:00.2', tp:'busan/terminal/pump03/temp',     p:'{"device":"pump03","value":32.1,"unit":"C","time":"2026-11-15T10:00:00+09:00"}'},
+    {n:2, rt:'10:00:01.1', tp:'busan/terminal/pump03/temp',     p:'{"device":"pump03","value":85.0,"unit":"C","time":"2026-11-15T10:00:01+09:00"}'},
+    {n:3, rt:'10:00:01.3', tp:'busan/terminal/crane07/position',p:'{"device":"crane07","lat":35.10560,"lon":129.08200,"time":"2026-11-15T10:00:01+09:00"}'},
+    {n:4, rt:'10:00:02.0', tp:'busan/terminal/pump03/temp',     p:'{"device":"pump03","value":32.3,"unit":"C","time":"2026-11-15T10:00:02+09:00"}'},
+    {n:5, rt:'10:00:02.4', tp:'busan/terminal/pump03/temp',     p:'{"device":"pump03","value":32.3,"unit":"C","time":"2026-11-15T10:00:02+09:00"}'},
+    {n:6, rt:'10:00:03.0', tp:'busan/terminal/pump05/temp',     p:'{"device":"pump05","value":91.4,"unit":"F","time":"2026-11-15T10:00:03+09:00"}'},
+    {n:7, rt:'10:00:03.5', tp:'busan/terminal/pump03/temp',     p:'{"device":"pump03","value":32.4,"unit":"C","time":"2026-11-15T09:58:03+09:00"}'},
+    {n:8, rt:'10:00:04.1', tp:'busan/terminal/pump03/temp',     p:'{"device":"pump03","value":32.5,"un'},
+    {n:9, rt:'10:00:04.6', tp:'busan/terminal/tmp-9/temp',      p:'{"device":"tmp-9","value":27.0,"unit":"C","time":"2026-11-15T10:00:04+09:00"}'}
+  ];
+  const clean = {
+    1:['ok','통과',''],
+    2:['flag','튀는 값 표시','1초 만에 32.1 → 85.0. 대장의 "1초 최대 변화 5℃"를 넘음. 지우지 않고 quality=spike로 표시'],
+    3:['ok','통과',''],
+    4:['ok','통과',''],
+    5:['drop','중복 제거','#4와 장비·시각·값이 같음. QoS 1 재전송으로 두 번 온 것'],
+    6:['fix','단위 변환','화씨 91.4°F → 섭씨 33.0℃. 대장에 이 장비는 F로 보낸다고 적혀 있음'],
+    7:['fix','시각 보정','장비 시계가 수신 시각보다 2분 늦음(허용 5초 초과). 수신 시각을 쓰고 quality=clock_fixed'],
+    8:['drop','형식 오류','JSON이 중간에 잘림. 원본만 보관하고 오류 기록에 남김'],
+    9:['flag','미등록 장비','장비 대장에 tmp-9가 없음. 보류 표에 넣고 담당자에게 알림']
+  };
+  const v = (k, t) => '<span class="v '+k+'">'+t+'</span>';
+  function esc(s){ return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+  const steps = [
+    {t:'① 원본', h:() =>
+      '<p>MQTT로 들어온 그대로입니다. 저장기는 먼저 <b>원본을 그대로 파일에 보관</b>합니다. 이 중 몇 통에는 문제가 숨어 있습니다.</p>'+
+      '<div class="tw"><table><tr><th>#</th><th>받은 시각</th><th>토픽</th><th>내용물</th></tr>'+
+      raw.map(r => '<tr><td>'+r.n+'</td><td class="code">'+r.rt+'</td><td class="code">'+esc(r.tp)+'</td><td class="code">'+esc(r.p)+'</td></tr>').join('')+
+      '</table></div>'},
+    {t:'② 정제', h:() =>
+      '<p>규칙에 따라 <b>검사하고, 고치고, 표시하고, 버립니다.</b></p>'+
+      '<div class="tw"><table><tr><th>#</th><th>판정</th><th>이유</th></tr>'+
+      raw.map(r => { const c = clean[r.n]; return '<tr'+(c[0]==='drop'?' class="dim"':'')+'><td>'+r.n+'</td><td>'+v(c[0],c[1])+'</td><td class="small">'+(c[2]||'형식·범위·변화량·중복 검사 모두 통과')+'</td></tr>'; }).join('')+
+      '</table></div>'+
+      '<h3>정제 규칙</h3><div class="rule">'+
+      '<b>형식</b><span>JSON이 풀리는가, 필수 칸(device, value, time)이 있는가 → 아니면 버림</span>'+
+      '<b>범위</b><span>물리적으로 가능한 값인가(예: -20~120℃) → 아니면 out_of_range 표시</span>'+
+      '<b>변화량</b><span>직전 정상값과 차이가 너무 큰가 → spike 표시 (그래서 #4는 85.0이 아니라 32.1과 비교해 통과)</span>'+
+      '<b>중복</b><span>같은 장비·시각·값이 또 왔는가 → 하나만 남김</span>'+
+      '<b>단위</b><span>대장에 적힌 단위로 통일</span>'+
+      '<b>시간</b><span>장비 시각과 수신 시각 차이가 크면 수신 시각으로 보정</span>'+
+      '<b>누락</b><span>pump03의 10:00:04 값이 비었음(#8 버림). 1초 정도면 앞뒤로 보간, 길면 "끊김" 표시</span></div>'},
+    {t:'③ 정합', h:() =>
+      '<p>살아남은 데이터를 <b>같은 대상, 같은 시간, 같은 좌표</b>로 맞춥니다. 기준은 장비 대장입니다.</p>'+
+      '<h3>장비 대장 (정합의 중심)</h3>'+
+      '<div class="tw"><table><tr><th>센서 ID</th><th>3D 물체(언리얼 액터)</th><th>보내는 단위</th><th>정상 범위</th><th>1초 최대 변화</th></tr>'+
+      '<tr><td class="code">pump03</td><td class="code">BP_Pump_03</td><td>C</td><td>-20~120</td><td>5</td></tr>'+
+      '<tr><td class="code">pump05</td><td class="code">BP_Pump_05</td><td>F</td><td>-20~120 (℃ 기준)</td><td>5</td></tr>'+
+      '<tr><td class="code">crane07</td><td class="code">BP_Crane_07</td><td>위경도</td><td>터미널 구역 안</td><td>이동 5m</td></tr>'+
+      '</table></div>'+
+      '<h3>대상 맞추기</h3><p class="small">메시지의 <code>device</code>로 대장을 찾아 3D 물체 이름을 붙입니다. 대장에 없으면(#9) 연결할 물체가 없으므로 보류합니다.</p>'+
+      '<h3>시간 맞추기</h3><p class="small"><code>2026-11-15T10:00:00+09:00</code> → <code>2026-11-15T01:00:00Z</code> (UTC로 통일). 크레인 GPS(1초 5회)와 헬멧(1초 2회)처럼 주기가 다른 데이터는 1초 칸으로 다시 나눠 같은 순간끼리 나란히 놓습니다.</p>'+
+      '<h3>좌표 맞추기</h3><p class="small">#3 크레인 위경도 <code>35.10560, 129.08200</code> → 터미널 원점 <code>35.10500, 129.08000</code> 기준으로 <b>동쪽 182.3m, 북쪽 66.6m</b> → 언리얼 단위(cm)로 <b>18,230 · 6,660</b>. 실제 프로젝트에서는 pyproj나 언리얼 Georeferencing이 계산하고, 축 방향은 Georeferencing 설정을 따릅니다.</p>'},
+    {t:'④ DB 저장', h:() =>
+      '<p>시계열 DB에는 <b>시각 · 무엇 · 값</b> 세 칸을 기본으로, 품질 표시를 함께 저장합니다.</p>'+
+      '<div class="tw"><table><tr><th>time (UTC)</th><th>asset_id</th><th>metric</th><th>value</th><th>quality</th></tr>'+
+      [['01:00:00','pump03','temp','32.1','ok'],['01:00:01','pump03','temp','85.0','spike'],['01:00:01','crane07','east_m','182.3','ok'],['01:00:01','crane07','north_m','66.6','ok'],
+       ['01:00:02','pump03','temp','32.3','ok'],['01:00:03','pump05','temp','33.0','ok'],['01:00:03.5','pump03','temp','32.4','clock_fixed']]
+       .map(r => '<tr><td class="code">'+r[0]+'</td><td class="code">'+r[1]+'</td><td class="code">'+r[2]+'</td><td class="code">'+r[3]+'</td><td>'+v(r[4]==='ok'?'ok':r[4]==='spike'?'flag':'fix', r[4])+'</td></tr>').join('')+
+      '</table></div>'+
+      '<p class="small muted" style="margin-top:6px">9통 → 7행. 중복 1통과 형식 오류 1통은 빠졌고(원본은 파일에 남음), 미등록 1통은 보류 표로 갔습니다. 크레인 위치는 두 줄(동·북)로 나뉘었습니다.</p>'+
+      '<h3>표 만들기 (PostgreSQL + TimescaleDB 예)</h3>'+
+      '<pre>CREATE TABLE sensor_data (\n  time      TIMESTAMPTZ NOT NULL,  -- 측정 시각(UTC)\n  asset_id  TEXT NOT NULL,         -- 3D 물체와 연결되는 ID\n  metric    TEXT NOT NULL,         -- temp, east_m ...\n  value     DOUBLE PRECISION,\n  quality   TEXT                   -- ok, spike, clock_fixed ...\n);\nSELECT create_hypertable(\'sensor_data\', \'time\');  -- 시간순 대용량 저장용으로 지정</pre>'+
+      '<h3>세 곳에 나눠 저장</h3><div class="rule">'+
+      '<b>최신값</b><span>지금 화면용. 메모리 캐시나 MQTT Retained</span>'+
+      '<b>이력</b><span>위의 시계열 DB. 그래프, 재생, 분석용</span>'+
+      '<b>원본</b><span>받은 그대로의 파일(JSON 줄 묶음, Parquet). 다시 정제할 때 씀</span></div>'},
+    {t:'⑤ 조회·활용', h:() =>
+      '<p>언리얼과 분석 프로그램은 DB에 <b>질문(SQL)</b>을 던져 필요한 만큼만 꺼냅니다.</p>'+
+      '<h3>지난 1시간, 장비별 1분 평균 (정상값만)</h3>'+
+      '<pre>SELECT time_bucket(\'1 minute\', time) AS minute, asset_id, avg(value)\nFROM sensor_data\nWHERE metric = \'temp\' AND quality = \'ok\'\n  AND time &gt; now() - interval \'1 hour\'\nGROUP BY minute, asset_id;</pre>'+
+      '<h3>사고 시각 10분 재생 (언리얼 타임라인용)</h3>'+
+      '<pre>SELECT * FROM sensor_data\nWHERE time BETWEEN \'2026-11-15 01:00:00Z\' AND \'2026-11-15 01:10:00Z\'\nORDER BY time;</pre>'+
+      '<h3>데이터 품질 점검</h3>'+
+      '<pre>SELECT quality, count(*) FROM sensor_data GROUP BY quality;</pre>'+
+      '<p class="small muted" style="margin-top:8px">데이터가 쌓이면 보관 규칙도 정합니다. 예: 1초 원값은 30일, 1분 평균은 1년. 이것이 빅데이터 관리입니다.</p>'}
+  ];
+
+  const tabs = document.getElementById('tabs'), panel = document.getElementById('panel');
+  let cur = 0;
+  steps.forEach((s,i) => {
+    const b = document.createElement('button');
+    b.textContent = s.t; b.setAttribute('role','tab');
+    b.onclick = () => show(i);
+    tabs.appendChild(b);
+  });
+  function show(i){
+    cur = Math.max(0, Math.min(steps.length-1, i));
+    [...tabs.children].forEach((b,j) => b.setAttribute('aria-selected', String(j===cur)));
+    panel.innerHTML = steps[cur].h();
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === steps.length-1;
+  }
+  document.getElementById('prev').onclick = () => show(cur-1);
+  document.getElementById('next').onclick = () => show(cur+1);
+  show(0);
+})();
+</script>
+</body>
+</html>

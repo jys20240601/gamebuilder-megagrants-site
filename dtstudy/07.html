@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>받은 빅데이터를 쓸모 있는 데이터로 만드는 과정</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><a class="side" href="./">목차</a></div></header>
+<main>
+<h1 id="받은-빅데이터를-쓸모-있는-데이터로-만드는-과정">받은 빅데이터를 쓸모 있는 데이터로 만드는 과정</h1>
+<p>정제·정합·저장은 <a href="06.html">06 정제정합DB</a> 참고. 이 문서는 그다음, 쌓인 데이터를 <strong>쓸모 있게</strong> 만드는 과정이다.</p>
+<h2 id="한-줄">한 줄</h2>
+<blockquote>
+<p><strong>쓸모 있는 데이터는 "질문에 바로 답할 수 있는 데이터"다.</strong> 받은 그대로는 기록일 뿐이고, 질문에 맞게 줄이고, 묶고, 다른 데이터를 붙이고, 의미 있는 값을 계산해야 정보가 된다.</p>
+</blockquote>
+<h2 id="세-층으로-나눠-쌓는다">세 층으로 나눠 쌓는다</h2>
+<p>업계에서는 흔히 원본층(Bronze), 정제층(Silver), 활용층(Gold)으로 나눈다.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>층</th>
+<th>내용</th>
+<th>누가 쓰나</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>원본층</td>
+<td>받은 그대로</td>
+<td>다시 가공할 때</td>
+</tr>
+<tr>
+<td>정제층</td>
+<td>정제·정합을 마친 시계열(06 문서의 결과)</td>
+<td>재생, 상세 분석</td>
+</tr>
+<tr>
+<td>활용층</td>
+<td>질문에 맞게 집계하고 계산한 지표, 예측값</td>
+<td>언리얼 트윈, 대시보드, 알람, 보고서</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="단계">단계</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>하는 일</th>
+<th>크레인 예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⓪ 질문 정하기</td>
+<td>무엇을 알고 싶은지 먼저 정한다. 질문이 없으면 쓸모도 정할 수 없다</td>
+<td>"크레인별 생산성은? 고장 징후를 미리 알 수 있나?"</td>
+</tr>
+<tr>
+<td>① 탐색</td>
+<td>데이터를 둘러본다. 기간, 양, 빈칸 비율, 값의 분포, 시간대별 패턴, 이상한 구간</td>
+<td>"야간에 GPS 빈칸이 많다", "3번 크레인은 진동이 늘 높다"</td>
+</tr>
+<tr>
+<td>② 정제·정합</td>
+<td>06 문서의 과정. 원본층 → 정제층</td>
+<td>튀는 값 표시, UTC 통일, 장비 ID 연결</td>
+</tr>
+<tr>
+<td>③ 결합(보강)</td>
+<td>다른 데이터를 시간과 장비·위치로 붙인다</td>
+<td>작업 지시(운영 DB), 선박 입항 일정(AIS), 풍속(기상), 정비 이력</td>
+</tr>
+<tr>
+<td>④ 집계</td>
+<td>목적에 맞는 단위로 묶어 줄인다</td>
+<td>1초 위치 → 1분 → 1시간 → 교대조·일</td>
+</tr>
+<tr>
+<td>⑤ 지표 만들기</td>
+<td>원값에서 의미 있는 값을 계산한다</td>
+<td>위치 → 이동 거리, 작업 1회 시간(사이클), 시간당 처리량, 가동률, 대기 시간 / 진동 → 세기(RMS), 상승 추세</td>
+</tr>
+<tr>
+<td>⑥ 라벨 붙이기 (AI용)</td>
+<td>과거 사건을 데이터에 표시해 학습 재료를 만든다</td>
+<td>정비 이력의 고장일 기준 "고장 3일 전" 구간에 표시</td>
+</tr>
+<tr>
+<td>⑦ 분석·모델</td>
+<td>추세, 상관, 이상탐지, 예측</td>
+<td>"진동이 이렇게 오르면 며칠 안에 고장" 예측 모델</td>
+</tr>
+<tr>
+<td>⑧ 검증</td>
+<td>현장 담당자와 맞춰 보고, 지난 사건으로 시험한다</td>
+<td>지난달 고장 2건을 모델이 미리 잡았는가</td>
+</tr>
+<tr>
+<td>⑨ 활용·피드백</td>
+<td>활용층을 화면과 알람에 연결하고, 현장이 바뀌면 다시 데이터로 확인</td>
+<td>언리얼 크레인 위에 처리량 게이지, 고장 위험 색, 정비 알림</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="줄어드는-양-커지는-쓸모-장비-100대-예">줄어드는 양, 커지는 쓸모 (장비 100대 예)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>하루 데이터 양</th>
+<th>답할 수 있는 질문</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1초 5회 원값</td>
+<td>4,320만 건 (100대 × 5 × 86,400초)</td>
+<td>그 순간 어디 있었나</td>
+</tr>
+<tr>
+<td>1분 지표</td>
+<td>14만 4천 건 (100대 × 1,440분)</td>
+<td>몇 시쯤 느려졌나</td>
+</tr>
+<tr>
+<td>1시간 지표</td>
+<td>2,400건 (100대 × 24시간)</td>
+<td>어느 교대조, 어느 장비가 문제인가</td>
+</tr>
+<tr>
+<td>활용 지표</td>
+<td>장비별 KPI 몇 개 + 예측값</td>
+<td>오늘 무엇을 해야 하나</td>
+</tr>
+<tr>
+<td>행동</td>
+<td>알람 1건</td>
+<td>"7번 크레인 이번 주 정비"</td>
+</tr>
+</tbody>
+</table></div>
+<p>양은 줄고, 바로 행동할 수 있는 정도는 커진다.</p>
+<h2 id="활용층-예시-예시-수치">활용층 예시 (예시 수치)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>크레인</th>
+<th>시간당 처리량</th>
+<th>평균 사이클</th>
+<th>가동률</th>
+<th>진동 추세</th>
+<th>판단</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>crane03</td>
+<td>29박스</td>
+<td>2분 4초</td>
+<td>86%</td>
+<td>정상</td>
+<td>-</td>
+</tr>
+<tr>
+<td>crane07</td>
+<td>24박스</td>
+<td>2분 30초</td>
+<td>71%</td>
+<td>상승 중</td>
+<td>정비 권고</td>
+</tr>
+</tbody>
+</table></div>
+<p>언리얼에서는 이 표를 크레인 위 게이지, 색, 알람으로 보여 준다. 원본 4,320만 건을 다 그릴 필요가 없다.</p>
+<h2 id="도구">도구</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>일</th>
+<th>도구 예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>탐색</td>
+<td>Jupyter + pandas, SQL</td>
+</tr>
+<tr>
+<td>집계·지표</td>
+<td>SQL(time_bucket 등), pandas·Polars, 아주 크면 Spark</td>
+</tr>
+<tr>
+<td>모델</td>
+<td>scikit-learn, 시계열 예측 라이브러리</td>
+</tr>
+<tr>
+<td>자동 실행</td>
+<td>스케줄러(매시·매일 정해진 시각에 집계 실행)</td>
+</tr>
+<tr>
+<td>확인</td>
+<td>대시보드(Grafana), 언리얼 트윈</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="인터뷰용-한-문단">인터뷰용 한 문단</h2>
+<p>"빅데이터를 받으면 먼저 무엇을 알고 싶은지 질문을 정하고, 원본층, 정제층, 활용층으로 단계적으로 가공합니다. 장비 100대가 하루에 만드는 4,320만 건의 원값을 1분 지표 14만 건, 시간 지표 2,400건으로 줄이고, 작업 일정이나 기상 같은 다른 데이터를 붙여 생산성과 고장 징후 같은 지표를 만듭니다. 그 결과를 언리얼 트윈에 표시하고 알람으로 연결하는 것까지가 '쓸모 있는 데이터'를 만드는 과정입니다."</p><nav class="pager"><a href="06.html"><small>← 이전</small>06 정제 · 정합 · DB</a><a class="n" href="08.html"><small>다음 →</small>08 현업 용어집</a></nav><p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준이라 홍보 성격이 있습니다.</p>
+</main>
+</body>
+</html>

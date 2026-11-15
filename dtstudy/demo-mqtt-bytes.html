@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root{--background:#fff;--foreground:#171717;--card:#fff;--card-foreground:#171717;--muted:#f4f4f5;--muted-foreground:#737373;--border:#e5e5e5;--input:#e5e5e5;--ring:#a3a3a3;--primary:#171717;--primary-foreground:#fafafa;--secondary:#f4f4f5;--secondary-foreground:#171717;--accent:#f4f4f5;--accent-foreground:#171717;--destructive:#dc2626}
+@media (prefers-color-scheme:dark){:root{--background:#0f1115;--foreground:#e8eaf0;--card:#171b22;--card-foreground:#e8eaf0;--muted:#222833;--muted-foreground:#9aa3b2;--border:#2a3140;--input:#2a3140;--ring:#6b7280;--primary:#e8eaf0;--primary-foreground:#111318;--secondary:#222833;--secondary-foreground:#e8eaf0;--accent:#2a3140;--accent-foreground:#fff;--destructive:#f87171}}
+.dt-back{display:block;font:600 14px/1.4 system-ui,-apple-system,"Malgun Gothic",sans-serif;padding:0 0 12px;color:var(--foreground);text-decoration:none}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MQTT 약속의 실제 모습</title>
+<style>
+  body{margin:0;padding:16px;background:var(--background,#fff);color:var(--foreground,#171717);
+    font-family:var(--font-sans,system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif);font-size:14px;line-height:1.55}
+  h2{font-size:17px;margin:2px 0 6px}
+  h3{font-size:14px;margin:0 0 6px}
+  p{margin:0 0 10px}
+  .muted{color:var(--muted-foreground,#737373)}
+  .small{font-size:12px}
+  .mono{font-family:var(--font-mono,ui-monospace,Consolas,monospace)}
+  .card{background:var(--card,#fff);color:var(--card-foreground,#171717);border:1px solid var(--border,#e5e5e5);
+    border-radius:var(--radius,10px);padding:12px 14px}
+  .section{margin-bottom:22px}
+  button,select,input{font:inherit;font-size:13px}
+  button{cursor:pointer;border-radius:calc(var(--radius,10px) - 2px);padding:5px 11px;
+    border:1px solid var(--border,#e5e5e5);background:var(--secondary,#f4f4f5);color:var(--secondary-foreground,#171717)}
+  button:hover{background:var(--accent,#f4f4f5);color:var(--accent-foreground,#171717)}
+  button.primary{background:var(--primary,#171717);color:var(--primary-foreground,#fafafa);border-color:transparent}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ring,#a3a3a3);outline-offset:2px}
+  input[type=text],select{border:1px solid var(--input,#e5e5e5);background:var(--background,#fff);color:var(--foreground,#171717);
+    border-radius:calc(var(--radius,10px) - 2px);padding:5px 8px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+
+  /* 대화 순서 */
+  .seq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:0;row-gap:4px;position:relative}
+  .lane{text-align:center;font-weight:600;font-size:13px;padding:6px 4px;border-bottom:2px solid var(--border,#e5e5e5)}
+  .msg{position:relative;padding:3px 0 6px;transition:opacity .25s}
+  .msg.hidden{opacity:.12}
+  .msg.cur .line{background:var(--primary,#171717)}
+  .msg.cur .pkt{background:var(--primary,#171717);color:var(--primary-foreground,#fafafa)}
+  .line{height:2px;background:var(--muted-foreground,#a3a3a3);margin:0 14px;position:relative}
+  .line.r::after,.line.l::before{content:"";position:absolute;top:-5px;border:6px solid transparent}
+  .line.r::after{right:-6px;border-left:8px solid var(--muted-foreground,#a3a3a3);border-right:0}
+  .line.l::before{left:-6px;border-right:8px solid var(--muted-foreground,#a3a3a3);border-left:0}
+  .msg.cur .line.r::after{border-left-color:var(--primary,#171717)}
+  .msg.cur .line.l::before{border-right-color:var(--primary,#171717)}
+  .lbl{display:flex;flex-wrap:wrap;gap:4px 6px;justify-content:center;align-items:baseline;margin-bottom:3px;font-size:12px}
+  .pkt{font-family:var(--font-mono,ui-monospace,Consolas,monospace);font-weight:700;font-size:11.5px;padding:0 6px;border-radius:4px;
+    background:var(--muted,#f4f4f5);border:1px solid var(--border,#e5e5e5)}
+  .say{color:var(--muted-foreground,#737373)}
+  .stepNote{min-height:44px}
+
+  /* 바이트 */
+  .bytes{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+  .seg{border-radius:6px;padding:4px 6px 5px;border:1px solid var(--border,#e5e5e5)}
+  .seg .name{font-size:11px;font-weight:600;margin-bottom:3px}
+  .seg .hex{font-family:var(--font-mono,ui-monospace,Consolas,monospace);font-size:12px;word-break:break-all;line-height:1.5}
+  .s1{background:color-mix(in srgb,var(--chart-1,#2563eb) 16%,transparent);border-color:color-mix(in srgb,var(--chart-1,#2563eb) 45%,transparent)}
+  .s2{background:color-mix(in srgb,var(--chart-2,#0891b2) 16%,transparent);border-color:color-mix(in srgb,var(--chart-2,#0891b2) 45%,transparent)}
+  .s3{background:color-mix(in srgb,var(--chart-3,#7c3aed) 16%,transparent);border-color:color-mix(in srgb,var(--chart-3,#7c3aed) 45%,transparent)}
+  .s4{background:color-mix(in srgb,var(--chart-4,#d97706) 16%,transparent);border-color:color-mix(in srgb,var(--chart-4,#d97706) 45%,transparent)}
+  .s5{background:color-mix(in srgb,var(--chart-5,#16a34a) 16%,transparent);border-color:color-mix(in srgb,var(--chart-5,#16a34a) 45%,transparent)}
+  .bits{display:inline-grid;grid-template-columns:repeat(4,auto);gap:4px;margin:4px 0 8px}
+  .bit{border:1px solid var(--border,#e5e5e5);border-radius:6px;padding:3px 8px;text-align:center}
+  .bit b{font-family:var(--font-mono,ui-monospace,Consolas,monospace);font-size:14px;display:block}
+  .bit span{font-size:11px;color:var(--muted-foreground,#737373)}
+  .warn{color:var(--destructive,#dc2626);font-size:12.5px}
+  .totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+  .tot{background:var(--muted,#f4f4f5);border-radius:calc(var(--radius,10px) - 2px);padding:8px 10px}
+  .tot .n{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+  pre{margin:4px 0 0;white-space:pre-wrap;word-break:break-all;font-size:11.5px;color:var(--muted-foreground,#737373)}
+  @media (max-width:560px){ .totals{grid-template-columns:1fr} .lane{font-size:12px} }
+</style>
+</head>
+<body>
+<a class="dt-back" href="./">← 디지털트윈 인터뷰 노트</a>
+
+<div class="section">
+  <h2>약속 ①: 누가 언제 무슨 말을 하는가 (대화 순서)</h2>
+  <p class="muted small">MQTT 규격은 메시지 종류(3.1.1 기준 14가지)와 주고받는 순서를 정합니다. 단계를 하나씩 넘겨 보세요.</p>
+  <div class="bar">
+    <button id="prevBtn">◀ 이전</button>
+    <button id="nextBtn" class="primary">다음 ▶</button>
+    <button id="allBtn">전체 보기</button>
+    <span class="small muted" id="stepCount"></span>
+  </div>
+  <div class="card">
+    <div class="seq" id="seq">
+      <div class="lane">센서</div><div class="lane">브로커</div><div class="lane">언리얼</div>
+    </div>
+    <div class="stepNote small" id="stepNote" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>약속 ②: 편지 한 통을 몇 번째 바이트에 무엇을 적는가</h2>
+  <p class="muted small">PUBLISH(보내기) 메시지 한 통이 실제 전선에 어떤 바이트로 나가는지 MQTT 3.1.1 규칙대로 계산합니다. 토픽과 내용을 바꿔 보세요.</p>
+  <div class="card">
+    <div class="bar">
+      <label class="small">토픽 <input id="topic" type="text" value="busan/terminal/pump03/temp" size="28" aria-label="토픽"></label>
+      <label class="small">내용물 <input id="payload" type="text" value="42.5" size="12" aria-label="내용물"></label>
+      <label class="small">QoS <select id="qos" aria-label="QoS"><option>0</option><option selected>1</option><option>2</option></select></label>
+      <label class="small"><input id="retain" type="checkbox" checked> Retained</label>
+      <button id="jsonBtn">내용물을 JSON으로</button>
+    </div>
+    <div id="warn" class="warn"></div>
+
+    <h3 style="margin-top:6px">첫 바이트 = 종류 4비트 + 옵션 4비트</h3>
+    <div class="bits" id="bits"></div>
+
+    <h3>전체 바이트 (16진수)</h3>
+    <div class="bytes" id="bytes"></div>
+
+    <div class="totals">
+      <div class="tot"><div class="small muted">MQTT로 보낼 때</div><div class="n" id="mqttTotal">0</div><div class="small muted">바이트</div></div>
+      <div class="tot"><div class="small muted">같은 값을 최소한의 HTTP 요청으로 보낼 때</div><div class="n" id="httpTotal">0</div><div class="small muted">바이트 (실제 브라우저·라이브러리는 헤더가 더 붙음)</div></div>
+    </div>
+    <details style="margin-top:8px"><summary class="small">비교에 쓴 HTTP 요청 보기</summary><pre id="httpText"></pre></details>
+    <p class="small muted" style="margin:10px 0 0">MQTT 5.0에서는 토픽 뒤에 "속성(Properties)" 칸이 하나 더 들어갑니다. 연결(CONNECT)할 때 계정·비밀번호와 유언 메시지를 함께 보냅니다.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- 대화 순서 ----------
+  const L = {s:0, b:1, u:2};
+  const steps = [
+    {f:'u',t:'b',p:'CONNECT',  say:'"나 언리얼이야. 60초마다 안부 보낼게"', note:'연결 직후 첫 메시지는 반드시 CONNECT여야 한다는 규칙이 있습니다. 아이디, 계정·비밀번호, 안부 간격(Keep Alive)을 함께 보냅니다.'},
+    {f:'b',t:'u',p:'CONNACK',  say:'"접속 허락"', note:'브로커는 CONNECT를 받으면 CONNACK으로 허락이나 거절(예: 비밀번호 틀림)을 답합니다.'},
+    {f:'u',t:'b',p:'SUBSCRIBE',say:'busan/terminal/#', note:'"이 주소로 오는 편지는 나한테 줘"라고 구독을 신청합니다. 받고 싶은 QoS도 함께 적습니다.'},
+    {f:'b',t:'u',p:'SUBACK',   say:'"구독 등록 완료"', note:'브로커가 구독 신청을 확인합니다. 그 토픽에 Retained 값이 있으면 바로 보내 줍니다.'},
+    {f:'s',t:'b',p:'CONNECT',  say:'"나 펌프03. 끊기면 offline 알려 줘"', note:'센서도 접속합니다. 이때 유언 메시지(Last Will)를 브로커에 맡겨 둘 수 있습니다.'},
+    {f:'b',t:'s',p:'CONNACK',  say:'"접속 허락"', note:''},
+    {f:'s',t:'b',p:'PUBLISH',  say:'pump03/temp = 42.5 (QoS 1)', note:'센서가 토픽과 내용물을 담아 보냅니다. 받는 사람이 누군지는 모릅니다.'},
+    {f:'b',t:'s',p:'PUBACK',   say:'"잘 받았어"', note:'QoS 1이면 받는 쪽이 PUBACK으로 수신을 확인해 줘야 합니다. 확인이 안 오면 보낸 쪽이 다시 보냅니다. QoS 2는 PUBREC → PUBREL → PUBCOMP 네 단계로 "정확히 한 번"을 보장합니다.'},
+    {f:'b',t:'u',p:'PUBLISH',  say:'pump03/temp = 42.5', note:'브로커가 토픽 필터가 맞는 구독자에게 같은 편지를 전달합니다.'},
+    {f:'u',t:'b',p:'PUBACK',   say:'"잘 받았어"', note:''},
+    {f:'s',t:'b',p:'PINGREQ',  say:'"살아 있어"', note:'보낼 데이터가 없어도 안부 간격 안에 PINGREQ를 보냅니다. 브로커가 안부 간격의 1.5배 동안 아무것도 못 받으면 연결을 끊고 유언 메시지를 대신 발행합니다.'},
+    {f:'b',t:'s',p:'PINGRESP', say:'"확인"', note:''}
+  ];
+  const seq = document.getElementById('seq');
+  steps.forEach((s,i) => {
+    const a = L[s.f], b = L[s.t], lo = Math.min(a,b), hi = Math.max(a,b);
+    const div = document.createElement('div');
+    div.className = 'msg hidden';
+    div.style.gridColumn = (lo+1)+' / '+(hi+2);
+    div.innerHTML = '<div class="lbl"><span class="pkt">'+s.p+'</span><span class="say">'+s.say+'</span></div>'+
+      '<div class="line '+(b>a?'r':'l')+'" style="margin:0 calc(100% / '+(2*(hi-lo+1))+')"></div>';
+    div.style.paddingLeft = '0'; div.style.paddingRight = '0';
+    seq.appendChild(div);
+    // 빈 칸 채우기 (그리드 정렬 유지)
+    s.el = div; s.lo = lo; s.hi = hi;
+  });
+  // 그리드: 각 메시지가 자기 줄을 차지하도록 행 지정
+  steps.forEach((s,i) => { s.el.style.gridRow = String(i+2); });
+  let cur = 0;
+  function show(n, all){
+    cur = Math.max(1, Math.min(steps.length, n));
+    steps.forEach((s,i) => {
+      s.el.classList.toggle('hidden', !all && i >= cur);
+      s.el.classList.toggle('cur', !all && i === cur-1);
+    });
+    const s = steps[cur-1];
+    document.getElementById('stepCount').textContent = all ? '전체 '+steps.length+'단계' : cur+' / '+steps.length;
+    document.getElementById('stepNote').innerHTML = all
+      ? '접속(CONNECT·CONNACK) → 구독(SUBSCRIBE·SUBACK) → 보내기(PUBLISH·PUBACK) → 안부(PINGREQ·PINGRESP). 이 순서와 메시지 종류가 약속의 뼈대입니다.'
+      : '<b class="mono">'+s.p+'</b> '+(s.note || '');
+  }
+  document.getElementById('nextBtn').onclick = () => show(cur+1);
+  document.getElementById('prevBtn').onclick = () => show(cur-1);
+  document.getElementById('allBtn').onclick = () => show(steps.length, true);
+  show(1);
+
+  // ---------- 바이트 계산 (MQTT 3.1.1 PUBLISH) ----------
+  const enc = new TextEncoder();
+  const $ = id => document.getElementById(id);
+  const hex = arr => Array.from(arr, b => b.toString(16).toUpperCase().padStart(2,'0')).join(' ');
+  function remLen(n){
+    const out = [];
+    do { let d = n % 128; n = Math.floor(n / 128); if (n > 0) d |= 128; out.push(d); } while (n > 0);
+    return out;
+  }
+  function esc(s){ return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  function build(){
+    const topic = $('topic').value, payload = $('payload').value;
+    const qos = parseInt($('qos').value,10), retain = $('retain').checked;
+    const warn = [];
+    if (!topic) warn.push('토픽은 비워 둘 수 없습니다.');
+    if (/[+#]/.test(topic)) warn.push('보내는 토픽에는 와일드카드(+, #)를 쓸 수 없습니다. 와일드카드는 구독할 때만 씁니다.');
+    $('warn').textContent = warn.join(' ');
+
+    const t = enc.encode(topic), p = enc.encode(payload);
+    const first = (3 << 4) | (0 << 3) | (qos << 1) | (retain ? 1 : 0);
+    const varLen = 2 + t.length + (qos > 0 ? 2 : 0);
+    const rl = remLen(varLen + p.length);
+    const segs = [
+      {c:'s1', n:'① 종류+옵션 (1바이트)', b:[first]},
+      {c:'s2', n:'② 남은 길이 ('+rl.length+'바이트) = '+(varLen+p.length), b:rl},
+      {c:'s3', n:'③ 토픽 길이 (2바이트) = '+t.length, b:[t.length >> 8, t.length & 255]},
+      {c:'s3', n:'④ 토픽 "'+esc(topic)+'" ('+t.length+'바이트)', b:Array.from(t)}
+    ];
+    if (qos > 0) segs.push({c:'s4', n:'⑤ 편지 번호 (2바이트, QoS 1·2만)', b:[0,1]});
+    segs.push({c:'s5', n:(qos>0?'⑥':'⑤')+' 내용물 "'+esc(payload)+'" ('+p.length+'바이트)', b:Array.from(p)});
+
+    $('bytes').innerHTML = segs.map(s => '<div class="seg '+s.c+'"><div class="name">'+s.n+'</div><div class="hex">'+(hex(s.b)||'(없음)')+'</div></div>').join('');
+    const bin = first.toString(2).padStart(8,'0');
+    $('bits').innerHTML =
+      '<div class="bit"><b>'+bin.slice(0,4)+'</b><span>종류 3 = PUBLISH</span></div>'+
+      '<div class="bit"><b>'+bin[4]+'</b><span>DUP 재전송 표시</span></div>'+
+      '<div class="bit"><b>'+bin.slice(5,7)+'</b><span>QoS '+qos+'</span></div>'+
+      '<div class="bit"><b>'+bin[7]+'</b><span>Retained '+(retain?'예':'아니오')+'</span></div>';
+
+    const total = 1 + rl.length + varLen + p.length;
+    $('mqttTotal').textContent = total;
+    const http = 'POST /'+topic+' HTTP/1.1\r\nHost: broker.local\r\nContent-Type: text/plain\r\nContent-Length: '+p.length+'\r\n\r\n'+payload;
+    $('httpTotal').textContent = enc.encode(http).length;
+    $('httpText').textContent = http.replace(/\r\n/g,'⏎\n');
+  }
+  ['topic','payload','qos','retain'].forEach(id => $(id).addEventListener('input', build));
+  $('qos').addEventListener('change', build); $('retain').addEventListener('change', build);
+  $('jsonBtn').onclick = () => { $('payload').value = '{"device":"pump03","value":42.5,"unit":"C"}'; build(); };
+  build();
+})();
+</script>
+</body>
+</html>

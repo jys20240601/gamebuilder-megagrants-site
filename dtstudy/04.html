@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>MQTT 쉽게 이해하기</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><a class="side" href="./">목차</a></div></header>
+<main>
+<h1 id="mqtt-쉽게-이해하기">MQTT 쉽게 이해하기</h1>
+<p>전체 흐름은 <a href="03.html">03 전체흐름 쉽게</a> 참고.</p>
+<h2 id="한-줄">한 줄</h2>
+<blockquote>
+<p><strong>MQTT는 센서처럼 작은 기기들이 데이터를 가볍고 안정적으로 주고받도록 만든 IoT용 메시지 전달 규칙이다.</strong> 보내는 쪽과 받는 쪽이 서로를 몰라도 되고, 가운데 "브로커"가 배달을 맡는다.</p>
+</blockquote>
+<ul>
+<li>1999년 IBM의 앤디 스탠퍼드-클라크와 알린 니퍼가 위성으로 송유관을 감시하려고 만들었다. 통신이 느리고 자주 끊기는 환경이 출발점이었다.</li>
+<li>2014년 OASIS 표준(3.1.1)이 됐고 2016년 ISO/IEC 20922가 됐다. 2019년에 5.0이 나왔다. 삼우이머션 사례 기사에서 말한 "ISO 표준 방식"이 이것이다.</li>
+</ul>
+<h2 id="누가-만들었나-규격과-프로그램은-다르다">누가 만들었나: 규격과 프로그램은 다르다</h2>
+<p>MQTT 자체는 프로그램이 아니라 <strong>규격(약속 문서)</strong>이다. 그 약속을 지켜 실제로 돌아가게 만든 프로그램은 여러 곳에서 따로 만들었다. 웹에 비유하면 HTTP가 규격이고, 크롬·엣지(브라우저)와 Nginx(웹 서버)가 그 규격을 구현한 프로그램인 것과 같다.</p>
+<h3 id="규격약속을-만든-곳">규격(약속)을 만든 곳</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>시기</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1999</td>
+<td>IBM의 앤디 스탠퍼드-클라크와 Arcom(나중에 Eurotech)의 알린 니퍼가 위성으로 송유관 설비를 감시하려고 설계. 이름의 MQ는 IBM 메시지 제품 MQSeries에서 왔다</td>
+</tr>
+<tr>
+<td>2010</td>
+<td>IBM이 규격(3.1)을 로열티 없이 공개. 누구나 무료로 구현할 수 있게 됨</td>
+</tr>
+<tr>
+<td>2014</td>
+<td>국제 표준화 단체 OASIS가 3.1.1을 표준으로 채택</td>
+</tr>
+<tr>
+<td>2016</td>
+<td>ISO/IEC 20922 국제 표준이 됨</td>
+</tr>
+<tr>
+<td>2019</td>
+<td>MQTT 5.0 표준. 지금은 OASIS의 MQTT 기술위원회가 관리</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="규격을-구현한-프로그램누가-만들었나">규격을 구현한 프로그램(누가 만들었나)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>종류</th>
+<th>프로그램</th>
+<th>만든 곳</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>브로커</td>
+<td>Mosquitto</td>
+<td>로저 라이트가 시작, 지금은 이클립스 재단 오픈소스</td>
+</tr>
+<tr>
+<td></td>
+<td>EMQX, NanoMQ</td>
+<td>EMQ(중국에서 시작한 회사), 오픈소스와 상용판</td>
+</tr>
+<tr>
+<td></td>
+<td>HiveMQ</td>
+<td>HiveMQ(독일 회사), 상용 중심</td>
+</tr>
+<tr>
+<td></td>
+<td>클라우드 브로커</td>
+<td>AWS IoT Core, Microsoft Azure 등</td>
+</tr>
+<tr>
+<td>클라이언트 라이브러리</td>
+<td>Eclipse Paho(Python paho-mqtt, C, Java, JS 등)</td>
+<td>이클립스 재단(IBM이 코드 기증)</td>
+</tr>
+<tr>
+<td></td>
+<td>MQTT.js</td>
+<td>오픈소스 커뮤니티</td>
+</tr>
+<tr>
+<td></td>
+<td>언리얼 MQTT 플러그인</td>
+<td>Epic(내장), 그 밖에 외부 개발사</td>
+</tr>
+<tr>
+<td>확인 도구</td>
+<td>MQTT Explorer, mosquitto_pub/sub</td>
+<td>개인 개발자 / 이클립스 재단</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="그래서-좋은-점">그래서 좋은 점</h3>
+<ul>
+<li>모두 같은 약속을 지키므로 <strong>서로 다른 회사 제품을 섞어도 통한다.</strong> 센서는 A사, 브로커는 Mosquitto, 저장기는 Python Paho, 화면은 언리얼 플러그인이어도 연결된다.</li>
+<li>특정 회사 제품에 묶이지 않는다. 수료생이 배운 것이 어느 회사 현장에서도 그대로 쓰인다.</li>
+<li>주의할 점은 버전이다. 3.1.1과 5.0이 섞여 쓰이므로 브로커와 클라이언트가 어느 버전을 지원하는지 확인한다.</li>
+</ul>
+<h2 id="어떤-약속인가-규격-문서에-적힌-것">어떤 약속인가: 규격 문서에 적힌 것</h2>
+<p>약속은 OASIS가 공개한 <strong>규격 문서</strong>로 되어 있다. 회사·단체 대표가 모인 기술위원회가 문안을 만들고 투표로 확정한다. 문서에는 "반드시(MUST) ~해야 한다" 식의 규칙이 번호와 함께 적혀 있다. 예를 들어 3.1.1의 첫 규칙은 "연결 후 클라이언트가 보내는 첫 메시지는 반드시 CONNECT여야 한다 [MQTT-3.1.0-1]"이다. 프로그램을 만드는 사람은 이 규칙을 지켜 구현하고, 규칙을 지킨 프로그램끼리는 서로 통한다.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>약속</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 메시지 종류</td>
+<td>3.1.1 기준 14가지(5.0은 인증용 AUTH를 더해 15가지). 접속 CONNECT·CONNACK, 보내기 PUBLISH·PUBACK(QoS 2는 PUBREC·PUBREL·PUBCOMP), 구독 SUBSCRIBE·SUBACK, 구독 해제 UNSUBSCRIBE·UNSUBACK, 안부 PINGREQ·PINGRESP, 종료 DISCONNECT</td>
+</tr>
+<tr>
+<td>② 대화 순서</td>
+<td>접속 → 허락 → 구독 → 확인 → 보내기 → (QoS 1이면) 수신 확인 → 안부</td>
+</tr>
+<tr>
+<td>③ 바이트 배치</td>
+<td>메시지마다 몇 번째 바이트에 무엇을 적는지. 첫 바이트의 앞 4비트는 종류, 뒤 4비트는 옵션(재전송 표시, QoS, Retained). 그다음 남은 길이, 토픽 길이, 토픽, 편지 번호(QoS 1·2), 내용물</td>
+</tr>
+<tr>
+<td>④ 토픽 규칙</td>
+<td><code>/</code>로 단계 구분, UTF-8 글자, 구독할 때만 <code>+</code>·<code>#</code> 사용, <code>$</code>로 시작하는 토픽은 브로커 내부용</td>
+</tr>
+<tr>
+<td>⑤ 행동 규칙</td>
+<td>새 구독자에게 Retained 값을 보낸다, 안부 간격의 1.5배 동안 소식이 없으면 연결을 끊는다, 비정상 종료 시 유언 메시지를 발행한다, QoS는 보내는 쪽과 받는 쪽 중 낮은 쪽을 따른다</td>
+</tr>
+<tr>
+<td>정하지 않은 것</td>
+<td>내용물 형식(JSON 등), 토픽 이름 짓는 법, 데이터 저장, 암호화(TLS에 맡김). 이것은 프로젝트에서 따로 약속해야 한다</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="실제-바이트-예">실제 바이트 예</h3>
+<p>토픽 <code>busan/terminal/pump03/temp</code>, 내용물 <code>42.5</code>, QoS 1, Retained를 3.1.1로 보내면 36바이트다.</p>
+<pre><code>33        첫 바이트: 0011(종류 3 = PUBLISH) 0(재전송 아님) 01(QoS 1) 1(Retained)
+22        남은 길이 34
+00 1A     토픽 길이 26
+62 75 ... 토픽 &quot;busan/terminal/pump03/temp&quot; (26바이트)
+00 01     편지 번호 1 (QoS 1·2만)
+34 32 2E 35  내용물 &quot;42.5&quot;
+</code></pre>
+<p>같은 값을 최소한의 HTTP 요청으로 보내면 114바이트이고, 실제 브라우저나 라이브러리는 헤더가 더 붙는다. MQTT가 가볍다는 말은 이 차이를 뜻한다.</p>
+<h2 id="mqtt와-json은-다르다">MQTT와 JSON은 다르다</h2>
+<ul>
+<li><strong>MQTT는 배달 방법</strong>(통신 규칙)이고, <strong>JSON은 편지 쓰는 형식</strong>(표기 방식)이다.</li>
+<li>MQTT 메시지 하나는 봉투(토픽, QoS, Retained)와 내용물(payload)로 되어 있다. 내용물은 JSON, 숫자 하나, CSV, 바이너리 무엇이든 된다.</li>
+<li>실무에서는 대부분 내용물을 JSON으로 쓴다. 예: 토픽 <code>busan/terminal/pump03/temp</code>, 내용물 <code>{"device":"pump03","value":42.5,"unit":"C","time":"2026-11-15T10:00:00+09:00"}</code></li>
+<li>웹(HTTP)도 JSON을 나르고 MQTT도 JSON을 나른다. JSON은 둘 다에 실리는 내용물 형식이다.</li>
+</ul>
+<h2 id="우체국-비유">우체국 비유</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>MQTT 용어</th>
+<th>우체국 비유</th>
+<th>디지털트윈 예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>발행자(Publisher)</strong></td>
+<td>편지를 보내는 사람</td>
+<td>크레인 GPS, 온도 센서</td>
+</tr>
+<tr>
+<td><strong>브로커(Broker)</strong></td>
+<td>우체국</td>
+<td>Mosquitto, EMQX 같은 서버</td>
+</tr>
+<tr>
+<td><strong>토픽(Topic)</strong></td>
+<td>받는 주소</td>
+<td><code>busan/terminal/crane07/position</code></td>
+</tr>
+<tr>
+<td><strong>구독자(Subscriber)</strong></td>
+<td>그 주소의 편지를 받겠다고 신청한 사람</td>
+<td>언리얼, Python 저장 프로그램, 관제 앱</td>
+</tr>
+<tr>
+<td><strong>메시지(Payload)</strong></td>
+<td>편지 내용</td>
+<td><code>{"lat":35.10,"lon":129.08,"t":"2026-11-15T10:00:00Z"}</code></td>
+</tr>
+</tbody>
+</table></div>
+<pre><code> 크레인 GPS ──발행──▶            ──전달──▶ 언리얼 (화면에 표시)
+ 온도 센서 ──발행──▶   브로커     ──전달──▶ Python (정제·DB 저장)
+ 헬멧      ──발행──▶            ──전달──▶ 알람 앱
+</code></pre>
+<p>센서는 누가 받는지 모르고 브로커에만 보낸다. 그래서 받는 쪽을 늘리거나 바꿔도 센서는 손댈 필요가 없다.</p>
+<h2 id="http와-무엇이-다른가">HTTP와 무엇이 다른가</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>HTTP (웹)</th>
+<th>MQTT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>방식</td>
+<td>요청해야 응답이 옴</td>
+<td>구독해 두면 새 값이 오는 즉시 밀어 줌</td>
+</tr>
+<tr>
+<td>실시간 값 받기</td>
+<td>계속 "새 값 있어?" 하고 물어야 함</td>
+<td>연결을 유지한 채 바로 받음</td>
+</tr>
+<tr>
+<td>메시지 크기</td>
+<td>헤더가 큼</td>
+<td>헤더 최소 2바이트로 가벼움</td>
+</tr>
+<tr>
+<td>맞는 곳</td>
+<td>웹 페이지, 파일, 조회</td>
+<td>센서, 장비, 저전력·불안정 네트워크</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="일반-통신-예시">일반 통신 예시</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>예</th>
+<th>방식</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>웹 브라우저로 페이지 열기</td>
+<td>브라우저가 서버에 요청 → 서버가 페이지를 응답 (HTTP)</td>
+</tr>
+<tr>
+<td>앱·프로그램이 날씨 API 조회</td>
+<td>"부산 지금 풍속?" 요청 → <code>{"wind": 7.2}</code> 응답 (HTTP REST API, 내용물은 JSON)</td>
+</tr>
+<tr>
+<td>공장 PLC 값 읽기</td>
+<td>관제 PC가 1초마다 "40001번 레지스터 값 줘" → PLC 응답 (Modbus 폴링)</td>
+</tr>
+<tr>
+<td>3D 모델·파일 내려받기</td>
+<td>요청 → 파일 응답 (HTTP)</td>
+</tr>
+</tbody>
+</table></div>
+<p>공통점: <strong>받는 쪽이 먼저 묻고, 상대 주소를 직접 알아야 하고, 1:1이다.</strong> 비유하면 전화 걸기다. MQTT는 구독 알림에 가깝다(구독해 두면 새 소식이 알아서 오고, 보내는 쪽은 누가 받는지 모른다).</p>
+<p>센서 하나를 세 곳(언리얼, 저장기, 알람)이 1초마다 HTTP로 물으면 센서는 1초에 3번 답해야 하고, 값이 그대로여도 계속 묻는다. MQTT는 센서가 한 번 보내면 브로커가 세 곳에 나눠 준다. 받는 곳이 100곳으로 늘어도 센서가 보내는 횟수는 같다.</p>
+<h3 id="디지털트윈은-둘-다-쓴다">디지털트윈은 둘 다 쓴다</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>용도</th>
+<th>방식</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>실시간 상태(위치, 온도), 알람, 제어 명령</td>
+<td>MQTT</td>
+</tr>
+<tr>
+<td>이력 조회("어제 하루 온도"), 설정 변경, 3D 모델·문서 받기, 외부 공공 API</td>
+<td>HTTP(REST)</td>
+</tr>
+</tbody>
+</table></div>
+<p>MQTT가 더 좋은 게 아니라 쓰임이 다르다.</p>
+<h2 id="꼭-알아야-할-기능-5가지">꼭 알아야 할 기능 5가지</h2>
+<ol>
+<li><strong>토픽 계층과 와일드카드</strong>
+   - 토픽은 <code>/</code>로 나뉜 폴더 구조다. 예: <code>busan/terminal/crane07/position</code>
+   - <code>+</code>는 한 단계를 대신한다. <code>busan/terminal/+/position</code>은 모든 크레인의 위치다.
+   - <code>#</code>은 그 아래 전부를 뜻한다. <code>busan/terminal/#</code>은 터미널의 모든 데이터다.
+   - 토픽 설계가 곧 디지털트윈의 데이터 지도다. 앞에서 말한 "대상 정합(ID 매핑)"과 바로 이어진다.</li>
+<li><strong>QoS (배달 보장 수준)</strong></li>
+</ol>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>QoS</th>
+<th>비유</th>
+<th>디지털트윈에서</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>일반 우편: 보내고 끝, 잃어버릴 수 있음</td>
+<td>1초 5회 오는 위치값. 곧 다음 값이 온다</td>
+</tr>
+<tr>
+<td>1</td>
+<td>등기: 최소 한 번 도착, 중복 가능</td>
+<td>알람, 상태 변경</td>
+</tr>
+<tr>
+<td>2</td>
+<td>정확히 한 번 도착 (가장 느림)</td>
+<td>제어 명령처럼 두 번 실행되면 안 되는 것</td>
+</tr>
+<tr>
+<td>3. <strong>Retained (마지막 값 보관)</strong>: 브로커가 토픽의 마지막 메시지를 기억한다. 언리얼을 새로 켜도 다음 값을 기다리지 않고 바로 현재 상태를 그린다.</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4. <strong>Last Will (유언 메시지)</strong>: 센서가 접속할 때 "내가 갑자기 끊기면 이걸 보내 줘"라고 맡겨 둔다. 연결이 끊기면 브로커가 대신 <code>offline</code>을 알린다. 트윈은 그 장비를 회색으로 바꾼다.</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>5. <strong>Keep Alive</strong>: 일정 간격으로 "살아 있음" 신호를 주고받아 끊김을 빨리 알아챈다.</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="기술-기본값">기술 기본값</h2>
+<ul>
+<li>TCP 위에서 동작한다. 기본 포트는 1883, 암호화(TLS)는 8883이다.</li>
+<li>브로커가 WebSocket을 지원하면 브라우저에서도 받을 수 있다.</li>
+<li>보안은 TLS 암호화, 아이디·비밀번호, 토픽별 접근 권한(ACL)으로 한다.</li>
+<li>대표 브로커: Mosquitto(가벼운 오픈소스, 실습용), EMQX·HiveMQ(대규모), 클라우드 IoT 서비스.</li>
+<li>언리얼: 엔진에 MQTT 플러그인이 들어 있다(UE 5.1~5.2 무렵부터 베타·실험 단계로 보고됨). 마켓 플러그인도 있고, Python으로 중계해도 된다.</li>
+</ul>
+<h2 id="한계-빅데이터-가공이-따로-필요한-이유">한계: 빅데이터 가공이 따로 필요한 이유</h2>
+<ul>
+<li><strong>MQTT는 배달부이지 창고가 아니다.</strong> 지나간 메시지를 쌓아 두지 않는다(Retained는 마지막 1개뿐). 이력 분석, 재생, 예측을 하려면 구독해서 DB에 저장해야 한다.</li>
+<li><strong>내용 형식은 정해 주지 않는다.</strong> JSON 구조, 단위, 시간 표기는 프로젝트에서 따로 약속해야 한다. 이 약속을 맞추는 일이 정제·정합 작업이다.</li>
+<li><strong>큰 영상에는 맞지 않는다.</strong> CCTV는 AI가 인식한 결과(이벤트)만 MQTT로 보낸다.</li>
+<li>브로커가 멈추면 전체가 멈춘다. 대규모 현장은 브로커를 여러 대로 묶는다(클러스터).</li>
+</ul>
+<h2 id="구축-방법">구축 방법</h2>
+<p>MQTT를 돌리는 데는 세 가지가 필요하다: <strong>브로커(우체국) 1개, 보내는 쪽, 받는 쪽.</strong> 처음 띄우는 일은 쉽고, 운영 수준으로 다듬는 일(토픽 설계, 보안, 저장, 규모)이 진짜 일이다.</p>
+<h3 id="1단계-브로커-띄우기-pc-한-대-약-30분">1단계: 브로커 띄우기 (PC 한 대, 약 30분)</h3>
+<ol>
+<li>Mosquitto(이클립스 재단의 오픈소스 브로커)를 설치한다. Windows 설치 파일이 있고, Docker라면 <code>eclipse-mosquitto</code> 이미지를 쓴다.</li>
+<li>설정 파일 <code>mosquitto.conf</code>에 최소 두 줄을 넣는다.
+   <code>listener 1883
+   allow_anonymous true</code>
+   Mosquitto 2.0부터는 설정이 없으면 같은 PC 안(localhost)에서만 받는다. 다른 PC(언리얼 PC, 라즈베리파이)에서 접속하려면 <code>listener</code>가 필요하고, 이때 익명 접속은 기본으로 막혀 있어 실습에서는 <code>allow_anonymous true</code>로 연다(운영에서는 4단계처럼 계정을 쓴다).</li>
+<li>터미널 두 개로 확인한다.
+   <code>mosquitto_sub -h localhost -t "busan/#" -v           # 받는 쪽: busan 아래 전부 구독
+   mosquitto_pub -h localhost -t busan/test -m "hello"  # 보내는 쪽</code>
+   받는 쪽 창에 <code>busan/test hello</code>가 찍히면 성공이다.</li>
+<li>눈으로 보려면 MQTT Explorer(무료 GUI)를 연결한다. 토픽 나무와 값이 실시간으로 보여서 수업용으로 좋다.</li>
+</ol>
+<h3 id="2단계-센서와-저장기-붙이기-python-paho-mqtt">2단계: 센서와 저장기 붙이기 (Python, paho-mqtt)</h3>
+<p>보내는 쪽(가짜 센서 또는 라즈베리파이 온도 센서):</p>
+<pre><code class="language-python">import json, time, random
+import paho.mqtt.client as mqtt
+
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+client.connect(&quot;브로커 IP&quot;, 1883)
+client.loop_start()
+while True:
+    data = {&quot;device&quot;: &quot;pump03&quot;, &quot;value&quot;: round(30 + random.random() * 15, 1),
+            &quot;unit&quot;: &quot;C&quot;, &quot;time&quot;: time.strftime(&quot;%Y-%m-%dT%H:%M:%S+09:00&quot;)}
+    client.publish(&quot;busan/terminal/pump03/temp&quot;, json.dumps(data), qos=1, retain=True)
+    time.sleep(1)
+</code></pre>
+<p>받는 쪽(저장기·알람):</p>
+<pre><code class="language-python">import json
+import paho.mqtt.client as mqtt
+
+def on_message(client, userdata, msg):
+    data = json.loads(msg.payload)          # JSON 풀기
+    print(msg.topic, data[&quot;value&quot;])         # 여기서 DB에 저장
+    if data[&quot;value&quot;] &gt; 40:                  # 기준 넘으면 알람 발행
+        client.publish(&quot;busan/terminal/pump03/alarm&quot;, json.dumps({&quot;level&quot;: &quot;warning&quot;}), qos=1)
+
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+client.on_message = on_message
+client.connect(&quot;브로커 IP&quot;, 1883)
+client.subscribe(&quot;busan/terminal/+/temp&quot;)
+client.loop_forever()
+</code></pre>
+<p>코드 없이 연결하는 도구도 있다. Node-RED(블록을 선으로 이어 MQTT → DB 연결), Telegraf(MQTT를 받아 InfluxDB에 저장).</p>
+<h3 id="3단계-언리얼-연결">3단계: 언리얼 연결</h3>
+<ul>
+<li>블루프린트 흐름: 브로커 접속 → 토픽 구독(<code>busan/terminal/#</code>) → 메시지 도착 이벤트 → JSON 풀기 → 토픽의 장비 ID로 액터 찾기 → 위치·색·UI 갱신.</li>
+</ul>
+<p>언리얼에서 MQTT를 받는 방법은 세 가지다(2026-11-15 조사).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>방법</th>
+<th>내용</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 엔진 내장 MQTT 플러그인</td>
+<td>Epic이 만든 플러그인. 플러그인 창의 IOT 분류. UE 5.1~5.2 무렵 들어옴</td>
+<td>2026년 5.6.1 보고까지도 <strong>실험 단계</strong>. 공식 문서가 거의 비어 있음. 포럼 보고: 연결 이벤트가 안 불림(5.2~5.3), 0.5초 간격 수신 시 크래시, 클라우드 브로커 접속 오류, 5.6.1에서 30초 안에 크래시, 블루프린트에서 내용물을 바이트 배열로 바꿔야 함</td>
+</tr>
+<tr>
+<td>② 외부 플러그인(Fab 등)</td>
+<td>Total MQTT(여러 브로커 동시 접속, BP·C++), MqttLink(QoS 0/1/2, Retained, BP·C++), MqttUtilities(오픈소스, BP), UnrealMosquitto(오픈소스)</td>
+<td>엔진 버전(5.8) 지원 여부를 제품마다 확인해야 함</td>
+</tr>
+<tr>
+<td>③ 중계</td>
+<td>Python·Node-RED가 MQTT를 받아 언리얼에 넘김. 언리얼 쪽은 Remote Control API(엔진 공식 기능, HTTP 30010·WebSocket 30020 포트로 액터 속성 변경·함수 호출) 또는 WebSocket</td>
+<td>가장 안정적. 데이터 레이어(Python)와 시각화 레이어(언리얼)를 나누는 과정 설계와도 맞음</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>수업 권장: 처음에는 ③ 중계로 확실히 동작하게 만들고, ①은 "실험 기능은 이런 문제가 있다"를 보여 주는 비교 실습으로, ②는 검증된 것 하나를 골라 쓴다.</li>
+<li>사전미팅 질문: 삼우이머션은 언리얼 MQTT 연동을 어떻게 하는가(내장 플러그인, 외부 플러그인, 자체 C++ 플러그인, 중계 서버). Epic 스포트라이트에는 MQTT를 연동했다는 사실만 있고 방법은 없다.</li>
+</ul>
+<h3 id="4단계-운영-수준으로">4단계: 운영 수준으로</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>할 일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>토픽 설계</td>
+<td><code>사이트/구역/장비/항목</code> 규칙을 먼저 정한다. 예: <code>busan/terminal/crane07/position</code></td>
+</tr>
+<tr>
+<td>내용물 약속</td>
+<td>JSON 필드 이름, 단위, 시간 표기(예: <code>device</code>, <code>value</code>, <code>unit</code>, <code>time</code> +09:00)를 문서로 고정</td>
+</tr>
+<tr>
+<td>보안</td>
+<td>계정·비밀번호(<code>mosquitto_passwd</code>), TLS 암호화(포트 8883), 토픽별 권한(ACL)</td>
+</tr>
+<tr>
+<td>저장</td>
+<td>구독자가 시계열 DB에 쌓는다. MQTT 자체는 저장하지 않는다</td>
+</tr>
+<tr>
+<td>옛 설비</td>
+<td>Modbus·OPC UA 장비는 게이트웨이(엣지 서버)가 읽어서 MQTT로 바꿔 발행</td>
+</tr>
+<tr>
+<td>규모·안정성</td>
+<td>장비가 많아지면 클러스터 브로커(EMQX, HiveMQ) 또는 클라우드 IoT 서비스</td>
+</tr>
+<tr>
+<td>감시</td>
+<td>브로커 접속 수, 메시지량, 끊긴 장비(Last Will)를 대시보드로 확인</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="과정에-넣는다면">과정에 넣는다면</h3>
+<ul>
+<li>Stage 1 첫 실습: 1~2단계(브로커 띄우기, 가짜 센서, 저장기).</li>
+<li>Stage 1 후반: 3단계(언리얼에서 펌프 색 바꾸기).</li>
+<li>Stage 2 이후·캡스톤: 4단계(토픽 설계서, 보안, 장비 수를 늘린 부하 시험).</li>
+</ul>
+<p>인터뷰에서는 "MQTT를 띄우는 건 브로커 설치 몇 분, 코드 열 줄 수준이다. 실무 역량은 토픽 설계, 데이터 약속, 보안, 저장, 규모에서 갈리고, 과정은 이 순서로 난이도를 올린다"라고 말할 수 있다.</p>
+<h2 id="인터뷰용-한-문단">인터뷰용 한 문단</h2>
+<p>"MQTT는 IoT 표준 메시지 프로토콜입니다. 센서가 토픽이라는 주소로 데이터를 발행하면, 브로커가 그 토픽을 구독한 언리얼과 저장 서버에 동시에 전달합니다. 가볍고 끊김에 강해서 항만이나 공장 현장 데이터 수집에 널리 쓰이고, 삼우이머션의 부산항 터미널 디지털트윈도 MQTT로 실시간 데이터를 받았습니다. 다만 MQTT는 전달만 하기 때문에, 이력 저장, 정제, 분석은 그 뒤의 빅데이터 파이프라인에서 처리합니다. 우리 과정은 첫 단계에서 MQTT로 센서 하나를 언리얼에 연결하는 것부터 시작합니다."</p><nav class="pager"><a href="03.html"><small>← 이전</small>03 전체 흐름 쉽게</a><a class="n" href="05.html"><small>다음 →</small>05 IoT 개념</a></nav><p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준이라 홍보 성격이 있습니다.</p>
+</main>
+</body>
+</html>
