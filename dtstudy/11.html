@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>정제 · 정합 파이썬 샘플 코드</title>
+<link rel="icon" type="image/png" href="/img/logo.png">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--fg:#1a1a1a;--mut:#6b6b6b;--line:#e4e4e0;--acc:#2563eb;--code:#efefeb;--mark:#fde68a;--star:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171b22;--fg:#e8eaf0;--mut:#9aa3b2;--line:#2a3140;--acc:#7aa2ff;--code:#1f2430;--mark:#6b4e0a;--star:#f5b83d}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top a{color:var(--fg);text-decoration:none;font-weight:700;font-size:.95rem}
+.top .side{font-weight:500;color:var(--mut);font-size:.85rem}
+main{max-width:780px;margin:0 auto;padding:12px 16px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:.5em 0 .7em}
+h2{font-size:1.18rem;line-height:1.4;margin:1.9em 0 .6em;padding-left:.55em;border-left:4px solid var(--acc)}
+h3{font-size:1.04rem;margin:1.5em 0 .4em}
+a{color:var(--acc)}
+p,li{font-size:1rem}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9em 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;font-size:.88rem;line-height:1.55;min-width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--code);white-space:nowrap}
+td{min-width:6.5em}
+td:first-child{min-width:5.5em}
+td:last-child{min-width:11em}
+tr:last-child td{border-bottom:0}
+pre{background:var(--code);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",monospace;font-size:.86em;background:var(--code);padding:.08em .35em;border-radius:5px;word-break:break-all}
+pre code{background:none;padding:0;word-break:normal}
+blockquote{margin:1em 0;padding:.7em 1em;border-left:4px solid var(--acc);background:var(--card);border-radius:0 10px 10px 0}
+blockquote p{margin:.2em 0}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.pager{display:flex;gap:10px;margin-top:2.6em}
+.pager a{flex:1;display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--fg);font-size:.92rem}
+.pager .n{text-align:right}
+.pager small{display:block;color:var(--mut);font-size:.78rem}
+.foot{margin-top:2.4em;color:var(--mut);font-size:.8rem}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-decoration:none;color:var(--fg)}
+.card b{display:block;font-size:1.02rem}
+.card span{display:block;color:var(--mut);font-size:.86rem;margin-top:2px;line-height:1.5}
+.card .no{color:var(--acc);font-weight:700;margin-right:.35em}
+.card.big{border:2px solid var(--acc)}
+.lead{color:var(--mut);font-size:.95rem}
+.key li{margin:.45em 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./">디지털트윈 인터뷰 노트</a><a class="side" href="./">목차</a></div></header>
+<main>
+<h1 id="정제-정합-파이썬-샘플-코드">정제 · 정합 파이썬 샘플 코드</h1>
+<p>개념은 <a href="06.html">06 정제정합DB</a> 참고. 코드 파일: <a href="code/clean_align_sample.py">code/clean_align_sample.py</a></p>
+<h2 id="이-코드가-하는-일">이 코드가 하는 일</h2>
+<p>MQTT로 들어온 메시지 9통을 06 문서의 예와 똑같이 처리한다. 파이썬 기본 기능만 써서 <strong>추가 설치 없이</strong> 돌아가고, DB는 파이썬에 들어 있는 SQLite를 쓴다.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>단계</th>
+<th>코드 위치</th>
+<th>하는 일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⓪ 원본 보관</td>
+<td><code>handle()</code> 처음</td>
+<td>받은 그대로 <code>raw_messages.jsonl</code>에 한 줄씩 저장</td>
+</tr>
+<tr>
+<td>① 형식 검사</td>
+<td><code>json.loads</code> + <code>try/except</code></td>
+<td>JSON이 깨졌거나 device가 없으면 <code>errors</code> 표로</td>
+</tr>
+<tr>
+<td>② 대상 정합</td>
+<td><code>REGISTRY.get(device)</code></td>
+<td>장비 대장에서 찾아 언리얼 액터 이름을 붙임. 없으면 <code>pending</code> 표로</td>
+</tr>
+<tr>
+<td>② 시간 정합</td>
+<td><code>fix_time()</code></td>
+<td>UTC로 바꾸고, 장비 시계가 5초 넘게 틀리면 받은 시각으로 대신(<code>clock_fixed</code>)</td>
+</tr>
+<tr>
+<td>① 단위 통일</td>
+<td><code>to_celsius()</code></td>
+<td>화씨 → 섭씨</td>
+</tr>
+<tr>
+<td>① 중복 제거</td>
+<td><code>self.seen</code></td>
+<td>같은 장비·시각·값이면 버림</td>
+</tr>
+<tr>
+<td>① 범위·변화량</td>
+<td><code>_handle_temp()</code></td>
+<td>정상 범위 밖이면 <code>out_of_range</code>, 직전 정상값보다 너무 크게 변하면 <code>spike</code> 표시</td>
+</tr>
+<tr>
+<td>② 좌표 정합</td>
+<td><code>latlon_to_local_m()</code></td>
+<td>위경도 → 원점 기준 동·북 거리(m) → 언리얼 cm</td>
+</tr>
+<tr>
+<td>③ 저장</td>
+<td><code>_insert()</code></td>
+<td>시각 · 장비 · 액터 · 항목 · 값 · 품질</td>
+</tr>
+<tr>
+<td>시간 정합(리샘플링)</td>
+<td><code>resample_last_per_second()</code></td>
+<td>1초 5회·1초 2회 데이터를 1초 칸으로 맞춤</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="실행">실행</h2>
+<pre><code>python clean_align_sample.py
+</code></pre>
+<p>Git Bash에서 한글이 깨지면 <code>PYTHONIOENCODING=utf-8 python clean_align_sample.py</code>로 실행한다.</p>
+<h2 id="실행-결과-2026-11-16-실제-실행">실행 결과 (2026-11-16 실제 실행)</h2>
+<pre><code>■ 판정
+  1. pump03   ok            32.1℃
+  2. pump03   spike         85.0℃
+  3. crane07  ok            (35.1056, 129.082) → 동 182.34m · 북 66.57m → 언리얼 18234 · 6657 cm
+  4. pump03   ok            32.3℃
+  5. pump03   중복 제거         32.3℃
+  6. pump05   ok            91.4°F → 33.0℃
+  7. pump03   clock_fixed   32.4℃
+  8. pump03   버림            형식 오류(JSON이 깨졌거나 device 없음)
+  9. tmp-9    보류            장비 대장에 없음
+
+■ DB에 저장된 행 (sensor_data)
+   ('01:00:00.000', 'pump03', 'BP_Pump_03', 'temp_c', 32.1, 'ok')
+   ('01:00:01.000', 'pump03', 'BP_Pump_03', 'temp_c', 85.0, 'spike')
+   ('01:00:01.000', 'crane07', 'BP_Crane_07', 'east_m', 182.34, 'ok')
+   ('01:00:01.000', 'crane07', 'BP_Crane_07', 'north_m', 66.57, 'ok')
+   ('01:00:02.000', 'pump03', 'BP_Pump_03', 'temp_c', 32.3, 'ok')
+   ('01:00:03.000', 'pump05', 'BP_Pump_05', 'temp_c', 33.0, 'ok')
+   ('01:00:03.500', 'pump03', 'BP_Pump_03', 'temp_c', 32.4, 'clock_fixed')
+
+■ 품질별 개수
+   ('clock_fixed', 1)
+   ('ok', 5)
+   ('spike', 1)
+
+■ 정상값만 장비별 평균 (분석할 때는 quality로 걸러 쓴다)
+   ('pump03', 32.27)
+   ('pump05', 33.0)
+
+■ 오류·보류: 1 건 / 1 건
+
+■ 리샘플링 예: 크레인 1초 5회 + 헬멧 1초 2회 → 1초 칸
+   0초  크레인 11.2m  헬멧 4.1m
+   1초  크레인 12.7m  헬멧 4.3m
+   2초  크레인 14.2m  헬멧 4.5m
+</code></pre>
+<ul>
+<li>9통 → DB 7행. 튀는 값(85.0)은 지우지 않고 <code>spike</code>로 남겼고, 평균을 낼 때는 <code>quality</code>로 걸러 32.27℃가 나왔다.</li>
+<li>크레인 위치는 동쪽 182.34m, 북쪽 66.57m로 바뀌었다. 언리얼 축 방향은 Georeferencing 설정을 따른다.</li>
+</ul>
+<h2 id="전체-코드">전체 코드</h2>
+<pre><code class="language-python">&quot;&quot;&quot;정제 · 정합 샘플 코드
+
+MQTT로 들어온 메시지를 정제하고(검사·고치기·표시·버리기), 정합하고(대상·시간·좌표 맞추기),
+DB(SQLite)에 저장한다. 파이썬 기본 기능만 써서 추가 설치 없이 돌아간다.
+
+실행:  python clean_align_sample.py   (Git Bash에서 한글이 깨지면 PYTHONIOENCODING=utf-8 을 앞에 붙인다)
+결과:  같은 폴더에 sample.db(DB)와 raw_messages.jsonl(원본 보관)이 생기고, 처리 결과가 화면에 나온다.
+&quot;&quot;&quot;
+import json
+import math
+import sqlite3
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+
+UTC = timezone.utc
+
+
+# ─────────────────────────────────────────────
+# 1. 장비 대장: 정합의 중심. 장비를 추가할 때는 여기에 한 줄만 넣는다
+# ─────────────────────────────────────────────
+@dataclass
+class Asset:
+    asset_id: str        # DB와 트윈에서 쓰는 ID
+    actor: str           # 언리얼 액터 이름
+    kind: str            # &quot;temp&quot; 또는 &quot;position&quot;
+    unit: str            # 센서가 보내는 단위: &quot;C&quot;, &quot;F&quot;, &quot;deg&quot;(위경도)
+    vmin: float | None   # 정상 범위 아래 (℃)
+    vmax: float | None   # 정상 범위 위 (℃)
+    max_jump: float      # 1초당 허용 변화량 (온도는 ℃, 위치는 m)
+
+
+REGISTRY = {
+    &quot;pump03&quot;:  Asset(&quot;pump03&quot;,  &quot;BP_Pump_03&quot;,  &quot;temp&quot;,     &quot;C&quot;,   -20, 120, 5),
+    &quot;pump05&quot;:  Asset(&quot;pump05&quot;,  &quot;BP_Pump_05&quot;,  &quot;temp&quot;,     &quot;F&quot;,   -20, 120, 5),
+    &quot;crane07&quot;: Asset(&quot;crane07&quot;, &quot;BP_Crane_07&quot;, &quot;position&quot;, &quot;deg&quot;, None, None, 5),
+}
+
+ORIGIN_LAT, ORIGIN_LON = 35.10500, 129.08000   # 터미널 원점(언리얼 0,0,0에 해당하는 실제 위치)
+MAX_CLOCK_SKEW = timedelta(seconds=5)          # 장비 시각과 받은 시각의 허용 차이
+
+
+# ─────────────────────────────────────────────
+# 2. 정제·정합에 쓰는 작은 함수들
+# ─────────────────────────────────────────────
+def to_celsius(value: float, unit: str) -&gt; float:
+    &quot;&quot;&quot;단위 통일: 화씨면 섭씨로 바꾼다.&quot;&quot;&quot;
+    if unit == &quot;F&quot;:
+        return round((value - 32) * 5 / 9, 1)
+    return value
+
+
+def fix_time(device_time: str | None, received: datetime) -&gt; tuple[datetime, str]:
+    &quot;&quot;&quot;시간 정합: UTC로 바꾸고, 장비 시계가 많이 틀렸으면 받은 시각으로 대신한다.&quot;&quot;&quot;
+    if not device_time:
+        return received, &quot;clock_missing&quot;
+    t = datetime.fromisoformat(device_time).astimezone(UTC)
+    if abs(t - received) &gt; MAX_CLOCK_SKEW:
+        return received, &quot;clock_fixed&quot;
+    return t, &quot;ok&quot;
+
+
+def latlon_to_local_m(lat: float, lon: float) -&gt; tuple[float, float]:
+    &quot;&quot;&quot;좌표 정합: 위경도(WGS84)를 원점 기준 동쪽·북쪽 거리(m)로 바꾼다.
+
+    수 km 안의 좁은 현장에서 쓰는 근사식이다. 넓은 지역이나 정밀 작업은
+    pyproj(좌표계 변환 라이브러리)나 언리얼 Georeferencing 플러그인을 쓴다.
+    &quot;&quot;&quot;
+    a, e2 = 6378137.0, 6.69437999014e-3                 # WGS84 타원체
+    phi = math.radians(ORIGIN_LAT)
+    w = 1 - e2 * math.sin(phi) ** 2
+    m = a * (1 - e2) / w ** 1.5                         # 남북 방향 곡률 반지름
+    n = a / math.sqrt(w)                                # 동서 방향 곡률 반지름
+    north = math.radians(lat - ORIGIN_LAT) * m
+    east = math.radians(lon - ORIGIN_LON) * n * math.cos(phi)
+    return round(east, 2), round(north, 2)
+
+
+# ─────────────────────────────────────────────
+# 3. 저장기: 메시지 한 통을 받아 처리한다 (MQTT on_message에서 이 함수를 부르면 된다)
+# ─────────────────────────────────────────────
+class Cleaner:
+    def __init__(self, db_path=&quot;sample.db&quot;, raw_path=&quot;raw_messages.jsonl&quot;):
+        self.db = sqlite3.connect(db_path)
+        self.db.executescript(&quot;&quot;&quot;
+            DROP TABLE IF EXISTS sensor_data; DROP TABLE IF EXISTS errors; DROP TABLE IF EXISTS pending;
+            CREATE TABLE sensor_data (time TEXT, asset_id TEXT, actor TEXT, metric TEXT, value REAL, quality TEXT);
+            CREATE TABLE errors  (received TEXT, topic TEXT, raw TEXT, reason TEXT);
+            CREATE TABLE pending (received TEXT, device TEXT, raw TEXT);
+        &quot;&quot;&quot;)
+        self.raw_file = open(raw_path, &quot;w&quot;, encoding=&quot;utf-8&quot;)
+        self.seen = set()       # 중복 확인용: (장비, 시각, 값)
+        self.last_ok = {}       # 장비별 마지막 정상값: {asset_id: (시각, 값)}
+        self.log = []           # 화면 출력용 판정 기록
+
+    def handle(self, received: datetime, topic: str, payload: str):
+        rec = received.astimezone(UTC)
+
+        # ⓪ 원본은 무조건 그대로 보관한다
+        self.raw_file.write(json.dumps({&quot;received&quot;: rec.isoformat(), &quot;topic&quot;: topic, &quot;payload&quot;: payload},
+                                       ensure_ascii=False) + &quot;\n&quot;)
+
+        # ① 정제: 형식 검사
+        try:
+            d = json.loads(payload)
+            device = d[&quot;device&quot;]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            return self._error(rec, topic, payload, &quot;형식 오류(JSON이 깨졌거나 device 없음)&quot;)
+
+        # ② 정합: 대상 맞추기 — 장비 대장에 없으면 보류
+        asset = REGISTRY.get(device)
+        if asset is None:
+            self.db.execute(&quot;INSERT INTO pending VALUES (?,?,?)&quot;, (rec.isoformat(), device, payload))
+            return self.log.append((device, &quot;보류&quot;, &quot;장비 대장에 없음&quot;))
+
+        # ② 정합: 시간 맞추기
+        t, time_flag = fix_time(d.get(&quot;time&quot;), rec)
+
+        if asset.kind == &quot;temp&quot;:
+            self._handle_temp(asset, d, t, time_flag)
+        else:
+            self._handle_position(asset, d, t, time_flag)
+
+    def _handle_temp(self, asset, d, t, time_flag):
+        if &quot;value&quot; not in d:
+            return self.log.append((asset.asset_id, &quot;버림&quot;, &quot;value 없음&quot;))
+        v = to_celsius(float(d[&quot;value&quot;]), asset.unit)                  # ① 단위 통일
+
+        key = (asset.asset_id, t.isoformat(), v)                       # ① 중복 제거
+        if key in self.seen:
+            return self.log.append((asset.asset_id, &quot;중복 제거&quot;, f&quot;{v}℃&quot;))
+        self.seen.add(key)
+
+        quality = time_flag                                            # ① 범위·변화량 검사
+        if not (asset.vmin &lt;= v &lt;= asset.vmax):
+            quality = &quot;out_of_range&quot;
+        elif asset.asset_id in self.last_ok:
+            t0, v0 = self.last_ok[asset.asset_id]
+            seconds = max((t - t0).total_seconds(), 1)
+            if abs(v - v0) &gt; asset.max_jump * seconds:
+                quality = &quot;spike&quot;
+
+        self._insert(t, asset, &quot;temp_c&quot;, v, quality)
+        if quality in (&quot;ok&quot;, &quot;clock_fixed&quot;):
+            self.last_ok[asset.asset_id] = (t, v)
+        note = f&quot;{d['value']}°F → {v}℃&quot; if asset.unit == &quot;F&quot; else f&quot;{v}℃&quot;
+        self.log.append((asset.asset_id, quality, note))
+
+    def _handle_position(self, asset, d, t, time_flag):
+        east, north = latlon_to_local_m(d[&quot;lat&quot;], d[&quot;lon&quot;])           # ② 좌표 맞추기
+        self._insert(t, asset, &quot;east_m&quot;, east, time_flag)
+        self._insert(t, asset, &quot;north_m&quot;, north, time_flag)
+        self.log.append((asset.asset_id, time_flag,
+                         f&quot;({d['lat']}, {d['lon']}) → 동 {east}m · 북 {north}m → 언리얼 {east*100:.0f} · {north*100:.0f} cm&quot;))
+
+    def _insert(self, t, asset, metric, value, quality):
+        self.db.execute(&quot;INSERT INTO sensor_data VALUES (?,?,?,?,?,?)&quot;,
+                        (t.isoformat(timespec=&quot;milliseconds&quot;), asset.asset_id, asset.actor, metric, value, quality))
+
+    def _error(self, rec, topic, payload, reason):
+        self.db.execute(&quot;INSERT INTO errors VALUES (?,?,?,?)&quot;, (rec.isoformat(), topic, payload, reason))
+        self.log.append((topic.split(&quot;/&quot;)[-2], &quot;버림&quot;, reason))
+
+    def close(self):
+        self.db.commit()
+        self.raw_file.close()
+
+
+# ─────────────────────────────────────────────
+# 4. 시간 정합 예: 주기가 다른 데이터를 1초 칸으로 다시 나누기(리샘플링)
+# ─────────────────────────────────────────────
+def resample_last_per_second(points: list[tuple[float, float]]) -&gt; dict[int, float]:
+    &quot;&quot;&quot;(초, 값) 목록을 받아 1초 칸마다 마지막 값만 남긴다.&quot;&quot;&quot;
+    out = {}
+    for sec, value in sorted(points):
+        out[int(sec)] = value
+    return out
+
+
+# ─────────────────────────────────────────────
+# 5. 실행 예: 5초 동안 들어온 메시지 9통
+# ─────────────────────────────────────────────
+SAMPLE = [  # (받은 시각, 토픽, 내용물)
+    (&quot;2026-11-15T10:00:00.2+09:00&quot;, &quot;busan/terminal/pump03/temp&quot;,
+     '{&quot;device&quot;:&quot;pump03&quot;,&quot;value&quot;:32.1,&quot;unit&quot;:&quot;C&quot;,&quot;time&quot;:&quot;2026-11-15T10:00:00+09:00&quot;}'),
+    (&quot;2026-11-15T10:00:01.1+09:00&quot;, &quot;busan/terminal/pump03/temp&quot;,
+     '{&quot;device&quot;:&quot;pump03&quot;,&quot;value&quot;:85.0,&quot;unit&quot;:&quot;C&quot;,&quot;time&quot;:&quot;2026-11-15T10:00:01+09:00&quot;}'),     # 튀는 값
+    (&quot;2026-11-15T10:00:01.3+09:00&quot;, &quot;busan/terminal/crane07/position&quot;,
+     '{&quot;device&quot;:&quot;crane07&quot;,&quot;lat&quot;:35.10560,&quot;lon&quot;:129.08200,&quot;time&quot;:&quot;2026-11-15T10:00:01+09:00&quot;}'),
+    (&quot;2026-11-15T10:00:02.0+09:00&quot;, &quot;busan/terminal/pump03/temp&quot;,
+     '{&quot;device&quot;:&quot;pump03&quot;,&quot;value&quot;:32.3,&quot;unit&quot;:&quot;C&quot;,&quot;time&quot;:&quot;2026-11-15T10:00:02+09:00&quot;}'),
+    (&quot;2026-11-15T10:00:02.4+09:00&quot;, &quot;busan/terminal/pump03/temp&quot;,
+     '{&quot;device&quot;:&quot;pump03&quot;,&quot;value&quot;:32.3,&quot;unit&quot;:&quot;C&quot;,&quot;time&quot;:&quot;2026-11-15T10:00:02+09:00&quot;}'),     # 중복
+    (&quot;2026-11-15T10:00:03.0+09:00&quot;, &quot;busan/terminal/pump05/temp&quot;,
+     '{&quot;device&quot;:&quot;pump05&quot;,&quot;value&quot;:91.4,&quot;unit&quot;:&quot;F&quot;,&quot;time&quot;:&quot;2026-11-15T10:00:03+09:00&quot;}'),     # 화씨
+    (&quot;2026-11-15T10:00:03.5+09:00&quot;, &quot;busan/terminal/pump03/temp&quot;,
+     '{&quot;device&quot;:&quot;pump03&quot;,&quot;value&quot;:32.4,&quot;unit&quot;:&quot;C&quot;,&quot;time&quot;:&quot;2026-11-15T09:58:03+09:00&quot;}'),     # 시계 2분 늦음
+    (&quot;2026-11-15T10:00:04.1+09:00&quot;, &quot;busan/terminal/pump03/temp&quot;,
+     '{&quot;device&quot;:&quot;pump03&quot;,&quot;value&quot;:32.5,&quot;un'),                                                 # 잘린 JSON
+    (&quot;2026-11-15T10:00:04.6+09:00&quot;, &quot;busan/terminal/tmp-9/temp&quot;,
+     '{&quot;device&quot;:&quot;tmp-9&quot;,&quot;value&quot;:27.0,&quot;unit&quot;:&quot;C&quot;,&quot;time&quot;:&quot;2026-11-15T10:00:04+09:00&quot;}'),      # 미등록 장비
+]
+
+if __name__ == &quot;__main__&quot;:
+    c = Cleaner()
+    for received, topic, payload in SAMPLE:
+        c.handle(datetime.fromisoformat(received), topic, payload)
+    c.close()
+
+    print(&quot;■ 판정&quot;)
+    for i, (who, verdict, note) in enumerate(c.log, 1):
+        print(f&quot;  {i}. {who:&lt;8} {verdict:&lt;13} {note}&quot;)
+
+    print(&quot;\n■ DB에 저장된 행 (sensor_data)&quot;)
+    for row in c.db.execute(&quot;SELECT substr(time,12,12), asset_id, actor, metric, value, quality FROM sensor_data&quot;):
+        print(&quot;  &quot;, row)
+
+    print(&quot;\n■ 품질별 개수&quot;)
+    for row in c.db.execute(&quot;SELECT quality, count(*) FROM sensor_data GROUP BY quality&quot;):
+        print(&quot;  &quot;, row)
+
+    print(&quot;\n■ 정상값만 장비별 평균 (분석할 때는 quality로 걸러 쓴다)&quot;)
+    for row in c.db.execute(&quot;SELECT asset_id, round(avg(value),2) FROM sensor_data &quot;
+                            &quot;WHERE metric='temp_c' AND quality IN ('ok','clock_fixed') GROUP BY asset_id&quot;):
+        print(&quot;  &quot;, row)
+
+    print(&quot;\n■ 오류·보류:&quot;, c.db.execute(&quot;SELECT count(*) FROM errors&quot;).fetchone()[0], &quot;건 /&quot;,
+          c.db.execute(&quot;SELECT count(*) FROM pending&quot;).fetchone()[0], &quot;건&quot;)
+
+    print(&quot;\n■ 리샘플링 예: 크레인 1초 5회 + 헬멧 1초 2회 → 1초 칸&quot;)
+    crane = [(i * 0.2, round(10 + i * 0.3, 1)) for i in range(15)]   # 0.0~2.8초, 위치(m)
+    helmet = [(i * 0.5, round(4 + i * 0.1, 1)) for i in range(6)]    # 0.0~2.5초, 위치(m)
+    rc, rh = resample_last_per_second(crane), resample_last_per_second(helmet)
+    for sec in sorted(set(rc) | set(rh)):
+        print(f&quot;   {sec}초  크레인 {rc.get(sec)}m  헬멧 {rh.get(sec)}m&quot;)
+</code></pre>
+<h2 id="mqtt에-연결하려면">MQTT에 연결하려면</h2>
+<p>위 <code>Cleaner.handle()</code>을 MQTT 구독 콜백에서 부르면 된다. paho-mqtt 2.x 기준 예시이고, 브로커와 <code>pip install paho-mqtt</code>가 필요하다(이 부분은 브로커 없이 실행해 보지 않았다).</p>
+<pre><code class="language-python">from datetime import datetime, timezone
+import paho.mqtt.client as mqtt
+from clean_align_sample import Cleaner
+
+cleaner = Cleaner(db_path=&quot;terminal.db&quot;, raw_path=&quot;raw_today.jsonl&quot;)
+
+def on_message(client, userdata, msg):
+    cleaner.handle(datetime.now(timezone.utc), msg.topic, msg.payload.decode(&quot;utf-8&quot;, &quot;replace&quot;))
+    cleaner.db.commit()
+
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+client.on_message = on_message
+client.connect(&quot;브로커 IP&quot;, 1883)
+client.subscribe(&quot;busan/terminal/#&quot;, qos=1)
+client.loop_forever()
+</code></pre>
+<h2 id="실무에서-더-하는-것">실무에서 더 하는 것</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>이 샘플</th>
+<th>실무</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>장비 대장을 코드 안 딕셔너리로</td>
+<td>DB 표나 설정 파일로 두고 화면에서 관리</td>
+</tr>
+<tr>
+<td>SQLite</td>
+<td>PostgreSQL + TimescaleDB, InfluxDB</td>
+</tr>
+<tr>
+<td>직전 정상값과의 차이로 튀는 값 판정</td>
+<td>이동 중앙값, 통계 기준(평균 ± 몇 배 표준편차), 장비별 학습 모델</td>
+</tr>
+<tr>
+<td>좌표 근사식</td>
+<td>pyproj(EPSG 변환), 언리얼 Georeferencing</td>
+</tr>
+<tr>
+<td>메시지 하나씩 처리</td>
+<td>대량이면 pandas·Polars로 묶어 처리, Kafka·Flink 같은 스트림 처리</td>
+</tr>
+<tr>
+<td>화면 출력</td>
+<td>로그, 대시보드(Grafana), 언리얼 트윈</td>
+</tr>
+</tbody>
+</table></div><nav class="pager"><a href="10.html"><small>← 이전</small>10 수질 · 침수 · 가스 · 화재 센서</a><a class="n" href="08.html"><small>다음 →</small>08 현업 용어집</a></nav><p class="foot">작성 2026-11-15. 회사 정보는 공개 자료(홈페이지·보도자료) 기준이라 홍보 성격이 있습니다.</p>
+</main>
+</body>
+</html>
